@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Funções em JavaScript — Notebook Interativo</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --bg-panel: #12181f;
+    --bg-code: #0a0e14;
+    --border: #1f2833;
+    --text: #d6deeb;
+    --text-dim: #7a8899;
+    --accent: #7dd3c0;
+    --accent-soft: #2a4a45;
+    --accent2: #f2c574;
+    --pink: #e394dc;
+    --err: #f47174;
+    --ok: #82e08c;
+    --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    --serif: Georgia, 'Times New Roman', serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 1.65;
+  }
+
+  .wrap {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 0 24px 120px;
+  }
+
+  header.hero {
+    padding: 72px 24px 48px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 8px;
+    background:
+      radial-gradient(ellipse at top, rgba(125,211,192,0.08), transparent 60%);
+  }
+
+  .hero-eyebrow {
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+
+  .hero h1 {
+    font-family: var(--serif);
+    font-size: 48px;
+    font-weight: 400;
+    margin: 14px 0 10px;
+    color: #fff;
+  }
+
+  .hero h1 span {
+    color: var(--accent);
+    font-style: italic;
+  }
+
+  .hero p {
+    color: var(--text-dim);
+    font-size: 16px;
+    max-width: 460px;
+    margin: 0 auto;
+  }
+
+  .progress-bar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    height: 3px;
+    background: var(--border);
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--accent), var(--pink));
+    transition: width .15s ease;
+  }
+
+  nav.toc {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin: 32px 0;
+  }
+  nav.toc h3 {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin: 0 0 12px;
+  }
+  nav.toc ol {
+    margin: 0;
+    padding-left: 20px;
+    columns: 2;
+    font-size: 14px;
+  }
+  nav.toc a {
+    color: var(--text);
+    text-decoration: none;
+    display: inline-block;
+    padding: 3px 0;
+  }
+  nav.toc a:hover { color: var(--accent); }
+
+  section.lesson {
+    margin: 64px 0;
+    scroll-margin-top: 20px;
+  }
+
+  .lesson-num {
+    font-family: var(--mono);
+    color: var(--accent);
+    font-size: 14px;
+    letter-spacing: 2px;
+  }
+
+  .lesson h2 {
+    font-family: var(--serif);
+    font-size: 30px;
+    font-weight: 400;
+    color: #fff;
+    margin: 6px 0 20px;
+  }
+
+  .lesson p {
+    font-size: 16px;
+    color: #c2cdd9;
+  }
+
+  .lesson ul, .lesson ol.explain {
+    font-size: 16px;
+    color: #c2cdd9;
+    padding-left: 22px;
+  }
+  .lesson li { margin-bottom: 6px; }
+
+  .callout {
+    border-left: 3px solid var(--accent2);
+    background: rgba(242, 197, 116, 0.06);
+    padding: 12px 18px;
+    border-radius: 0 8px 8px 0;
+    font-size: 14.5px;
+    color: #e8dcc0;
+    margin: 18px 0;
+  }
+  .callout strong { color: var(--accent2); }
+
+  .analogy {
+    border-left: 3px solid var(--pink);
+    background: rgba(227, 148, 220, 0.06);
+    padding: 12px 18px;
+    border-radius: 0 8px 8px 0;
+    font-size: 14.5px;
+    color: #ecd9ea;
+    margin: 18px 0;
+  }
+  .analogy strong { color: var(--pink); }
+
+  /* Code playground */
+  .playground {
+    background: var(--bg-code);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 20px 0;
+  }
+  .playground-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px;
+    background: #0f151c;
+    border-bottom: 1px solid var(--border);
+  }
+  .playground-header .dots { display: flex; gap: 6px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.r { background: #ff5f56; }
+  .dot.y { background: #ffbd2e; }
+  .dot.g { background: #27c93f; }
+  .playground-label {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  textarea.code-input {
+    width: 100%;
+    background: transparent;
+    color: #e6f1ff;
+    font-family: var(--mono);
+    font-size: 14px;
+    line-height: 1.6;
+    border: none;
+    padding: 16px;
+    resize: vertical;
+    min-height: 90px;
+    outline: none;
+    white-space: pre;
+    tab-size: 2;
+  }
+
+  .playground-actions {
+    display: flex;
+    gap: 10px;
+    padding: 0 16px 14px;
+  }
+
+  button.run-btn {
+    background: var(--accent);
+    color: #06231d;
+    border: none;
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 13px;
+    padding: 9px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: transform .1s ease, background .15s ease;
+  }
+  button.run-btn:hover { background: #92e0cf; transform: translateY(-1px); }
+  button.run-btn:active { transform: translateY(0); }
+
+  button.reset-btn {
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 9px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  button.reset-btn:hover { color: var(--text); border-color: var(--text-dim); }
+
+  .output {
+    border-top: 1px solid var(--border);
+    background: #080b10;
+    font-family: var(--mono);
+    font-size: 13.5px;
+    padding: 14px 16px;
+    min-height: 20px;
+    color: var(--ok);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .output:empty::before {
+    content: '// o resultado aparece aqui';
+    color: var(--text-dim);
+  }
+  .output .err { color: var(--err); }
+  .output .log-line { display: block; }
+  .output .log-line + .log-line { margin-top: 2px; }
+
+  /* Quiz */
+  .quiz {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 22px 24px;
+    margin: 22px 0;
+  }
+  .quiz-q {
+    font-size: 15.5px;
+    color: #fff;
+    margin-bottom: 14px;
+  }
+  .quiz-q .qtag {
+    font-family: var(--mono);
+    color: var(--pink);
+    font-size: 12px;
+    letter-spacing: 1px;
+    display: block;
+    margin-bottom: 6px;
+  }
+  .quiz-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .quiz-opt {
+    text-align: left;
+    background: #0f151c;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 11px 14px;
+    border-radius: 7px;
+    font-size: 14.5px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .quiz-opt:hover { border-color: var(--accent); }
+  .quiz-opt.correct { border-color: var(--ok); background: rgba(130,224,140,0.08); color: var(--ok); }
+  .quiz-opt.wrong { border-color: var(--err); background: rgba(244,113,116,0.08); color: var(--err); }
+  .quiz-feedback {
+    margin-top: 12px;
+    font-size: 14px;
+    color: var(--text-dim);
+    display: none;
+  }
+  .quiz-feedback.show { display: block; }
+
+  /* Challenge */
+  .challenge {
+    border: 1px dashed var(--accent);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin: 22px 0;
+    background: rgba(125,211,192,0.04);
+  }
+  .challenge-tag {
+    font-family: var(--mono);
+    color: var(--accent);
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .challenge h4 {
+    margin: 8px 0 10px;
+    color: #fff;
+    font-weight: 500;
+  }
+
+  code.inline {
+    background: rgba(125,211,192,0.1);
+    color: var(--accent);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 13.5px;
+  }
+
+  hr.divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 64px 0 0;
+  }
+
+  footer {
+    text-align: center;
+    padding: 60px 24px 20px;
+    color: var(--text-dim);
+    font-size: 14px;
+  }
+  footer .accent { color: var(--accent); }
+
+  .badge-done {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ok);
+    margin-left: 10px;
+    opacity: 0;
+    transition: opacity .2s ease;
+  }
+  .badge-done.show { opacity: 1; }
+
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 34px; }
+    nav.toc ol { columns: 1; }
+    .lesson h2 { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<header class="hero">
+  <div class="hero-eyebrow">Notebook Interativo · JavaScript</div>
+  <h1>Entendendo <span>funções</span></h1>
+  <p>Do zero absoluto até escrever suas próprias funções com confiança. Leia, rode o código, mude o que quiser.</p>
+</header>
+
+<div class="wrap">
+
+  <nav class="toc">
+    <h3>Neste notebook</h3>
+    <ol>
+      <li><a href="#l1">O que é uma função?</a></li>
+      <li><a href="#l2">Parâmetros e argumentos</a></li>
+      <li><a href="#l3">O return</a></li>
+      <li><a href="#l4">Funções com array</a></li>
+      <li><a href="#l5">Funções com objeto</a></li>
+      <li><a href="#l6">Arrow functions</a></li>
+      <li><a href="#l7">Valores padrão</a></li>
+      <li><a href="#l8">Desafio final</a></li>
+    </ol>
+  </nav>
+
+  <!-- LESSON 1 -->
+  <section class="lesson" id="l1">
+    <div class="lesson-num">01</div>
+    <h2>O que é uma função?</h2>
+    <p>
+      Uma função é uma <strong>caixinha de instruções reutilizável</strong>. Você escreve o código uma vez
+      dentro dela, dá um nome pra essa caixinha, e depois é só "chamar" ela sempre que precisar — sem
+      reescrever tudo de novo.
+    </p>
+
+    <div class="analogy">
+      <strong>Pensa assim:</strong> uma função é como uma receita de bolo. A receita (função) descreve os passos.
+      Você só faz o bolo de verdade (executa) quando decide seguir a receita — e pode fazer isso quantas vezes quiser,
+      até com ingredientes diferentes.
+    </div>
+
+    <p>A estrutura básica é essa:</p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">exemplo.js</span>
+      </div>
+      <textarea class="code-input" data-id="p1" spellcheck="false">function saudacao() {
+  console.log("Olá! Isso é uma função rodando.");
+}
+
+saudacao(); // aqui a gente "chama" a função</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p1')">▶ Rodar</button>
+        <button class="reset-btn" onclick="resetCode('p1')">↺ Restaurar</button>
+      </div>
+      <div class="output" id="out-p1"></div>
+    </div>
+
+    <p>Repare em três partes:</p>
+    <ul>
+      <li><code class="inline">function</code> — a palavra que avisa "estou criando uma função"</li>
+      <li><code class="inline">saudacao</code> — o nome que você escolheu pra ela</li>
+      <li><code class="inline">{ ... }</code> — as chaves guardam o que a função faz por dentro</li>
+    </ul>
+
+    <div class="callout">
+      <strong>Importante:</strong> só escrever a função não faz nada acontecer. É preciso <em>chamar</em> ela
+      escrevendo o nome seguido de parênteses: <code class="inline">saudacao()</code>. Tente apagar essa linha
+      no editor acima e rodar de novo — o console fica vazio!
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-q">
+        <span class="qtag">TESTE RÁPIDO</span>
+        O que acontece se você só definir a função, sem chamá-la com <code class="inline">nome()</code>?
+      </div>
+      <div class="quiz-options" data-answer="0">
+        <button class="quiz-opt">O código dentro dela nunca roda</button>
+        <button class="quiz-opt">Dá erro na hora</button>
+        <button class="quiz-opt">Ela roda sozinha automaticamente</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- LESSON 2 -->
+  <section class="lesson" id="l2">
+    <div class="lesson-num">02</div>
+    <h2>Parâmetros e argumentos</h2>
+    <p>
+      Uma função fica muito mais útil quando ela pode <strong>receber informações</strong> de fora.
+      Esses "espaços em branco" que ela recebe se chamam <strong>parâmetros</strong>. Quando você
+      realmente chama a função e preenche esses espaços, os valores que você passa se chamam
+      <strong>argumentos</strong>.
+    </p>
+
+    <div class="analogy">
+      <strong>Voltando à receita:</strong> o parâmetro é tipo "quantidade de açúcar" escrito na receita —
+      um espaço reservado. O argumento é quando você realmente coloca "2 xícaras" na hora de fazer o bolo.
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">soma.js</span>
+      </div>
+      <textarea class="code-input" data-id="p2" spellcheck="false">function soma(n1, n2) {
+  console.log(n1 + n2);
+}
+
+soma(2, 3);   // n1 vira 2, n2 vira 3
+soma(10, 20); // a mesma função, com outros números</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p2')">▶ Rodar</button>
+        <button class="reset-btn" onclick="resetCode('p2')">↺ Restaurar</button>
+      </div>
+      <div class="output" id="out-p2"></div>
+    </div>
+
+    <p>
+      <code class="inline">n1</code> e <code class="inline">n2</code> são os parâmetros — nomes que você escolhe
+      livremente. Eles só existem "dentro" da função, como se fossem gavetas temporárias que se enchem
+      toda vez que a função é chamada.
+    </p>
+
+    <div class="challenge">
+      <div class="challenge-tag">Mão na massa</div>
+      <h4>Edite o código acima</h4>
+      <p style="margin:0; color:#c2cdd9; font-size:15px;">
+        Mude os números em <code class="inline">soma(2, 3)</code> para outros valores, ou adicione uma terceira
+        chamada <code class="inline">soma(100, -50)</code>. Aperte "Rodar" de novo e veja o resultado mudar.
+      </p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- LESSON 3 -->
+  <section class="lesson" id="l3">
+    <div class="lesson-num">03</div>
+    <h2>O <code class="inline">return</code></h2>
+    <p>
+      Até agora usamos <code class="inline">console.log</code> dentro da função pra <em>mostrar</em> um resultado.
+      Mas na maioria das vezes você quer que a função <strong>devolva</strong> um valor pra você usar depois,
+      guardar numa variável, ou passar pra outra função. É pra isso que existe o <code class="inline">return</code>.
+    </p>
+
+    <div class="callout">
+      <strong>Diferença chave:</strong> <code class="inline">console.log</code> só imprime algo na tela.
+      <code class="inline">return</code> entrega o valor de volta pra quem chamou a função — e assim que o
+      <code class="inline">return</code> roda, a função para ali, na hora.
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">soma-com-return.js</span>
+      </div>
+      <textarea class="code-input" data-id="p3" spellcheck="false">function soma(n1, n2) {
+  return n1 + n2;
+}
+
+// como a função "devolve" o valor, posso guardar numa variável:
+let resultado = soma(2, 3);
+console.log(resultado);
+
+// e posso até usar o resultado dentro de outra conta:
+console.log(soma(2, 3) + 100);</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p3')">▶ Rodar</button>
+        <button class="reset-btn" onclick="resetCode('p3')">↺ Restaurar</button>
+      </div>
+      <div class="output" id="out-p3"></div>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-q">
+        <span class="qtag">TESTE RÁPIDO</span>
+        Se uma função só usa <code class="inline">console.log</code> e não tem <code class="inline">return</code>,
+        o que acontece se eu tentar guardar o resultado numa variável?
+      </div>
+      <div class="quiz-options" data-answer="1">
+        <button class="quiz-opt">A variável recebe o texto impresso</button>
+        <button class="quiz-opt">A variável recebe <code class="inline">undefined</code></button>
+        <button class="quiz-opt">Dá erro de sintaxe</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- LESSON 4 -->
+  <section class="lesson" id="l4">
+    <div class="lesson-num">04</div>
+    <h2>Funções que trabalham com arrays</h2>
+    <p>
+      Um dos usos mais comuns de função é processar uma lista de valores — um array. Vamos criar uma função
+      que recebe um array de nomes e descobre qual é o maior nome (o com mais letras).
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">maior-nome.js</span>
+      </div>
+      <textarea class="code-input" data-id="p4" spellcheck="false">function maiorString(array) {
+  let maior = array[0]; // começamos assumindo que o primeiro é o maior
+
+  for (let i = 1; i < array.length; i++) {
+    if (array[i].length > maior.length) {
+      maior = array[i]; // achamos um nome ainda maior, atualizamos
+    }
+  }
+
+  return maior;
+}
+
+const nomes = ['Giovanna', 'Nicolas', 'Larissa', 'Ana'];
+console.log(maiorString(nomes));</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p4')">▶ Rodar</button>
+        <button class="reset-btn" onclick="resetCode('p4')">↺ Restaurar</button>
+      </div>
+      <div class="output" id="out-p4"></div>
+    </div>
+
+    <p>
+      Repare que a função não sabe, de antemão, quais nomes existem — ela recebe <code class="inline">array</code>
+      como parâmetro e funciona pra <em>qualquer</em> array de strings que você passar. Essa é a força de uma função:
+      ela é genérica, e você decide os dados na hora de chamar.
+    </p>
+
+    <div class="challenge">
+      <div class="challenge-tag">Mão na massa</div>
+      <h4>Troque a lista de nomes</h4>
+      <p style="margin:0; color:#c2cdd9; font-size:15px;">
+        Edite o array <code class="inline">nomes</code> com nomes de amigos seus e rode de novo.
+        A mesma função funciona sem precisar mudar nada nela.
+      </p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- LESSON 5 -->
+  <section class="lesson" id="l5">
+    <div class="lesson-num">05</div>
+    <h2>Funções que trabalham com objetos</h2>
+    <p>
+      Objetos em JavaScript guardam informação em pares <code class="inline">chave: valor</code>.
+      Uma função pode receber um objeto inteiro como parâmetro e mexer nele — muito comum quando você
+      representa algo do mundo real, tipo um usuário ou um produto.
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">usuario.js</span>
+      </div>
+      <textarea class="code-input" data-id="p5" spellcheck="false">function retornaChaves(objeto) {
+  return Object.keys(objeto); // devolve um array com os nomes das chaves
+}
+
+const produto = { produto: 'ventilador', preco: 69.99 };
+console.log(retornaChaves(produto));
+
+function criarUsuario(nome, email, senha) {
+  // aqui "empacotamos" três valores soltos num único objeto
+  return { nome: nome, email: email, senha: senha };
+}
+
+const usuario1 = criarUsuario("Ana", "ana@email.com", "1234");
+console.log(usuario1);
+console.log(usuario1.nome); // acessando uma chave específica</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p5')">▶ Rodar</button>
+        <button class="reset-btn" onclick="resetCode('p5')">↺ Restaurar</button>
+      </div>
+      <div class="output" id="out-p5"></div>
+    </div>
+
+    <div class="callout">
+      <strong>Dica:</strong> <code class="inline">Object.keys(objeto)</code> é uma função pronta do JavaScript
+      que devolve todas as chaves de um objeto num array. Existem várias funções assim já embutidas na linguagem —
+      você vai conhecendo aos poucos.
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- LESSON 6 -->
+  <section class="lesson" id="l6">
+    <div class="lesson-num">06</div>
+    <h2>Arrow functions — a forma curta</h2>
+    <p>
+      Depois que você entende o formato "clássico" de função, vale conhecer a <strong>arrow function</strong>
+      (função seta), uma forma mais enxuta de escrever a mesma coisa. Ela é muito usada no dia a dia.
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">arrow.js</span>
+      </div>
+      <textarea class="code-input" data-id="p6" spellcheck="false">// forma clássica
+function somaClassica(a, b) {
+  return a + b;
+}
+
+// mesma coisa, como arrow function
+const somaArrow = (a, b) => {
+  return a + b;
+};
+
+// se o corpo é só um "return", dá pra encurtar ainda mais:
+const somaCurta = (a, b) => a + b;
+
+console.log(somaClassica(2, 3));
+console.log(somaArrow(2, 3));
+console.log(somaCurta(2, 3));</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p6')">▶ Rodar</button>
+        <button class="reset-btn" onclick="resetCode('p6')">↺ Restaurar</button>
+      </div>
+      <div class="output" id="out-p6"></div>
+    </div>
+
+    <p>
+      As três funções acima fazem exatamente a mesma coisa. A arrow function troca a palavra
+      <code class="inline">function</code> por uma seta <code class="inline">=></code> e costuma ser guardada
+      numa variável com <code class="inline">const</code>. Quando o corpo é uma linha só, dá até pra tirar as
+      chaves e o <code class="inline">return</code> fica implícito.
+    </p>
+  </section>
+
+  <hr class="divider">
+
+  <!-- LESSON 7 -->
+  <section class="lesson" id="l7">
+    <div class="lesson-num">07</div>
+    <h2>Valores padrão (parâmetros opcionais)</h2>
+    <p>
+      Às vezes você quer que um parâmetro tenha um valor "reserva", caso ninguém passe nada na hora de chamar
+      a função. Isso se chama <strong>valor padrão (default)</strong>.
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">default.js</span>
+      </div>
+      <textarea class="code-input" data-id="p7" spellcheck="false">function recebeNome(nome = "visitante") {
+  return `Bem-vindo(a), ${nome}!`;
+}
+
+console.log(recebeNome("Nicolas")); // passamos um valor
+console.log(recebeNome());          // não passamos nada, usa o padrão</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p7')">▶ Rodar</button>
+        <button class="reset-btn" onclick="resetCode('p7')">↺ Restaurar</button>
+      </div>
+      <div class="output" id="out-p7"></div>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-q">
+        <span class="qtag">TESTE RÁPIDO</span>
+        Em <code class="inline">function f(x = 10) {}</code>, se eu chamar <code class="inline">f(0)</code>, qual valor <code class="inline">x</code> recebe?
+      </div>
+      <div class="quiz-options" data-answer="0">
+        <button class="quiz-opt"><code class="inline">0</code> — porque foi explicitamente passado</button>
+        <button class="quiz-opt"><code class="inline">10</code> — o valor padrão</button>
+        <button class="quiz-opt">Dá erro</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- LESSON 8 - CHALLENGE -->
+  <section class="lesson" id="l8">
+    <div class="lesson-num">08</div>
+    <h2>Desafio final</h2>
+    <p>
+      Hora de juntar tudo. Abaixo está uma função incompleta. Complete o código no editor pra que ela:
+    </p>
+    <ol class="explain">
+      <li>Receba um array de números como parâmetro;</li>
+      <li>Retorne apenas os números pares;</li>
+      <li>Use <code class="inline">return</code> (não <code class="inline">console.log</code>) para devolver o resultado.</li>
+    </ol>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">desafio.js</span>
+      </div>
+      <textarea class="code-input" data-id="p8" spellcheck="false">function filtrarPares(numeros) {
+  // escreva seu código aqui
+  // dica: você pode percorrer o array com um "for"
+  // e juntar os números pares num array novo com .push()
+
+}
+
+console.log(filtrarPares([1, 2, 3, 4, 5, 6, 7, 8]));
+// resultado esperado: [2, 4, 6, 8]</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p8')">▶ Rodar</button>
+        <button class="reset-btn" onclick="resetCode('p8')">↺ Restaurar</button>
+      </div>
+      <div class="output" id="out-p8"></div>
+    </div>
+
+    <div class="callout">
+      <strong>Travou?</strong> Clique abaixo pra ver uma solução possível — mas tente sozinho primeiro,
+      é assim que gruda de verdade.
+    </div>
+
+    <details style="margin-top: 12px;">
+      <summary style="cursor:pointer; color: var(--accent); font-family: var(--mono); font-size: 13px;">▶ ver solução</summary>
+      <div class="playground" style="margin-top: 12px;">
+        <div class="playground-header">
+          <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+          <span class="playground-label">solucao.js</span>
+        </div>
+        <textarea class="code-input" data-id="p9" spellcheck="false">function filtrarPares(numeros) {
+  let pares = [];
+  for (let i = 0; i < numeros.length; i++) {
+    if (numeros[i] % 2 === 0) {
+      pares.push(numeros[i]);
+    }
+  }
+  return pares;
+}
+
+console.log(filtrarPares([1, 2, 3, 4, 5, 6, 7, 8]));</textarea>
+        <div class="playground-actions">
+          <button class="run-btn" onclick="runCode('p9')">▶ Rodar</button>
+          <button class="reset-btn" onclick="resetCode('p9')">↺ Restaurar</button>
+        </div>
+        <div class="output" id="out-p9"></div>
+      </div>
+    </details>
+  </section>
+
+  <hr class="divider">
+
+  <footer>
+    Você chegou ao fim. Funções são a base de praticamente tudo em JavaScript —
+    <span class="accent">continue praticando</span> escrevendo pequenas funções pro seu dia a dia.
+  </footer>
+
+</div>
+
+<script>
+  // Guarda o conteúdo original de cada textarea pra permitir "restaurar"
+  const originals = {};
+  document.querySelectorAll('.code-input').forEach(ta => {
+    originals[ta.dataset.id] = ta.value;
+  });
+
+  function resetCode(id) {
+    const ta = document.querySelector(`.code-input[data-id="${id}"]`);
+    ta.value = originals[id];
+    document.getElementById('out-' + id).innerHTML = '';
+  }
+
+  function runCode(id) {
+    const ta = document.querySelector(`.code-input[data-id="${id}"]`);
+    const outEl = document.getElementById('out-' + id);
+    outEl.innerHTML = '';
+
+    const logs = [];
+    const fakeConsole = {
+      log: (...args) => {
+        logs.push(args.map(a => {
+          if (typeof a === 'object' && a !== null) {
+            try { return JSON.stringify(a); } catch(e) { return String(a); }
+          }
+          return String(a);
+        }).join(' '));
+      },
+      error: (...args) => {
+        logs.push('ERR:' + args.join(' '));
+      }
+    };
+
+    try {
+      const fn = new Function('console', ta.value);
+      fn(fakeConsole);
+
+      if (logs.length === 0) {
+        outEl.innerHTML = '<span class="log-line" style="color:var(--text-dim)">// código rodou, mas nada foi impresso (use console.log)</span>';
+      } else {
+        outEl.innerHTML = logs.map(l => {
+          if (l.startsWith('ERR:')) {
+            return `<span class="log-line err">${escapeHtml(l.slice(4))}</span>`;
+          }
+          return `<span class="log-line">${escapeHtml(l)}</span>`;
+        }).join('');
+      }
+    } catch (e) {
+      outEl.innerHTML = `<span class="log-line err">⚠ ${escapeHtml(e.message)}</span>`;
+    }
+  }
+
+  function escapeHtml(str) {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  // Quiz logic
+  document.querySelectorAll('.quiz').forEach(quiz => {
+    const optsWrap = quiz.querySelector('.quiz-options');
+    const answer = parseInt(optsWrap.dataset.answer, 10);
+    const feedback = quiz.querySelector('.quiz-feedback');
+    const buttons = optsWrap.querySelectorAll('.quiz-opt');
+
+    buttons.forEach((btn, idx) => {
+      btn.addEventListener('click', () => {
+        buttons.forEach(b => { b.disabled = true; });
+        if (idx === answer) {
+          btn.classList.add('correct');
+          feedback.textContent = '✓ Isso mesmo! Mandou bem.';
+        } else {
+          btn.classList.add('wrong');
+          buttons[answer].classList.add('correct');
+          feedback.textContent = '✗ Quase — a resposta certa está marcada em verde.';
+        }
+        feedback.classList.add('show');
+      });
+    });
+  });
+
+  // Progress bar based on scroll
+  window.addEventListener('scroll', () => {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    document.getElementById('progressFill').style.width = pct + '%';
+  });
+</script>
+
+</body>
+</html>
