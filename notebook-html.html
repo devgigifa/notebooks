@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTML — Notebook Interativo Completo</title>
+<style>
+  :root {
+    --bg: #130d0a;
+    --bg-panel: #1a120d;
+    --bg-code: #0f0a07;
+    --border: #2e2018;
+    --text: #eaded2;
+    --text-dim: #9a8a78;
+    --accent: #ff8a5c;
+    --accent2: #f2c574;
+    --pink: #e394dc;
+    --err: #f47174;
+    --ok: #82e08c;
+    --html-orange: #e34c26;
+    --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    --serif: Georgia, 'Times New Roman', serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 1.65;
+  }
+
+  .wrap { max-width: 840px; margin: 0 auto; padding: 0 24px 120px; }
+
+  header.hero {
+    padding: 72px 24px 48px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 8px;
+    background: radial-gradient(ellipse at top, rgba(227,76,38,0.14), transparent 60%);
+  }
+  .hero-eyebrow { font-family: var(--mono); font-size: 13px; letter-spacing: 3px; color: var(--html-orange); text-transform: uppercase; }
+  .hero h1 { font-family: var(--serif); font-size: 46px; font-weight: 400; margin: 14px 0 10px; color: #fff; }
+  .hero h1 span { color: var(--accent); font-style: italic; }
+  .hero p { color: var(--text-dim); font-size: 16px; max-width: 500px; margin: 0 auto; }
+
+  .progress-bar { position: sticky; top: 0; z-index: 50; height: 3px; background: var(--border); }
+  .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--html-orange), var(--pink)); transition: width .15s ease; }
+
+  nav.toc { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; margin: 32px 0; }
+  nav.toc h3 { font-family: var(--mono); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); margin: 0 0 12px; }
+  nav.toc ol { margin: 0; padding-left: 20px; columns: 2; font-size: 13.5px; }
+  nav.toc a { color: var(--text); text-decoration: none; display: inline-block; padding: 3px 0; }
+  nav.toc a:hover { color: var(--accent); }
+
+  .module-divider { margin: 80px 0 40px; text-align: center; }
+  .module-divider .tag {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 3px; color: var(--html-orange);
+    text-transform: uppercase; background: rgba(227,76,38,0.12); padding: 6px 16px;
+    border-radius: 20px; border: 1px solid rgba(227,76,38,0.3);
+  }
+
+  section.lesson { margin: 56px 0; scroll-margin-top: 20px; }
+  .lesson-num { font-family: var(--mono); color: var(--accent); font-size: 14px; letter-spacing: 2px; }
+  .lesson h2 { font-family: var(--serif); font-size: 28px; font-weight: 400; color: #fff; margin: 6px 0 20px; }
+  .lesson p { font-size: 16px; color: #d8c9ba; }
+  .lesson ul, .lesson ol.explain { font-size: 16px; color: #d8c9ba; padding-left: 22px; }
+  .lesson li { margin-bottom: 6px; }
+
+  .callout { border-left: 3px solid var(--accent2); background: rgba(242,197,116,0.07); padding: 12px 18px; border-radius: 0 8px 8px 0; font-size: 14.5px; color: #e8dcc0; margin: 18px 0; }
+  .callout strong { color: var(--accent2); }
+  .analogy { border-left: 3px solid var(--pink); background: rgba(227,148,220,0.07); padding: 12px 18px; border-radius: 0 8px 8px 0; font-size: 14.5px; color: #ecd9ea; margin: 18px 0; }
+  .analogy strong { color: var(--pink); }
+  .semantics-note { border-left: 3px solid var(--html-orange); background: rgba(227,76,38,0.07); padding: 12px 18px; border-radius: 0 8px 8px 0; font-size: 14.5px; color: #f2d2c4; margin: 18px 0; }
+  .semantics-note strong { color: var(--accent); }
+
+  .playground { background: var(--bg-code); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin: 20px 0; }
+  .playground-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; background: #150f0b; border-bottom: 1px solid var(--border); }
+  .playground-header .dots { display: flex; gap: 6px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.r { background: #ff5f56; } .dot.y { background: #ffbd2e; } .dot.g { background: #27c93f; }
+  .playground-label { font-family: var(--mono); font-size: 12px; color: var(--text-dim); }
+
+  textarea.code-input {
+    width: 100%; background: transparent; color: #f5e9dc;
+    font-family: var(--mono); font-size: 14px; line-height: 1.6;
+    border: none; padding: 16px; resize: vertical; min-height: 110px;
+    outline: none; white-space: pre; tab-size: 2;
+  }
+
+  .playground-actions { display: flex; gap: 10px; padding: 0 16px 14px; flex-wrap: wrap; }
+
+  button.run-btn {
+    background: var(--html-orange); color: #fff; border: none;
+    font-family: var(--mono); font-weight: 700; font-size: 13px;
+    padding: 9px 18px; border-radius: 6px; cursor: pointer;
+    transition: transform .1s ease, background .15s ease;
+  }
+  button.run-btn:hover { background: #f05f39; transform: translateY(-1px); }
+  button.run-btn:active { transform: translateY(0); }
+
+  button.reset-btn {
+    background: transparent; color: var(--text-dim); border: 1px solid var(--border);
+    font-family: var(--mono); font-size: 13px; padding: 9px 14px; border-radius: 6px; cursor: pointer;
+  }
+  button.reset-btn:hover { color: var(--text); border-color: var(--text-dim); }
+
+  .render-output {
+    border-top: 1px solid var(--border);
+    background: #fff;
+    color: #111;
+    min-height: 60px;
+    padding: 16px;
+    font-family: -apple-system, sans-serif;
+  }
+  .render-output-label {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 1px; color: var(--text-dim);
+    padding: 8px 16px 0; text-transform: uppercase;
+  }
+
+  .quiz { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px; padding: 22px 24px; margin: 22px 0; }
+  .quiz-q { font-size: 15.5px; color: #fff; margin-bottom: 14px; }
+  .quiz-q .qtag { font-family: var(--mono); color: var(--pink); font-size: 12px; letter-spacing: 1px; display: block; margin-bottom: 6px; }
+  .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+  .quiz-opt { text-align: left; background: #150f0b; border: 1px solid var(--border); color: var(--text); padding: 11px 14px; border-radius: 7px; font-size: 14.5px; cursor: pointer; font-family: inherit; transition: border-color .15s ease, background .15s ease; }
+  .quiz-opt:hover { border-color: var(--accent); }
+  .quiz-opt.correct { border-color: var(--ok); background: rgba(130,224,140,0.08); color: var(--ok); }
+  .quiz-opt.wrong { border-color: var(--err); background: rgba(244,113,116,0.08); color: var(--err); }
+  .quiz-feedback { margin-top: 12px; font-size: 14px; color: var(--text-dim); display: none; }
+  .quiz-feedback.show { display: block; }
+
+  .challenge { border: 1px dashed var(--accent); border-radius: 10px; padding: 20px 24px; margin: 22px 0; background: rgba(255,138,92,0.05); }
+  .challenge-tag { font-family: var(--mono); color: var(--accent); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; }
+  .challenge h4 { margin: 8px 0 10px; color: #fff; font-weight: 500; }
+
+  code.inline { background: rgba(255,138,92,0.14); color: var(--accent); padding: 2px 6px; border-radius: 4px; font-family: var(--mono); font-size: 13.5px; }
+
+  table.compare { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 14px; }
+  table.compare th, table.compare td { border: 1px solid var(--border); padding: 10px 14px; text-align: left; }
+  table.compare th { background: var(--bg-panel); color: var(--accent); font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+  table.compare td { color: #d8c9ba; }
+  table.compare code.inline { font-size: 12.5px; }
+
+  hr.divider { border: none; border-top: 1px solid var(--border); margin: 56px 0 0; }
+  footer { text-align: center; padding: 60px 24px 20px; color: var(--text-dim); font-size: 14px; }
+  footer .accent { color: var(--accent); }
+
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 30px; }
+    nav.toc ol { columns: 1; }
+    .lesson h2 { font-size: 22px; }
+    table.compare { font-size: 12.5px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<header class="hero">
+  <div class="hero-eyebrow">Notebook Interativo · HTML</div>
+  <h1>Entendendo <span>HTML</span></h1>
+  <p>A estrutura por trás de toda página da web. Edite o código e veja o resultado renderizado de verdade, ao vivo.</p>
+</header>
+
+<div class="wrap">
+
+  <nav class="toc">
+    <h3>Neste notebook</h3>
+    <ol>
+      <li><a href="#l1">O que é HTML?</a></li>
+      <li><a href="#l2">Estrutura de um documento</a></li>
+      <li><a href="#l3">Tags de texto</a></li>
+      <li><a href="#l4">Links e navegação</a></li>
+      <li><a href="#l5">Imagens e mídia</a></li>
+      <li><a href="#l6">Listas</a></li>
+      <li><a href="#l7">Tabelas</a></li>
+      <li><a href="#l8">Formulários</a></li>
+      <li><a href="#l9">Div e span</a></li>
+      <li><a href="#l10">HTML semântico</a></li>
+      <li><a href="#l11">Atributos globais</a></li>
+      <li><a href="#l12">Acessibilidade</a></li>
+      <li><a href="#l13">Desafio final</a></li>
+    </ol>
+  </nav>
+
+  <div class="module-divider"><span class="tag">Módulo 1 · Fundamentos</span></div>
+
+  <section class="lesson" id="l1">
+    <div class="lesson-num">01</div>
+    <h2>O que é HTML?</h2>
+    <p>
+      HTML significa <strong>HyperText Markup Language</strong> — linguagem de marcação de hipertexto.
+      Ele não é uma linguagem de programação: não tem lógica, condições ou loops. HTML serve pra uma coisa só:
+      descrever a <strong>estrutura</strong> de uma página. O que é título, o que é parágrafo, o que é imagem, o que é link.
+    </p>
+
+    <div class="analogy">
+      <strong>Pensa assim:</strong> se um site fosse uma casa, o HTML é o esqueleto estrutural — paredes,
+      cômodos, portas. O CSS depois vem pintar e decorar, e o JavaScript é o que faz as coisas se mexerem
+      (portas abrindo, luzes acendendo).
+    </div>
+
+    <p>HTML é feito de <strong>tags</strong> — palavras entre <code class="inline">&lt;&gt;</code> que marcam onde algo começa e termina:</p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">exemplo.html</span>
+      </div>
+      <textarea class="code-input" data-id="p1" spellcheck="false"><h1>Isso é um título</h1>
+<p>Isso é um parágrafo de texto.</p></textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p1')">▶ Renderizar</button>
+        <button class="reset-btn" onclick="resetCode('p1')">↺ Restaurar</button>
+      </div>
+      <div class="render-output-label">Resultado</div>
+      <div class="render-output" id="out-p1"></div>
+    </div>
+
+    <p>
+      Repare que a tag tem uma abertura <code class="inline">&lt;h1&gt;</code> e um fechamento <code class="inline">&lt;/h1&gt;</code>
+      (com a barra <code class="inline">/</code>). Tudo que fica entre elas é o conteúdo daquele elemento.
+    </p>
+
+    <div class="quiz">
+      <div class="quiz-q">
+        <span class="qtag">TESTE RÁPIDO</span>
+        Qual a diferença entre <code class="inline">&lt;h1&gt;</code> e <code class="inline">&lt;/h1&gt;</code>?
+      </div>
+      <div class="quiz-options" data-answer="1">
+        <button class="quiz-opt">São a mesma coisa, não importa a ordem</button>
+        <button class="quiz-opt">Uma abre o elemento, a outra (com barra) fecha</button>
+        <button class="quiz-opt"><code class="inline">&lt;/h1&gt;</code> é um comentário</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="lesson" id="l2">
+    <div class="lesson-num">02</div>
+    <h2>Estrutura de um documento</h2>
+    <p>
+      Todo arquivo HTML segue um "esqueleto" padrão. Esses elementos raramente mudam de um site pro outro
+      — é basicamente o ponto de partida de qualquer página.
+    </p>
+
+    <table class="compare">
+      <tr><th>Tag</th><th>Função</th></tr>
+      <tr><td><code class="inline">&lt;!DOCTYPE html&gt;</code></td><td>Avisa ao navegador que isso é HTML5</td></tr>
+      <tr><td><code class="inline">&lt;html&gt;</code></td><td>Envolve todo o conteúdo da página</td></tr>
+      <tr><td><code class="inline">&lt;head&gt;</code></td><td>Metadados: título da aba, ícone, links de CSS — nada disso aparece na tela</td></tr>
+      <tr><td><code class="inline">&lt;body&gt;</code></td><td>Tudo que realmente é visível na página fica aqui dentro</td></tr>
+    </table>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">estrutura.html</span>
+      </div>
+      <textarea class="code-input" data-id="p2" spellcheck="false"><h1>Minha Página</h1>
+<p>Esse conteúdo fica dentro do &lt;body&gt; — é o que aparece na tela.</p>
+<p>Tudo que está no &lt;head&gt; (como o &lt;title&gt;) não aparece aqui, só na aba do navegador.</p></textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p2')">▶ Renderizar</button>
+        <button class="reset-btn" onclick="resetCode('p2')">↺ Restaurar</button>
+      </div>
+      <div class="render-output-label">Resultado</div>
+      <div class="render-output" id="out-p2"></div>
+    </div>
+
+    <div class="callout">
+      <strong>Nos exemplos deste notebook</strong>, você vai editar só o que entraria dentro do
+      <code class="inline">&lt;body&gt;</code> — a estrutura completa (doctype, head etc.) fica implícita,
+      pra focar no que muda visualmente.
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="lesson" id="l3">
+    <div class="lesson-num">03</div>
+    <h2>Tags de texto</h2>
+    <p>
+      Existem várias tags específicas pra dar ênfase ou estilo a pedaços de texto. Algumas são mais visuais,
+      outras carregam significado (o que importa pra acessibilidade e SEO — falamos disso mais à frente).
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">texto.html</span>
+      </div>
+      <textarea class="code-input" data-id="p3" spellcheck="false"><p><b>negrito</b> vs <strong>forte (também negrito, mas com significado)</strong></p>
+<p><i>itálico</i> vs <em>ênfase (também itálico, mas com significado)</em></p>
+<p><u>sublinhado</u></p>
+<p><s>texto riscado</s></p>
+<p>Fórmula: H<sub>2</sub>O</p>
+<p>Área: m<sup>2</sup></p>
+<p><small>texto em tamanho reduzido</small></p></textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p3')">▶ Renderizar</button>
+        <button class="reset-btn" onclick="resetCode('p3')">↺ Restaurar</button>
+      </div>
+      <div class="render-output-label">Resultado</div>
+      <div class="render-output" id="out-p3"></div>
+    </div>
+
+    <div class="semantics-note">
+      <strong>b vs strong, i vs em:</strong> visualmente <code class="inline">&lt;b&gt;</code> e <code class="inline">&lt;strong&gt;</code>
+      parecem idênticos (os dois deixam em negrito). A diferença é de significado: <code class="inline">&lt;strong&gt;</code>
+      diz "isso é importante de verdade", enquanto <code class="inline">&lt;b&gt;</code> é só estilo visual, sem peso semântico.
+      Leitores de tela (usados por pessoas com deficiência visual) tratam eles diferente.
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="lesson" id="l4">
+    <div class="lesson-num">04</div>
+    <h2>Links e navegação</h2>
+    <p>
+      A tag <code class="inline">&lt;a&gt;</code> (de "anchor", âncora) cria links. O destino do link vai no
+      atributo <code class="inline">href</code>.
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">links.html</span>
+      </div>
+      <textarea class="code-input" data-id="p4" spellcheck="false"><a href="https://exemplo.com">Link normal</a><br><br>
+
+<a href="https://exemplo.com" target="_blank">Link que abre em outra aba</a><br><br>
+
+<a href="#secao2">Link âncora (pula pra uma parte da mesma página)</a><br><br>
+
+<a href="mailto:contato@exemplo.com">Enviar email</a></textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p4')">▶ Renderizar</button>
+        <button class="reset-btn" onclick="resetCode('p4')">↺ Restaurar</button>
+      </div>
+      <div class="render-output-label">Resultado</div>
+      <div class="render-output" id="out-p4"></div>
+    </div>
+
+    <div class="callout">
+      <strong>Sobre atributos:</strong> <code class="inline">href</code> é um exemplo de <em>atributo</em> —
+      uma informação extra que você passa dentro da tag de abertura, no formato <code class="inline">nome="valor"</code>.
+      Quase toda tag HTML aceita atributos específicos.
+    </div>
+  </section>
+
+  <div class="module-divider"><span class="tag">Módulo 2 · Conteúdo</span></div>
+
+  <section class="lesson" id="l5">
+    <div class="lesson-num">05</div>
+    <h2>Imagens e mídia</h2>
+    <p>
+      Imagens usam a tag <code class="inline">&lt;img&gt;</code>, que é <strong>auto-fechada</strong> — não tem
+      conteúdo entre abertura e fechamento, então não precisa de tag de fechamento separada.
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">imagens.html</span>
+      </div>
+      <textarea class="code-input" data-id="p5" spellcheck="false"><img
+  src="https://placehold.co/300x150/e34c26/fff?text=Imagem"
+  alt="Uma imagem de exemplo"
+  width="300"
+  height="150"
+/>
+
+<p>O atributo <code>alt</code> descreve a imagem pra quem não consegue vê-la
+(leitores de tela, ou quando a imagem falha ao carregar).</p></textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p5')">▶ Renderizar</button>
+        <button class="reset-btn" onclick="resetCode('p5')">↺ Restaurar</button>
+      </div>
+      <div class="render-output-label">Resultado</div>
+      <div class="render-output" id="out-p5"></div>
+    </div>
+
+    <div class="semantics-note">
+      <strong>Nunca pule o <code class="inline">alt</code>:</strong> além de ajudar pessoas com deficiência
+      visual, o texto do <code class="inline">alt</code> aparece se a imagem não carregar, e ajuda mecanismos
+      de busca a entenderem o conteúdo da página.
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="lesson" id="l6">
+    <div class="lesson-num">06</div>
+    <h2>Listas</h2>
+    <p>
+      Existem dois tipos principais: lista <strong>não ordenada</strong> (com marcadores/bolinhas) e lista
+      <strong>ordenada</strong> (numerada). Cada item vai dentro de uma tag <code class="inline">&lt;li&gt;</code>.
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">listas.html</span>
+      </div>
+      <textarea class="code-input" data-id="p6" spellcheck="false"><h3>Lista não ordenada (ul)</h3>
+<ul>
+  <li>Café</li>
+  <li>Leite</li>
+  <li>Açúcar</li>
+</ul>
+
+<h3>Lista ordenada (ol)</h3>
+<ol>
+  <li>Ferver a água</li>
+  <li>Adicionar o café</li>
+  <li>Esperar 3 minutos</li>
+</ol></textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p6')">▶ Renderizar</button>
+        <button class="reset-btn" onclick="resetCode('p6')">↺ Restaurar</button>
+      </div>
+      <div class="render-output-label">Resultado</div>
+      <div class="render-output" id="out-p6"></div>
+    </div>
+
+    <div class="challenge">
+      <div class="challenge-tag">Mão na massa</div>
+      <h4>Edite o código acima</h4>
+      <p style="margin:0; color:#d8c9ba; font-size:15px;">
+        Troque <code class="inline">&lt;ul&gt;</code> por <code class="inline">&lt;ol&gt;</code> na primeira
+        lista e veja os marcadores virarem números.
+      </p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="lesson" id="l7">
+    <div class="lesson-num">07</div>
+    <h2>Tabelas</h2>
+    <p>
+      Tabelas organizam dados em linhas e colunas. A estrutura tem três partes principais:
+      <code class="inline">&lt;thead&gt;</code> (cabeçalho), <code class="inline">&lt;tbody&gt;</code> (corpo)
+      e <code class="inline">&lt;tfoot&gt;</code> (rodapé, opcional).
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">tabela.html</span>
+      </div>
+      <textarea class="code-input" data-id="p7" spellcheck="false"><table border="1">
+  <thead>
+    <tr>
+      <th>Produto</th>
+      <th>Preço</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Teclado</td>
+      <td>R$ 150</td>
+    </tr>
+    <tr>
+      <td>Mouse</td>
+      <td>R$ 80</td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">Total: R$ 230</td>
+    </tr>
+  </tfoot>
+</table></textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p7')">▶ Renderizar</button>
+        <button class="reset-btn" onclick="resetCode('p7')">↺ Restaurar</button>
+      </div>
+      <div class="render-output-label">Resultado</div>
+      <div class="render-output" id="out-p7"></div>
+    </div>
+
+    <div class="callout">
+      <strong><code class="inline">colspan="2"</code></strong> faz aquela célula ocupar o espaço de 2 colunas —
+      útil pra linhas de total, como no exemplo. Existe também <code class="inline">rowspan</code>, pra ocupar
+      várias linhas.
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="lesson" id="l8">
+    <div class="lesson-num">08</div>
+    <h2>Formulários</h2>
+    <p>
+      Formulários coletam informação do usuário. A tag <code class="inline">&lt;form&gt;</code> envolve
+      campos de entrada (<code class="inline">&lt;input&gt;</code>) e um botão de envio.
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">formulario.html</span>
+      </div>
+      <textarea class="code-input" data-id="p8" spellcheck="false"><form>
+  <label>Nome: <input type="text" placeholder="Seu nome"></label><br><br>
+
+  <label>Email: <input type="email" placeholder="seu@email.com"></label><br><br>
+
+  <label>Idade: <input type="number"></label><br><br>
+
+  <label>Nascimento: <input type="date"></label><br><br>
+
+  <label><input type="checkbox"> Aceito os termos</label><br><br>
+
+  <button type="submit">Enviar</button>
+</form></textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p8')">▶ Renderizar</button>
+        <button class="reset-btn" onclick="resetCode('p8')">↺ Restaurar</button>
+      </div>
+      <div class="render-output-label">Resultado</div>
+      <div class="render-output" id="out-p8"></div>
+    </div>
+
+    <table class="compare">
+      <tr><th>type do input</th><th>Uso</th></tr>
+      <tr><td><code class="inline">text</code></td><td>Texto livre</td></tr>
+      <tr><td><code class="inline">email</code></td><td>Valida formato de email</td></tr>
+      <tr><td><code class="inline">password</code></td><td>Esconde os caracteres digitados</td></tr>
+      <tr><td><code class="inline">number</code></td><td>Só aceita números</td></tr>
+      <tr><td><code class="inline">date</code></td><td>Seletor de data</td></tr>
+      <tr><td><code class="inline">checkbox</code></td><td>Caixa de marcar</td></tr>
+      <tr><td><code class="inline">radio</code></td><td>Escolha única entre opções</td></tr>
+      <tr><td><code class="inline">file</code></td><td>Upload de arquivo</td></tr>
+    </table>
+
+    <div class="callout">
+      <strong>A tag <code class="inline">&lt;label&gt;</code></strong> conecta um texto a um campo — clicar no
+      texto "Nome:" também foca o campo de input. Isso melhora bastante a usabilidade, principalmente em telas
+      pequenas.
+    </div>
+  </section>
+
+  <div class="module-divider"><span class="tag">Módulo 3 · Organização e significado</span></div>
+
+  <section class="lesson" id="l9">
+    <div class="lesson-num">09</div>
+    <h2>Div e span</h2>
+    <p>
+      <code class="inline">&lt;div&gt;</code> e <code class="inline">&lt;span&gt;</code> são "caixas genéricas"
+      sem significado próprio — servem só pra agrupar conteúdo, geralmente pra aplicar estilo com CSS depois.
+      A diferença é o comportamento: <code class="inline">div</code> ocupa a linha toda (block); <code class="inline">span</code>
+      ocupa só o espaço do conteúdo, ficando na mesma linha do texto ao redor (inline).
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">div-span.html</span>
+      </div>
+      <textarea class="code-input" data-id="p9" spellcheck="false"><div style="background:#fce4dc; padding:10px;">
+  Isso é uma div — ocupa a linha inteira, como um bloco.
+</div>
+
+<p>
+  Este parágrafo tem uma <span style="background:#fce4dc;">palavra destacada</span>
+  no meio do texto, sem quebrar a linha.
+</p></textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p9')">▶ Renderizar</button>
+        <button class="reset-btn" onclick="resetCode('p9')">↺ Restaurar</button>
+      </div>
+      <div class="render-output-label">Resultado</div>
+      <div class="render-output" id="out-p9"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="lesson" id="l10">
+    <div class="lesson-num">10</div>
+    <h2>HTML semântico</h2>
+    <p>
+      Em vez de usar só <code class="inline">&lt;div&gt;</code> pra tudo, HTML moderno tem tags que já dizem
+      <strong>o que aquele bloco representa</strong>. Isso se chama HTML semântico, e ajuda tanto humanos
+      lendo o código quanto mecanismos de busca e leitores de tela.
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">semantico.html</span>
+      </div>
+      <textarea class="code-input" data-id="p10" spellcheck="false"><header style="background:#fce4dc; padding:8px;">Cabeçalho do site (logo, menu)</header>
+
+<nav style="background:#fdf0ea; padding:8px;">Navegação (links principais)</nav>
+
+<main style="padding:8px;">
+  <article style="border:1px solid #e34c26; padding:8px; margin-bottom:8px;">
+    Um artigo/post — conteúdo independente
+  </article>
+
+  <section style="border:1px dashed #999; padding:8px;">
+    Uma seção temática dentro da página
+  </section>
+</main>
+
+<aside style="background:#fdf0ea; padding:8px;">Conteúdo relacionado (barra lateral)</aside>
+
+<footer style="background:#fce4dc; padding:8px;">Rodapé (copyright, links extras)</footer></textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p10')">▶ Renderizar</button>
+        <button class="reset-btn" onclick="resetCode('p10')">↺ Restaurar</button>
+      </div>
+      <div class="render-output-label">Resultado</div>
+      <div class="render-output" id="out-p10"></div>
+    </div>
+
+    <table class="compare">
+      <tr><th>Tag</th><th>Significado</th></tr>
+      <tr><td><code class="inline">&lt;header&gt;</code></td><td>Cabeçalho da página ou de uma seção</td></tr>
+      <tr><td><code class="inline">&lt;nav&gt;</code></td><td>Agrupamento de links de navegação</td></tr>
+      <tr><td><code class="inline">&lt;main&gt;</code></td><td>Conteúdo principal da página (só um por página)</td></tr>
+      <tr><td><code class="inline">&lt;article&gt;</code></td><td>Conteúdo autocontido (ex: um post de blog)</td></tr>
+      <tr><td><code class="inline">&lt;section&gt;</code></td><td>Agrupamento temático de conteúdo</td></tr>
+      <tr><td><code class="inline">&lt;aside&gt;</code></td><td>Conteúdo relacionado, mas secundário</td></tr>
+      <tr><td><code class="inline">&lt;footer&gt;</code></td><td>Rodapé da página ou de uma seção</td></tr>
+    </table>
+
+    <div class="semantics-note">
+      <strong>Por que isso importa de verdade:</strong> essas tags são fundamentais pra SEO (mecanismos de
+      busca entendem melhor a estrutura da sua página) e acessibilidade (leitores de tela conseguem navegar
+      "pulando" direto pra <code class="inline">&lt;nav&gt;</code> ou <code class="inline">&lt;main&gt;</code>,
+      por exemplo).
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="lesson" id="l11">
+    <div class="lesson-num">11</div>
+    <h2>Atributos globais</h2>
+    <p>
+      Alguns atributos funcionam em <strong>qualquer</strong> tag HTML, independente de qual seja. Os mais usados:
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">atributos-globais.html</span>
+      </div>
+      <textarea class="code-input" data-id="p11" spellcheck="false"><p id="paragrafo-unico">Esse parágrafo tem um <code>id</code> único.</p>
+
+<p class="destaque">Esse parágrafo tem uma <code>class</code>,
+  que pode ser reutilizada em vários elementos.</p>
+<p class="destaque">Outro parágrafo com a mesma classe.</p>
+
+<p title="Isso aparece ao passar o mouse">Passe o mouse aqui.</p>
+
+<style>
+  .destaque { background: #fce4dc; padding: 4px; }
+</style></textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p11')">▶ Renderizar</button>
+        <button class="reset-btn" onclick="resetCode('p11')">↺ Restaurar</button>
+      </div>
+      <div class="render-output-label">Resultado</div>
+      <div class="render-output" id="out-p11"></div>
+    </div>
+
+    <div class="callout">
+      <strong>id vs class:</strong> <code class="inline">id</code> deve ser único na página inteira (só um
+      elemento com aquele id). <code class="inline">class</code> pode se repetir em quantos elementos você quiser
+      — é assim que o CSS aplica o mesmo estilo a vários elementos de uma vez.
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="lesson" id="l12">
+    <div class="lesson-num">12</div>
+    <h2>Acessibilidade básica</h2>
+    <p>
+      Acessibilidade é garantir que sua página funcione bem pra todo mundo, incluindo pessoas que usam leitores
+      de tela ou navegam só pelo teclado. Boa parte disso já vem de usar HTML semântico corretamente — mas
+      alguns pontos merecem atenção extra.
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">acessibilidade.html</span>
+      </div>
+      <textarea class="code-input" data-id="p12" spellcheck="false"><!-- imagem sempre com alt descritivo -->
+<img src="https://placehold.co/100x60/e34c26/fff?text=Logo" alt="Logo da empresa AcmeCorp" width="100">
+
+<!-- botões com texto claro, não só ícone -->
+<button aria-label="Fechar janela">✕</button>
+
+<!-- inputs sempre associados a um label -->
+<label for="busca">Buscar:</label>
+<input id="busca" type="text">
+
+<!-- hierarquia de títulos em ordem, sem pular níveis -->
+<h1>Título principal</h1>
+<h2>Subtítulo</h2>
+<h3>Sub-subtítulo</h3></textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p12')">▶ Renderizar</button>
+        <button class="reset-btn" onclick="resetCode('p12')">↺ Restaurar</button>
+      </div>
+      <div class="render-output-label">Resultado</div>
+      <div class="render-output" id="out-p12"></div>
+    </div>
+
+    <div class="semantics-note">
+      <strong>aria-label</strong> dá um texto descritivo pra elementos sem texto visível (como um botão só com
+      ícone) — leitores de tela leem esse texto em voz alta. Repare também que <code class="inline">label for="busca"</code>
+      se conecta ao <code class="inline">input id="busca"</code> pelo mesmo valor.
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-q">
+        <span class="qtag">TESTE RÁPIDO</span>
+        Por que não devemos pular níveis de título (ex: ir de <code class="inline">&lt;h1&gt;</code> direto pra <code class="inline">&lt;h4&gt;</code>)?
+      </div>
+      <div class="quiz-options" data-answer="1">
+        <button class="quiz-opt">Porque o navegador não deixa</button>
+        <button class="quiz-opt">Porque quebra a hierarquia lógica que leitores de tela usam pra navegar</button>
+        <button class="quiz-opt">Porque deixa a página mais lenta</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+  </section>
+
+  <div class="module-divider"><span class="tag">Desafio final</span></div>
+
+  <section class="lesson" id="l13">
+    <div class="lesson-num">13</div>
+    <h2>Desafio final</h2>
+    <p>Construa um pequeno "cartão de perfil" no editor abaixo. Ele deve ter:</p>
+    <ol class="explain">
+      <li>Uma imagem (pode usar a URL de exemplo: <code class="inline">https://placehold.co/100x100</code>);</li>
+      <li>Um <code class="inline">&lt;h2&gt;</code> com um nome;</li>
+      <li>Um parágrafo com uma breve descrição;</li>
+      <li>Uma lista não ordenada com pelo menos 2 "habilidades";</li>
+      <li>Um link para algum lugar.</li>
+    </ol>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">desafio.html</span>
+      </div>
+      <textarea class="code-input" data-id="p13" spellcheck="false"><!-- construa seu cartão de perfil aqui -->
+<div style="border:1px solid #ddd; padding:16px; max-width:300px; border-radius:8px;">
+
+</div></textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p13')">▶ Renderizar</button>
+        <button class="reset-btn" onclick="resetCode('p13')">↺ Restaurar</button>
+      </div>
+      <div class="render-output-label">Resultado</div>
+      <div class="render-output" id="out-p13"></div>
+    </div>
+
+    <div class="callout">
+      <strong>Travou?</strong> Tente sozinho primeiro — a solução está escondida abaixo.
+    </div>
+
+    <details style="margin-top: 12px;">
+      <summary style="cursor:pointer; color: var(--accent); font-family: var(--mono); font-size: 13px;">▶ ver solução</summary>
+      <div class="playground" style="margin-top: 12px;">
+        <div class="playground-header">
+          <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+          <span class="playground-label">solucao.html</span>
+        </div>
+        <textarea class="code-input" data-id="p14" spellcheck="false"><div style="border:1px solid #ddd; padding:16px; max-width:300px; border-radius:8px;">
+  <img src="https://placehold.co/100x100/e34c26/fff?text=Foto" alt="Foto de perfil" width="100" height="100">
+  <h2>Larissa Souza</h2>
+  <p>Desenvolvedora front-end apaixonada por acessibilidade.</p>
+  <ul>
+    <li>HTML semântico</li>
+    <li>CSS responsivo</li>
+  </ul>
+  <a href="https://exemplo.com">Ver portfólio</a>
+</div></textarea>
+        <div class="playground-actions">
+          <button class="run-btn" onclick="runCode('p14')">▶ Renderizar</button>
+          <button class="reset-btn" onclick="resetCode('p14')">↺ Restaurar</button>
+        </div>
+        <div class="render-output-label">Resultado</div>
+        <div class="render-output" id="out-p14"></div>
+      </div>
+    </details>
+  </section>
+
+  <hr class="divider">
+
+  <footer>
+    Você entendeu a estrutura por trás de toda página da web.
+    <span class="accent">Próximo passo:</span> aprender CSS pra estilizar tudo isso.
+  </footer>
+
+</div>
+
+<script>
+  const originals = {};
+  document.querySelectorAll('.code-input').forEach(ta => {
+    originals[ta.dataset.id] = ta.value;
+  });
+
+  function resetCode(id) {
+    const ta = document.querySelector(`.code-input[data-id="${id}"]`);
+    ta.value = originals[id];
+    document.getElementById('out-' + id).innerHTML = '';
+  }
+
+  function runCode(id) {
+    const ta = document.querySelector(`.code-input[data-id="${id}"]`);
+    const outEl = document.getElementById('out-' + id);
+    // Renderiza diretamente o HTML digitado dentro de um container isolado visualmente
+    outEl.innerHTML = ta.value;
+  }
+
+  // Renderiza os exemplos iniciais automaticamente
+  document.querySelectorAll('.code-input').forEach(ta => {
+    runCode(ta.dataset.id);
+  });
+
+  document.querySelectorAll('.quiz').forEach(quiz => {
+    const optsWrap = quiz.querySelector('.quiz-options');
+    const answer = parseInt(optsWrap.dataset.answer, 10);
+    const feedback = quiz.querySelector('.quiz-feedback');
+    const buttons = optsWrap.querySelectorAll('.quiz-opt');
+
+    buttons.forEach((btn, idx) => {
+      btn.addEventListener('click', () => {
+        buttons.forEach(b => { b.disabled = true; });
+        if (idx === answer) {
+          btn.classList.add('correct');
+          feedback.textContent = '✓ Isso mesmo! Mandou bem.';
+        } else {
+          btn.classList.add('wrong');
+          buttons[answer].classList.add('correct');
+          feedback.textContent = '✗ Quase — a resposta certa está marcada em verde.';
+        }
+        feedback.classList.add('show');
+      });
+    });
+  });
+
+  window.addEventListener('scroll', () => {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    document.getElementById('progressFill').style.width = pct + '%';
+  });
+</script>
+
+</body>
+</html>

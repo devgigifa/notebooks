@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JavaScript — Notebook Interativo Completo</title>
+<style>
+  :root {
+    --bg: #120d1a;
+    --bg-panel: #170f22;
+    --bg-code: #0d0916;
+    --border: #281c38;
+    --text: #e5ddf0;
+    --text-dim: #8778a0;
+    --accent: #c9a3ff;
+    --accent2: #f2c574;
+    --pink: #e394dc;
+    --err: #f47174;
+    --ok: #82e08c;
+    --js-yellow: #f0db4f;
+    --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    --serif: Georgia, 'Times New Roman', serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.65; }
+  .wrap { max-width: 840px; margin: 0 auto; padding: 0 24px 120px; }
+
+  header.hero {
+    padding: 72px 24px 48px; text-align: center; border-bottom: 1px solid var(--border); margin-bottom: 8px;
+    background: radial-gradient(ellipse at top, rgba(240,219,79,0.12), transparent 60%);
+  }
+  .hero-eyebrow { font-family: var(--mono); font-size: 13px; letter-spacing: 3px; color: var(--js-yellow); text-transform: uppercase; }
+  .hero h1 { font-family: var(--serif); font-size: 46px; font-weight: 400; margin: 14px 0 10px; color: #fff; }
+  .hero h1 span { color: var(--accent); font-style: italic; }
+  .hero p { color: var(--text-dim); font-size: 16px; max-width: 500px; margin: 0 auto; }
+
+  .progress-bar { position: sticky; top: 0; z-index: 50; height: 3px; background: var(--border); }
+  .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--js-yellow), var(--pink)); transition: width .15s ease; }
+
+  nav.toc { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; margin: 32px 0; }
+  nav.toc h3 { font-family: var(--mono); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); margin: 0 0 12px; }
+  nav.toc ol { margin: 0; padding-left: 20px; columns: 2; font-size: 13.5px; }
+  nav.toc a { color: var(--text); text-decoration: none; display: inline-block; padding: 3px 0; }
+  nav.toc a:hover { color: var(--accent); }
+
+  .module-divider { margin: 80px 0 40px; text-align: center; }
+  .module-divider .tag {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 3px; color: var(--js-yellow);
+    text-transform: uppercase; background: rgba(240,219,79,0.1); padding: 6px 16px;
+    border-radius: 20px; border: 1px solid rgba(240,219,79,0.3);
+  }
+
+  section.lesson { margin: 56px 0; scroll-margin-top: 20px; }
+  .lesson-num { font-family: var(--mono); color: var(--accent); font-size: 14px; letter-spacing: 2px; }
+  .lesson h2 { font-family: var(--serif); font-size: 28px; font-weight: 400; color: #fff; margin: 6px 0 20px; }
+  .lesson p { font-size: 16px; color: #cdc2e0; }
+  .lesson ul, .lesson ol.explain { font-size: 16px; color: #cdc2e0; padding-left: 22px; }
+  .lesson li { margin-bottom: 6px; }
+
+  .callout { border-left: 3px solid var(--accent2); background: rgba(242,197,116,0.07); padding: 12px 18px; border-radius: 0 8px 8px 0; font-size: 14.5px; color: #e8dcc0; margin: 18px 0; }
+  .callout strong { color: var(--accent2); }
+  .analogy { border-left: 3px solid var(--pink); background: rgba(227,148,220,0.07); padding: 12px 18px; border-radius: 0 8px 8px 0; font-size: 14.5px; color: #ecd9ea; margin: 18px 0; }
+  .analogy strong { color: var(--pink); }
+  .tip { border-left: 3px solid var(--js-yellow); background: rgba(240,219,79,0.08); padding: 12px 18px; border-radius: 0 8px 8px 0; font-size: 14.5px; color: #f0ead0; margin: 18px 0; }
+  .tip strong { color: var(--js-yellow); }
+
+  .playground { background: var(--bg-code); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin: 20px 0; }
+  .playground-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; background: #120c1c; border-bottom: 1px solid var(--border); }
+  .playground-header .dots { display: flex; gap: 6px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.r { background: #ff5f56; } .dot.y { background: #ffbd2e; } .dot.g { background: #27c93f; }
+  .playground-label { font-family: var(--mono); font-size: 12px; color: var(--text-dim); }
+
+  textarea.code-input {
+    width: 100%; background: transparent; color: #ede4fa;
+    font-family: var(--mono); font-size: 14px; line-height: 1.6;
+    border: none; padding: 16px; resize: vertical; min-height: 90px;
+    outline: none; white-space: pre; tab-size: 2;
+  }
+
+  .playground-actions { display: flex; gap: 10px; padding: 0 16px 14px; flex-wrap: wrap; }
+
+  button.run-btn {
+    background: var(--js-yellow); color: #1a1500; border: none;
+    font-family: var(--mono); font-weight: 700; font-size: 13px;
+    padding: 9px 18px; border-radius: 6px; cursor: pointer;
+    transition: transform .1s ease, background .15s ease;
+  }
+  button.run-btn:hover { background: #f5e37a; transform: translateY(-1px); }
+  button.run-btn:active { transform: translateY(0); }
+
+  button.reset-btn {
+    background: transparent; color: var(--text-dim); border: 1px solid var(--border);
+    font-family: var(--mono); font-size: 13px; padding: 9px 14px; border-radius: 6px; cursor: pointer;
+  }
+  button.reset-btn:hover { color: var(--text); border-color: var(--text-dim); }
+
+  .output {
+    border-top: 1px solid var(--border); background: #0a0712;
+    font-family: var(--mono); font-size: 13.5px; padding: 14px 16px;
+    min-height: 20px; color: var(--ok); white-space: pre-wrap; word-break: break-word;
+  }
+  .output:empty::before { content: '// o resultado aparece aqui'; color: var(--text-dim); }
+  .output .err { color: var(--err); }
+  .output .log-line { display: block; }
+  .output .log-line + .log-line { margin-top: 2px; }
+
+  .inline-demo {
+    background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 22px; margin: 20px 0;
+  }
+  .inline-demo label { font-size: 13.5px; color: var(--text-dim); display: block; margin-bottom: 10px; font-family: var(--mono); }
+  .demo-input {
+    font-family: var(--mono); font-size: 14px; padding: 9px 12px; border-radius: 6px;
+    border: 1px solid var(--border); background: var(--bg-code); color: var(--text);
+    width: 100%; margin-bottom: 10px; outline: none;
+  }
+  .demo-input:focus { border-color: var(--accent); }
+  .demo-output {
+    font-size: 13.5px; color: var(--text); padding: 10px 12px; background: var(--bg-code);
+    border-radius: 6px; border: 1px solid var(--border); min-height: 20px; font-family: var(--mono);
+    white-space: pre-wrap;
+  }
+  input[type=range] { width: 100%; margin-bottom: 10px; accent-color: var(--js-yellow); }
+  input[type=number].demo-input { width: 120px; }
+
+  code.inline { background: rgba(201,163,255,0.14); color: var(--accent); padding: 2px 6px; border-radius: 4px; font-family: var(--mono); font-size: 13.5px; }
+
+  hr.divider { border: none; border-top: 1px solid var(--border); margin: 56px 0 0; }
+  footer { text-align: center; padding: 60px 24px 20px; color: var(--text-dim); font-size: 14px; }
+  footer .accent { color: var(--accent); }
+
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 30px; }
+    nav.toc ol { columns: 1; }
+    .lesson h2 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<header class="hero">
+  <div class="hero-eyebrow">Notebook Interativo · JavaScript</div>
+  <h1>Do zero ao <span>básico</span></h1>
+  <p>Edite qualquer célula e clique em Executar para ver o resultado. Algumas seções têm demos ao vivo — mexa nelas também.</p>
+</header>
+
+<div class="wrap">
+
+  <nav class="toc">
+    <h3>Neste notebook</h3>
+    <ol>
+      <li><a href="#s1">1. Variáveis</a></li>
+      <li><a href="#s2">2. Tipos de dados</a></li>
+      <li><a href="#s3">3. Operadores</a></li>
+      <li><a href="#s4">4. Condicionais</a></li>
+      <li><a href="#s5">5. Laços</a></li>
+      <li><a href="#s6">6. Funções</a></li>
+      <li><a href="#s7">7. Arrays</a></li>
+    </ol>
+  </nav>
+
+  <!-- SEÇÃO 1 -->
+  <section class="lesson" id="s1">
+    <div class="lesson-num">01</div>
+    <h2>Variáveis</h2>
+    <p>
+      Uma variável é um <em>nome que guarda um valor</em>. Em JavaScript moderno usamos <code class="inline">let</code>
+      para valores que mudam e <code class="inline">const</code> para valores fixos. O antigo <code class="inline">var</code>
+      ainda existe, mas tem comportamentos confusos — evite.
+    </p>
+
+    <div class="tip">
+      <strong>Dica:</strong> <code class="inline">let</code> existe só dentro do bloco <code class="inline">{}</code>
+      em que foi criada. <code class="inline">var</code> vaza para fora do bloco — esse é o problema histórico dele.
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">var vs let vs const</span>
+      </div>
+      <textarea class="code-input" data-id="c1" spellcheck="false">const nome = "Maria"      // não muda nunca
+let idade = 25            // pode mudar
+let cidade = "Florianópolis"
+
+console.log(nome)         // Maria
+console.log(idade)        // 25
+
+idade = 26                // atualiza o valor
+console.log(idade)        // 26
+
+// let tem escopo de bloco:
+if (true) {
+  let dentroDoBloco = "só existe aqui dentro"
+  console.log(dentroDoBloco) // funciona
+}
+// console.log(dentroDoBloco) → erro! não existe aqui fora
+
+console.log("Variáveis ok!")</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c1')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('c1')">↺ Restaurar</button>
+      </div>
+      <div class="output" id="out-c1"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 2 -->
+  <section class="lesson" id="s2">
+    <div class="lesson-num">02</div>
+    <h2>Tipos de dados</h2>
+    <p>
+      JavaScript tem tipos primitivos: <code class="inline">string</code> (texto), <code class="inline">number</code>
+      (número), <code class="inline">boolean</code> (verdadeiro/falso), <code class="inline">null</code> e
+      <code class="inline">undefined</code>. O operador <code class="inline">typeof</code> revela o tipo de qualquer valor.
+    </p>
+
+    <div class="inline-demo">
+      <label>Digite qualquer valor e veja o tipo detectado:</label>
+      <input class="demo-input" id="type-input" placeholder='ex: 42, true, "olá"' oninput="detectType(this.value)">
+      <div class="demo-output" id="type-output">aguardando...</div>
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">tipos primitivos e conversão</span>
+      </div>
+      <textarea class="code-input" data-id="c2" spellcheck="false">let texto = "JavaScript"     // string
+let numero = 42              // number
+let decimal = 3.14           // também é number
+let ligado = true            // boolean
+let desligado = false        // boolean
+let vazio = null             // null (ausência intencional)
+let indefinido               // undefined (não atribuído ainda)
+
+console.log(typeof texto)      // string
+console.log(typeof numero)     // number
+console.log(typeof ligado)     // boolean
+console.log(typeof vazio)      // object (quirk histórico do JS!)
+console.log(typeof indefinido) // undefined
+
+// converter tipos:
+let numComoTexto = "10"
+console.log(typeof numComoTexto)           // string
+let convertido = Number(numComoTexto)
+console.log(typeof convertido, convertido) // number 10</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c2')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('c2')">↺ Restaurar</button>
+      </div>
+      <div class="output" id="out-c2"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 3 -->
+  <section class="lesson" id="s3">
+    <div class="lesson-num">03</div>
+    <h2>Operadores</h2>
+    <p>
+      Operadores fazem contas, comparam valores e combinam condições. Use sempre <code class="inline">===</code>
+      (igual exato) em vez de <code class="inline">==</code> — o duplo igual faz conversão de tipo automática
+      e pode surpreender.
+    </p>
+
+    <div class="inline-demo">
+      <label>Calculadora ao vivo — digite uma expressão JavaScript:</label>
+      <input class="demo-input" id="calc-input" placeholder='ex: 10 * 5 + 3 ou "oi" + " mundo"' oninput="calcLive(this.value)">
+      <div class="demo-output" id="calc-output">aguardando...</div>
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">aritméticos, comparação e lógicos</span>
+      </div>
+      <textarea class="code-input" data-id="c3" spellcheck="false">// aritméticos
+console.log(10 + 3)    // 13
+console.log(10 - 3)    // 7
+console.log(10 * 3)    // 30
+console.log(10 / 3)    // 3.333...
+console.log(10 % 3)    // 1 (resto da divisão)
+console.log(2 ** 8)    // 256 (potência)
+
+// comparação — sempre retorna true ou false
+console.log(5 === 5)    // true (igual em valor E tipo)
+console.log(5 === "5")  // false! número ≠ string
+console.log(5 !== 3)    // true (diferente)
+console.log(10 > 5)     // true
+console.log(10 <= 10)   // true
+
+// lógicos
+console.log(true && false)  // false (E — ambos precisam ser true)
+console.log(true || false)  // true  (OU — um basta)
+console.log(!true)          // false (NÃO — inverte)
+
+// atalhos de atribuição
+let x = 10
+x += 5    // x = x + 5  →  15
+x *= 2    // x = x * 2  →  30
+console.log(x) // 30</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c3')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('c3')">↺ Restaurar</button>
+      </div>
+      <div class="output" id="out-c3"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 4 -->
+  <section class="lesson" id="s4">
+    <div class="lesson-num">04</div>
+    <h2>Condicionais</h2>
+    <p>
+      Com <code class="inline">if / else if / else</code> o programa toma decisões baseadas em condições.
+      O operador ternário (<code class="inline">condição ? sim : não</code>) é um if/else compacto para casos simples.
+    </p>
+
+    <div class="inline-demo">
+      <label>Simulador de aprovação — arraste para mudar a nota:</label>
+      <input type="range" id="nota-input" min="0" max="10" step="0.1" value="7" oninput="calcNota(this.value)">
+      <div class="demo-output" id="nota-output">nota: 7.0 → Aprovado!</div>
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">if / else if / else e operador ternário</span>
+      </div>
+      <textarea class="code-input" data-id="c4" spellcheck="false">function verificarAprovacao(media) {
+  if (media >= 7) {
+    return `${media.toFixed(1)} → Aprovado!`
+  } else if (media > 3) {
+    return `${media.toFixed(1)} → Recuperação`
+  } else {
+    return `${media.toFixed(1)} → Reprovado`
+  }
+}
+
+console.log(verificarAprovacao(9))    // Aprovado!
+console.log(verificarAprovacao(5))    // Recuperação
+console.log(verificarAprovacao(2))    // Reprovado
+
+// operador ternário — if/else em uma linha:
+let nota = 8
+let resultado = nota >= 7 ? "passou" : "não passou"
+console.log(resultado) // passou
+
+// switch — ótimo para múltiplas opções fixas:
+let dia = 3
+switch (dia) {
+  case 1: console.log("Segunda"); break
+  case 2: console.log("Terça"); break
+  case 3: console.log("Quarta"); break
+  default: console.log("Outro dia")
+}</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c4')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('c4')">↺ Restaurar</button>
+      </div>
+      <div class="output" id="out-c4"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 5 -->
+  <section class="lesson" id="s5">
+    <div class="lesson-num">05</div>
+    <h2>Laços (loops)</h2>
+    <p>
+      Laços repetem código enquanto uma condição for verdadeira. O <code class="inline">for</code> é o mais
+      comum: define início, condição de parada e incremento. O <code class="inline">while</code> é mais simples
+      quando não sabe quantas repetições terá.
+    </p>
+
+    <div class="inline-demo">
+      <label>Tabuada interativa:</label>
+      <input type="number" class="demo-input" id="tab-input" min="1" max="20" value="7" style="width:120px" oninput="calcTabuada(this.value)">
+      <div class="demo-output" id="tab-output" style="white-space:pre; max-height:180px; overflow-y:auto; font-size:13px;"></div>
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">for, while e FizzBuzz clássico</span>
+      </div>
+      <textarea class="code-input" data-id="c5" spellcheck="false">// for clássico — soma de 1 a 100
+let soma = 0
+for (let i = 1; i <= 100; i++) {
+  soma += i
+}
+console.log("Soma 1→100:", soma) // 5050
+
+// contagem regressiva
+for (let i = 5; i >= 1; i--) {
+  console.log(i)
+}
+console.log("🚀")
+
+// while — repete enquanto condição for true
+let tentativas = 0
+while (tentativas < 3) {
+  console.log("tentativa", tentativas + 1)
+  tentativas++
+}
+
+// FizzBuzz — clássico de entrevista!
+console.log("--- FizzBuzz (1 a 20) ---")
+for (let i = 1; i <= 20; i++) {
+  if (i % 3 === 0 && i % 5 === 0) console.log("FizzBuzz")
+  else if (i % 3 === 0) console.log("Fizz")
+  else if (i % 5 === 0) console.log("Buzz")
+  else console.log(i)
+}</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c5')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('c5')">↺ Restaurar</button>
+      </div>
+      <div class="output" id="out-c5"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 6 -->
+  <section class="lesson" id="s6">
+    <div class="lesson-num">06</div>
+    <h2>Funções</h2>
+    <p>
+      Funções empacotam código reutilizável. Recebem <em>parâmetros</em>, executam lógica e
+      <code class="inline">return</code> devolve o resultado. Arrow functions (<code class="inline">=&gt;</code>)
+      são uma sintaxe mais curta, muito usada no JS moderno.
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">function, arrow function, parâmetros padrão</span>
+      </div>
+      <textarea class="code-input" data-id="c6" spellcheck="false">// função tradicional
+function soma(a, b) {
+  return a + b
+}
+console.log(soma(3, 4)) // 7
+
+// arrow function — mesma coisa, escrita mais curta
+const multiplica = (a, b) => a * b
+console.log(multiplica(3, 4)) // 12
+
+// parâmetro padrão
+function saudar(nome = "visitante") {
+  return `Olá, ${nome}!`
+}
+console.log(saudar("Ana"))  // Olá, Ana!
+console.log(saudar())       // Olá, visitante!
+
+// função que recebe data e retorna dia da semana
+function diaSemana(data) {
+  const dias = ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"]
+  return dias[data.getDay()]
+}
+console.log("Hoje é:", diaSemana(new Date()))
+
+// funções podem ser passadas como argumento!
+function aplicar(fn, valor) {
+  return fn(valor)
+}
+const dobro = x => x * 2
+const quadrado = x => x ** 2
+console.log(aplicar(dobro, 10))    // 20
+console.log(aplicar(quadrado, 5))  // 25</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c6')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('c6')">↺ Restaurar</button>
+      </div>
+      <div class="output" id="out-c6"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 7 -->
+  <section class="lesson" id="s7">
+    <div class="lesson-num">07</div>
+    <h2>Arrays</h2>
+    <p>
+      Arrays guardam listas de valores. Índices começam em <code class="inline">0</code>. Os métodos
+      <code class="inline">push</code>, <code class="inline">pop</code>, <code class="inline">splice</code>,
+      <code class="inline">sort</code> e <code class="inline">reverse</code> manipulam a lista.
+      <code class="inline">filter</code>, <code class="inline">map</code> e <code class="inline">reduce</code>
+      são os métodos modernos mais poderosos.
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">criar, acessar e manipular arrays</span>
+      </div>
+      <textarea class="code-input" data-id="c7" spellcheck="false">let frutas = ["maçã", "banana", "laranja"]
+
+console.log(frutas[0])       // maçã (índice começa em 0)
+console.log(frutas.length)   // 3
+
+frutas.push("uva")           // adiciona no fim
+console.log(frutas)
+
+frutas.pop()                 // remove do fim
+console.log(frutas)
+
+// ordenar e inverter
+let nums = [3, 1, 4, 1, 5, 9, 2, 6]
+nums.sort((a, b) => a - b)   // crescente
+console.log("Ordenado:", nums)
+nums.reverse()
+console.log("Invertido:", nums)
+
+// maior e menor
+let valores = [17434, 26483, 30745, 49636, 36472]
+console.log("Maior:", Math.max(...valores))
+console.log("Menor:", Math.min(...valores))</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c7')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('c7')">↺ Restaurar</button>
+      </div>
+      <div class="output" id="out-c7"></div>
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">filter, map e reduce — os três mais importantes</span>
+      </div>
+      <textarea class="code-input" data-id="c8" spellcheck="false">let numeros = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+// filter — filtra elementos que passam no teste
+let pares = numeros.filter(n => n % 2 === 0)
+console.log("Pares:", pares) // [2, 4, 6, 8, 10]
+
+// map — transforma cada elemento
+let dobrados = numeros.map(n => n * 2)
+console.log("Dobrados:", dobrados)
+
+// reduce — acumula em um único valor
+let soma = numeros.reduce((acc, n) => acc + n, 0)
+console.log("Soma total:", soma) // 55
+
+// combinando os três:
+let resultado = numeros
+  .filter(n => n % 2 !== 0)   // só ímpares
+  .map(n => n ** 2)            // eleva ao quadrado
+  .reduce((a, b) => a + b, 0) // soma tudo
+
+console.log("Soma dos quadrados dos ímpares:", resultado)</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c8')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('c8')">↺ Restaurar</button>
+      </div>
+      <div class="output" id="out-c8"></div>
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">🧪 área livre — escreva e teste seu próprio código</span>
+      </div>
+      <textarea class="code-input" data-id="c9" spellcheck="false">// Sua vez! Experimente qualquer coisa aqui.
+// Sugestão: crie um array com 5 números e calcule a média.
+
+let meuArray = [10, 20, 30, 40, 50]
+let media = meuArray.reduce((a, b) => a + b, 0) / meuArray.length
+console.log("Média:", media)</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c9')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('c9')">↺ Restaurar</button>
+      </div>
+      <div class="output" id="out-c9"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <footer>
+    Você passou pelo básico de JavaScript, de variáveis a arrays com filter/map/reduce.
+    <span class="accent">Continue praticando</span> — tente resolver pequenos problemas usando só o que viu aqui.
+  </footer>
+
+</div>
+
+<script>
+  const originals = {};
+  document.querySelectorAll('.code-input').forEach(ta => {
+    originals[ta.dataset.id] = ta.value;
+  });
+
+  function resetCode(id) {
+    const ta = document.querySelector(`.code-input[data-id="${id}"]`);
+    ta.value = originals[id];
+    document.getElementById('out-' + id).innerHTML = '';
+  }
+
+  function runCode(id) {
+    const ta = document.querySelector(`.code-input[data-id="${id}"]`);
+    const outEl = document.getElementById('out-' + id);
+    outEl.innerHTML = '';
+
+    const logs = [];
+    const fakeConsole = {
+      log: (...args) => {
+        logs.push(args.map(a => {
+          if (Array.isArray(a)) return '[' + a.map(v => JSON.stringify(v)).join(', ') + ']';
+          if (typeof a === 'object' && a !== null) {
+            try { return JSON.stringify(a, null, 2); } catch(e) { return String(a); }
+          }
+          return String(a);
+        }).join(' '));
+      },
+      error: (...args) => {
+        logs.push('ERR:' + args.join(' '));
+      }
+    };
+
+    try {
+      const fn = new Function('console', ta.value);
+      fn(fakeConsole);
+
+      if (logs.length === 0) {
+        outEl.innerHTML = '<span class="log-line" style="color:var(--text-dim)">// executado sem saída (use console.log)</span>';
+      } else {
+        outEl.innerHTML = logs.map(l => {
+          if (l.startsWith('ERR:')) {
+            return `<span class="log-line err">${escapeHtml(l.slice(4))}</span>`;
+          }
+          return `<span class="log-line">${escapeHtml(l)}</span>`;
+        }).join('');
+      }
+    } catch (e) {
+      outEl.innerHTML = `<span class="log-line err">⚠ ${escapeHtml(e.message)}</span>`;
+    }
+  }
+
+  function escapeHtml(str) {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  function detectType(val) {
+    const out = document.getElementById('type-output');
+    if (!val.trim()) { out.textContent = 'aguardando...'; return; }
+    let parsed;
+    try { parsed = JSON.parse(val); } catch { parsed = val; }
+    const t = typeof parsed;
+    out.textContent = `tipo: ${t}   valor: ${JSON.stringify(parsed)}`;
+  }
+
+  function calcLive(expr) {
+    const out = document.getElementById('calc-output');
+    if (!expr.trim()) { out.textContent = 'aguardando...'; return; }
+    try {
+      const r = new Function('return (' + expr + ')')();
+      out.textContent = `→ ${JSON.stringify(r)}   (tipo: ${typeof r})`;
+    } catch {
+      out.textContent = 'expressão incompleta...';
+    }
+  }
+
+  function calcNota(val) {
+    const n = parseFloat(val);
+    let status;
+    if (n >= 7) status = 'Aprovado! ✅';
+    else if (n > 3) status = 'Recuperação ⚠️';
+    else status = 'Reprovado ❌';
+    document.getElementById('nota-output').textContent = `nota: ${n.toFixed(1)} → ${status}`;
+  }
+
+  function calcTabuada(val) {
+    const n = parseInt(val);
+    if (!n || isNaN(n)) return;
+    let t = '';
+    for (let i = 1; i <= 10; i++) t += `${n} × ${i} = ${n * i}\n`;
+    document.getElementById('tab-output').textContent = t.trim();
+  }
+
+  calcTabuada(7);
+
+  window.addEventListener('scroll', () => {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    document.getElementById('progressFill').style.width = pct + '%';
+  });
+</script>
+
+</body>
+</html>

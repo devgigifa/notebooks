@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQL — Notebook Interativo Completo</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.js"></script>
+<style>
+  :root {
+    --bg: #0a0f0c;
+    --bg-panel: #0e1512;
+    --bg-code: #080c0a;
+    --border: #1c2b23;
+    --text: #dcebe2;
+    --text-dim: #789483;
+    --accent: #5fd99a;
+    --accent2: #f2c574;
+    --pink: #e394dc;
+    --err: #f47174;
+    --ok: #82e08c;
+    --sql-green: #2f9e5f;
+    --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    --serif: Georgia, 'Times New Roman', serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.65; }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 0 24px 120px; }
+
+  header.hero {
+    padding: 72px 24px 48px; text-align: center; border-bottom: 1px solid var(--border); margin-bottom: 8px;
+    background: radial-gradient(ellipse at top, rgba(47,158,95,0.16), transparent 60%);
+  }
+  .hero-eyebrow { font-family: var(--mono); font-size: 13px; letter-spacing: 3px; color: var(--sql-green); text-transform: uppercase; }
+  .hero h1 { font-family: var(--serif); font-size: 46px; font-weight: 400; margin: 14px 0 10px; color: #fff; }
+  .hero h1 span { color: var(--accent); font-style: italic; }
+  .hero p { color: var(--text-dim); font-size: 16px; max-width: 540px; margin: 0 auto; }
+
+  .progress-bar { position: sticky; top: 0; z-index: 50; height: 3px; background: var(--border); }
+  .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--sql-green), var(--pink)); transition: width .15s ease; }
+
+  .loading-banner {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: var(--sql-green); color: #05130a; text-align: center;
+    font-family: var(--mono); font-size: 13px; padding: 8px; font-weight: 700;
+    transform: translateY(-100%); transition: transform .3s ease;
+  }
+  .loading-banner.show { transform: translateY(0); }
+
+  nav.toc { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; margin: 32px 0; }
+  nav.toc h3 { font-family: var(--mono); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); margin: 0 0 12px; }
+  nav.toc ol { margin: 0; padding-left: 20px; columns: 2; font-size: 13.5px; }
+  nav.toc a { color: var(--text); text-decoration: none; display: inline-block; padding: 3px 0; }
+  nav.toc a:hover { color: var(--accent); }
+
+  .schema-box {
+    background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px;
+    padding: 20px 24px; margin: 32px 0;
+  }
+  .schema-box h3 { font-family: var(--mono); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--sql-green); margin: 0 0 14px; }
+  .schema-tables { display: flex; gap: 16px; flex-wrap: wrap; }
+  .schema-table { background: var(--bg-code); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; flex: 1; min-width: 200px; }
+  .schema-table-name { font-family: var(--mono); color: var(--accent); font-weight: 700; font-size: 13.5px; margin-bottom: 8px; }
+  .schema-table ul { margin: 0; padding-left: 16px; font-size: 12.5px; color: var(--text-dim); font-family: var(--mono); }
+  .schema-table li { margin-bottom: 3px; }
+  .schema-table .pk { color: var(--accent2); }
+
+  .module-divider { margin: 80px 0 40px; text-align: center; }
+  .module-divider .tag {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 3px; color: var(--sql-green);
+    text-transform: uppercase; background: rgba(47,158,95,0.14); padding: 6px 16px;
+    border-radius: 20px; border: 1px solid rgba(47,158,95,0.35);
+  }
+
+  section.lesson { margin: 56px 0; scroll-margin-top: 20px; }
+  .lesson-num { font-family: var(--mono); color: var(--accent); font-size: 14px; letter-spacing: 2px; }
+  .lesson h2 { font-family: var(--serif); font-size: 28px; font-weight: 400; color: #fff; margin: 6px 0 20px; }
+  .lesson p { font-size: 16px; color: #c9d9cf; }
+  .lesson ul, .lesson ol.explain { font-size: 16px; color: #c9d9cf; padding-left: 22px; }
+  .lesson li { margin-bottom: 6px; }
+
+  .callout { border-left: 3px solid var(--accent2); background: rgba(242,197,116,0.07); padding: 12px 18px; border-radius: 0 8px 8px 0; font-size: 14.5px; color: #e8dcc0; margin: 18px 0; }
+  .callout strong { color: var(--accent2); }
+  .analogy { border-left: 3px solid var(--pink); background: rgba(227,148,220,0.07); padding: 12px 18px; border-radius: 0 8px 8px 0; font-size: 14.5px; color: #ecd9ea; margin: 18px 0; }
+  .analogy strong { color: var(--pink); }
+  .sqlnote { border-left: 3px solid var(--sql-green); background: rgba(47,158,95,0.08); padding: 12px 18px; border-radius: 0 8px 8px 0; font-size: 14.5px; color: #cdeadb; margin: 18px 0; }
+  .sqlnote strong { color: var(--accent); }
+
+  .playground { background: var(--bg-code); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin: 20px 0; }
+  .playground-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; background: #0b120e; border-bottom: 1px solid var(--border); }
+  .playground-header .dots { display: flex; gap: 6px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.r { background: #ff5f56; } .dot.y { background: #ffbd2e; } .dot.g { background: #27c93f; }
+  .playground-label { font-family: var(--mono); font-size: 12px; color: var(--text-dim); }
+
+  textarea.code-input {
+    width: 100%; background: transparent; color: #e8f5ee;
+    font-family: var(--mono); font-size: 14px; line-height: 1.6;
+    border: none; padding: 16px; resize: vertical; min-height: 90px;
+    outline: none; white-space: pre; tab-size: 2;
+  }
+
+  .playground-actions { display: flex; gap: 10px; padding: 0 16px 14px; flex-wrap: wrap; }
+
+  button.run-btn {
+    background: var(--sql-green); color: #05130a; border: none;
+    font-family: var(--mono); font-weight: 700; font-size: 13px;
+    padding: 9px 18px; border-radius: 6px; cursor: pointer;
+    transition: transform .1s ease, background .15s ease;
+  }
+  button.run-btn:hover { background: #3fbb73; transform: translateY(-1px); }
+  button.run-btn:active { transform: translateY(0); }
+
+  button.reset-btn {
+    background: transparent; color: var(--text-dim); border: 1px solid var(--border);
+    font-family: var(--mono); font-size: 13px; padding: 9px 14px; border-radius: 6px; cursor: pointer;
+  }
+  button.reset-btn:hover { color: var(--text); border-color: var(--text-dim); }
+
+  .output-wrap {
+    border-top: 1px solid var(--border);
+    background: #060a08;
+    padding: 14px 16px;
+    font-family: var(--mono);
+    font-size: 13px;
+  }
+  .output-wrap:empty::before { content: '// o resultado da query aparece aqui'; color: var(--text-dim); }
+
+  table.result-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+    margin-top: 4px;
+  }
+  table.result-table th {
+    background: rgba(47,158,95,0.16);
+    color: var(--accent);
+    padding: 6px 10px;
+    text-align: left;
+    border: 1px solid var(--border);
+    position: sticky; top: 0;
+  }
+  table.result-table td {
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    color: #dcebe2;
+  }
+  table.result-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+  .result-meta { color: var(--text-dim); font-size: 12px; margin-bottom: 8px; }
+  .result-scroll { max-height: 300px; overflow: auto; }
+  .sql-err { color: var(--err); }
+
+  .quiz { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px; padding: 22px 24px; margin: 22px 0; }
+  .quiz-q { font-size: 15.5px; color: #fff; margin-bottom: 14px; }
+  .quiz-q .qtag { font-family: var(--mono); color: var(--pink); font-size: 12px; letter-spacing: 1px; display: block; margin-bottom: 6px; }
+  .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+  .quiz-opt { text-align: left; background: #0b120e; border: 1px solid var(--border); color: var(--text); padding: 11px 14px; border-radius: 7px; font-size: 14.5px; cursor: pointer; font-family: inherit; transition: border-color .15s ease, background .15s ease; }
+  .quiz-opt:hover { border-color: var(--accent); }
+  .quiz-opt.correct { border-color: var(--ok); background: rgba(130,224,140,0.08); color: var(--ok); }
+  .quiz-opt.wrong { border-color: var(--err); background: rgba(244,113,116,0.08); color: var(--err); }
+  .quiz-feedback { margin-top: 12px; font-size: 14px; color: var(--text-dim); display: none; }
+  .quiz-feedback.show { display: block; }
+
+  .challenge { border: 1px dashed var(--accent); border-radius: 10px; padding: 20px 24px; margin: 22px 0; background: rgba(95,217,154,0.05); }
+  .challenge-tag { font-family: var(--mono); color: var(--accent); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; }
+  .challenge h4 { margin: 8px 0 10px; color: #fff; font-weight: 500; }
+
+  code.inline { background: rgba(95,217,154,0.14); color: var(--accent); padding: 2px 6px; border-radius: 4px; font-family: var(--mono); font-size: 13.5px; }
+
+  table.compare { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 14px; }
+  table.compare th, table.compare td { border: 1px solid var(--border); padding: 10px 14px; text-align: left; }
+  table.compare th { background: var(--bg-panel); color: var(--accent); font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+  table.compare td { color: #c9d9cf; }
+  table.compare code.inline { font-size: 12.5px; }
+
+  hr.divider { border: none; border-top: 1px solid var(--border); margin: 56px 0 0; }
+  footer { text-align: center; padding: 60px 24px 20px; color: var(--text-dim); font-size: 14px; }
+  footer .accent { color: var(--accent); }
+
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 30px; }
+    nav.toc ol { columns: 1; }
+    .lesson h2 { font-size: 22px; }
+    table.compare { font-size: 12.5px; }
+    .schema-tables { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<div class="loading-banner" id="loadingBanner">carregando banco de dados...</div>
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<header class="hero">
+  <div class="hero-eyebrow">Notebook Interativo · SQL</div>
+  <h1>Consultando com <span>SQL</span></h1>
+  <p>Um banco de dados de verdade rodando no seu navegador. Escreva queries reais e veja os resultados de verdade, ao vivo.</p>
+</header>
+
+<div class="wrap">
+
+  <nav class="toc">
+    <h3>Neste notebook</h3>
+    <ol>
+      <li><a href="#l1">O que é SQL?</a></li>
+      <li><a href="#l2">SELECT e FROM</a></li>
+      <li><a href="#l3">DISTINCT</a></li>
+      <li><a href="#l4">WHERE</a></li>
+      <li><a href="#l5">ORDER BY e LIMIT</a></li>
+      <li><a href="#l6">BETWEEN e IN</a></li>
+      <li><a href="#l7">LIKE</a></li>
+      <li><a href="#l8">Funções de agregação</a></li>
+      <li><a href="#l9">GROUP BY</a></li>
+      <li><a href="#l10">HAVING</a></li>
+      <li><a href="#l11">INNER JOIN</a></li>
+      <li><a href="#l12">LEFT JOIN</a></li>
+      <li><a href="#l13">Subqueries</a></li>
+      <li><a href="#l14">UNION</a></li>
+      <li><a href="#l15">INSERT, UPDATE, DELETE</a></li>
+      <li><a href="#l16">Chaves primárias e estrangeiras</a></li>
+      <li><a href="#l17">Desafio final</a></li>
+    </ol>
+  </nav>
+
+  <div class="schema-box">
+    <h3>Banco de dados deste notebook</h3>
+    <p style="margin:0 0 14px; color:#c9d9cf; font-size:14.5px;">
+      Todos os exercícios usam o mesmo banco, com 3 tabelas de uma loja fictícia:
+    </p>
+    <div class="schema-tables">
+      <div class="schema-table">
+        <div class="schema-table-name">clientes</div>
+        <ul>
+          <li class="pk">id (PK)</li>
+          <li>nome</li>
+          <li>sobrenome</li>
+          <li>cidade</li>
+        </ul>
+      </div>
+      <div class="schema-table">
+        <div class="schema-table-name">produtos</div>
+        <ul>
+          <li class="pk">id (PK)</li>
+          <li>nome</li>
+          <li>cor</li>
+          <li>preco</li>
+        </ul>
+      </div>
+      <div class="schema-table">
+        <div class="schema-table-name">pedidos</div>
+        <ul>
+          <li class="pk">id (PK)</li>
+          <li>cliente_id (FK)</li>
+          <li>produto_id (FK)</li>
+          <li>quantidade</li>
+          <li>data_pedido</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="module-divider"><span class="tag">Módulo 1 · Consultas básicas</span></div>
+
+  <section class="lesson" id="l1">
+    <div class="lesson-num">01</div>
+    <h2>O que é SQL?</h2>
+    <p>
+      SQL (Structured Query Language) é a linguagem usada pra conversar com bancos de dados relacionais —
+      bancos organizados em <strong>tabelas</strong>, parecidas com planilhas: linhas e colunas.
+      Com SQL você busca, filtra, junta e modifica dados guardados nessas tabelas.
+    </p>
+
+    <div class="analogy">
+      <strong>Pensa assim:</strong> se um banco de dados é um arquivo de fichários, cada tabela é uma gaveta
+      (clientes, produtos, pedidos), e cada linha dentro dela é uma ficha individual. SQL é a linguagem que
+      você usa pra pedir "me traga todas as fichas que tenham tal característica".
+    </div>
+
+    <div class="callout">
+      <strong>Sobre este notebook:</strong> os comandos aqui rodam num banco SQLite de verdade, carregado
+      no seu navegador. Isso significa que os resultados são reais — não são simulados ou pré-calculados.
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="lesson" id="l2">
+    <div class="lesson-num">02</div>
+    <h2>SELECT e FROM</h2>
+    <p>
+      Toda consulta começa com <code class="inline">SELECT</code> (o que eu quero ver) e <code class="inline">FROM</code>
+      (de qual tabela). Pra pegar todas as colunas, usa-se o asterisco <code class="inline">*</code>.
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">select-from.sql</span>
+      </div>
+      <textarea class="code-input" data-id="p1" spellcheck="false">SELECT *
+FROM clientes;</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runQuery('p1')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('p1')">↺ Restaurar</button>
+      </div>
+      <div class="output-wrap" id="out-p1"></div>
+    </div>
+
+    <p>
+      Você também pode escolher só colunas específicas, em vez de tudo:
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">select-colunas.sql</span>
+      </div>
+      <textarea class="code-input" data-id="p2" spellcheck="false">SELECT nome, sobrenome
+FROM clientes;</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runQuery('p2')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('p2')">↺ Restaurar</button>
+      </div>
+      <div class="output-wrap" id="out-p2"></div>
+    </div>
+
+    <div class="challenge">
+      <div class="challenge-tag">Desafio</div>
+      <h4>A equipe de marketing quer os nomes e sobrenomes de todos os clientes</h4>
+      <p style="margin:0; color:#c9d9cf; font-size:15px;">
+        Isso já é exatamente a query acima! Tente agora selecionar só a coluna <code class="inline">cidade</code>
+        de todos os clientes.
+      </p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="lesson" id="l3">
+    <div class="lesson-num">03</div>
+    <h2>DISTINCT</h2>
+    <p>
+      <code class="inline">DISTINCT</code> remove valores duplicados do resultado — útil pra descobrir
+      quais valores <em>únicos</em> existem numa coluna.
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">distinct.sql</span>
+      </div>
+      <textarea class="code-input" data-id="p3" spellcheck="false">SELECT DISTINCT cidade
+FROM clientes;</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runQuery('p3')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('p3')">↺ Restaurar</button>
+      </div>
+      <div class="output-wrap" id="out-p3"></div>
+    </div>
+
+    <div class="sqlnote">
+      <strong>Compare os dois:</strong> tente rodar <code class="inline">SELECT cidade FROM clientes;</code>
+      (sem DISTINCT) no editor acima e veja a diferença — sem DISTINCT, cidades repetidas aparecem várias vezes.
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="lesson" id="l4">
+    <div class="lesson-num">04</div>
+    <h2>WHERE</h2>
+    <p>
+      <code class="inline">WHERE</code> filtra quais linhas aparecem no resultado, baseado numa condição.
+    </p>
+
+    <table class="compare">
+      <tr><th>Operador</th><th>Significado</th></tr>
+      <tr><td><code class="inline">=</code></td><td>Igual</td></tr>
+      <tr><td><code class="inline">&gt;</code> / <code class="inline">&lt;</code></td><td>Maior que / menor que</td></tr>
+      <tr><td><code class="inline">&gt;=</code> / <code class="inline">&lt;=</code></td><td>Maior ou igual / menor ou igual</td></tr>
+      <tr><td><code class="inline">&lt;&gt;</code> ou <code class="inline">!=</code></td><td>Diferente de</td></tr>
+      <tr><td><code class="inline">AND</code> / <code class="inline">OR</code></td><td>E / OU lógico, pra combinar condições</td></tr>
+    </table>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">where.sql</span>
+      </div>
+      <textarea class="code-input" data-id="p4" spellcheck="false">SELECT *
+FROM produtos
+WHERE preco > 100;</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runQuery('p4')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('p4')">↺ Restaurar</button>
+      </div>
+      <div class="output-wrap" id="out-p4"></div>
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">where-and-or.sql</span>
+      </div>
+      <textarea class="code-input" data-id="p5" spellcheck="false">SELECT *
+FROM produtos
+WHERE cor = 'azul' OR cor = 'preto';</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runQuery('p5')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('p5')">↺ Restaurar</button>
+      </div>
+      <div class="output-wrap" id="out-p5"></div>
+    </div>
+
+    <div class="callout">
+      <strong>Textos entre aspas simples:</strong> valores de texto sempre vão entre aspas simples, como
+      <code class="inline">'azul'</code>. Números não precisam de aspas.
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="lesson" id="l5">
+    <div class="lesson-num">05</div>
+    <h2>ORDER BY e LIMIT</h2>
+    <p>
+      <code class="inline">ORDER BY</code> ordena o resultado — <code class="inline">ASC</code> (crescente,
+      padrão) ou <code class="inline">DESC</code> (decrescente). <code class="inline">LIMIT</code> restringe
+      quantas linhas voltam.
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">order-limit.sql</span>
+      </div>
+      <textarea class="code-input" data-id="p6" spellcheck="false">SELECT nome, preco
+FROM produtos
+ORDER BY preco DESC
+LIMIT 5;</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runQuery('p6')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('p6')">↺ Restaurar</button>
+      </div>
+      <div class="output-wrap" id="out-p6"></div>
+    </div>
+
+    <div class="sqlnote">
+      <strong>Nota sobre TOP:</strong> em SQL Server você usaria <code class="inline">SELECT TOP 5</code> em vez
+      de <code class="inline">LIMIT 5</code> no final. A ideia é a mesma — cada banco de dados tem pequenas
+      diferenças de sintaxe pra coisas assim, mas a lógica geral do SQL é a mesma em todos.
+    </div>
+
+    <div class="challenge">
+      <div class="challenge-tag">Desafio</div>
+      <h4>Os 3 produtos mais baratos</h4>
+      <p style="margin:0; color:#c9d9cf; font-size:15px;">
+        Edite a query acima pra trazer os 3 produtos mais <strong>baratos</strong> (dica: troque DESC por ASC).
+      </p>
+    </div>
+  </section>
+
+  <div class="module-divider"><span class="tag">Módulo 2 · Filtros avançados</span></div>
+
+  <section class="lesson" id="l6">
+    <div class="lesson-num">06</div>
+    <h2>BETWEEN e IN</h2>
+    <p>
+      <code class="inline">BETWEEN</code> verifica se um valor está dentro de um intervalo (inclusive nas pontas).
+      <code class="inline">IN</code> verifica se um valor está numa lista específica de opções.
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">between.sql</span>
+      </div>
+      <textarea class="code-input" data-id="p7" spellcheck="false">SELECT nome, preco
+FROM produtos
+WHERE preco BETWEEN 50 AND 200;</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runQuery('p7')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('p7')">↺ Restaurar</button>
+      </div>
+      <div class="output-wrap" id="out-p7"></div>
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">in.sql</span>
+      </div>
+      <textarea class="code-input" data-id="p8" spellcheck="false">SELECT nome, cidade
+FROM clientes
+WHERE cidade IN ('São Paulo', 'Curitiba');</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runQuery('p8')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('p8')">↺ Restaurar</button>
+      </div>
+      <div class="output-wrap" id="out-p8"></div>
+    </div>
+
+    <div class="callout">
+      <strong>Equivalências:</strong> <code class="inline">valor BETWEEN a AND b</code> é o mesmo que
+      <code class="inline">valor >= a AND valor <= b</code>. Da mesma forma, <code class="inline">IN (1,2,3)</code>
+      é um jeito mais curto de escrever <code class="inline">= 1 OR = 2 OR = 3</code>.
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="lesson" id="l7">
+    <div class="lesson-num">07</div>
+    <h2>LIKE</h2>
+    <p>
+      <code class="inline">LIKE</code> busca por um <strong>padrão</strong> de texto, usando <code class="inline">%</code>
+      como curinga (qualquer sequência de caracteres, inclusive vazia).
+    </p>
+
+    <table class="compare">
+      <tr><th>Padrão</th><th>Encontra</th></tr>
+      <tr><td><code class="inline">'A%'</code></td><td>Começa com "A"</td></tr>
+      <tr><td><code class="inline">'%a'</code></td><td>Termina com "a"</td></tr>
+      <tr><td><code class="inline">'%ana%'</code></td><td>Contém "ana" em qualquer posição</td></tr>
+    </table>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">like.sql</span>
+      </div>
+      <textarea class="code-input" data-id="p9" spellcheck="false">SELECT nome
+FROM clientes
+WHERE nome LIKE 'A%';</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runQuery('p9')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('p9')">↺ Restaurar</button>
+      </div>
+      <div class="output-wrap" id="out-p9"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="lesson" id="l8">
+    <div class="lesson-num">08</div>
+    <h2>Funções de agregação</h2>
+    <p>
+      Funções de agregação combinam várias linhas num único resultado — soma, contagem, média, mínimo, máximo.
+    </p>
+
+    <table class="compare">
+      <tr><th>Função</th><th>Calcula</th></tr>
+      <tr><td><code class="inline">COUNT()</code></td><td>Quantidade de linhas</td></tr>
+      <tr><td><code class="inline">SUM()</code></td><td>Soma dos valores</td></tr>
+      <tr><td><code class="inline">AVG()</code></td><td>Média dos valores</td></tr>
+      <tr><td><code class="inline">MIN()</code></td><td>Menor valor</td></tr>
+      <tr><td><code class="inline">MAX()</code></td><td>Maior valor</td></tr>
+    </table>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">agregacao.sql</span>
+      </div>
+      <textarea class="code-input" data-id="p10" spellcheck="false">SELECT
+  COUNT(*) AS total_produtos,
+  AVG(preco) AS preco_medio,
+  MIN(preco) AS mais_barato,
+  MAX(preco) AS mais_caro
+FROM produtos;</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runQuery('p10')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('p10')">↺ Restaurar</button>
+      </div>
+      <div class="output-wrap" id="out-p10"></div>
+    </div>
+
+    <div class="sqlnote">
+      <strong>Sobre <code class="inline">AS</code>:</strong> renomeia a coluna no resultado, só pra ficar mais
+      legível — sem alterar nada na tabela original. Se o novo nome tiver espaço, precisa de aspas: <code class="inline">AS "preço médio"</code>.
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-q">
+        <span class="qtag">TESTE RÁPIDO</span>
+        Qual função de agregação eu usaria pra saber quantos clientes existem na tabela?
+      </div>
+      <div class="quiz-options" data-answer="1">
+        <button class="quiz-opt"><code class="inline">SUM(*)</code></button>
+        <button class="quiz-opt"><code class="inline">COUNT(*)</code></button>
+        <button class="quiz-opt"><code class="inline">AVG(*)</code></button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="lesson" id="l9">
+    <div class="lesson-num">09</div>
+    <h2>GROUP BY</h2>
+    <p>
+      <code class="inline">GROUP BY</code> agrupa linhas que têm o mesmo valor numa coluna, permitindo aplicar
+      uma função de agregação <strong>pra cada grupo</strong> separadamente — em vez de pra tabela inteira.
+    </p>
+
+    <div class="analogy">
+      <strong>Pensa assim:</strong> é como separar um monte de cartas de baralho em pilhas por naipe, e depois
+      contar quantas cartas tem em cada pilha.
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">group-by.sql</span>
+      </div>
+      <textarea class="code-input" data-id="p11" spellcheck="false">SELECT cor, COUNT(*) AS quantidade
+FROM produtos
+GROUP BY cor;</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runQuery('p11')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('p11')">↺ Restaurar</button>
+      </div>
+      <div class="output-wrap" id="out-p11"></div>
+    </div>
+
+    <div class="callout">
+      <strong>Regra importante:</strong> toda coluna no <code class="inline">SELECT</code> que não está dentro
+      de uma função de agregação precisa estar também no <code class="inline">GROUP BY</code> — como <code class="inline">cor</code>
+      no exemplo acima.
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="lesson" id="l10">
+    <div class="lesson-num">10</div>
+    <h2>HAVING</h2>
+    <p>
+      <code class="inline">HAVING</code> filtra <strong>depois</strong> do agrupamento — é o "WHERE dos grupos".
+      Enquanto <code class="inline">WHERE</code> filtra linhas individuais antes de agrupar, <code class="inline">HAVING</code>
+      filtra os grupos já formados.
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">having.sql</span>
+      </div>
+      <textarea class="code-input" data-id="p12" spellcheck="false">SELECT cor, COUNT(*) AS quantidade
+FROM produtos
+GROUP BY cor
+HAVING COUNT(*) > 1;</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runQuery('p12')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('p12')">↺ Restaurar</button>
+      </div>
+      <div class="output-wrap" id="out-p12"></div>
+    </div>
+
+    <table class="compare">
+      <tr><th>WHERE</th><th>HAVING</th></tr>
+      <tr><td>Filtra linhas antes de agrupar</td><td>Filtra grupos depois de agrupar</td></tr>
+      <tr><td>Não pode usar funções de agregação</td><td>Pode usar funções de agregação</td></tr>
+    </table>
+  </section>
+
+  <div class="module-divider"><span class="tag">Módulo 3 · Múltiplas tabelas</span></div>
+
+  <section class="lesson" id="l11">
+    <div class="lesson-num">11</div>
+    <h2>INNER JOIN</h2>
+    <p>
+      Até agora consultamos uma tabela por vez. <code class="inline">JOIN</code> combina informações de
+      <strong>tabelas diferentes</strong>, conectando linhas que têm um valor em comum (geralmente uma chave
+      estrangeira). <code class="inline">INNER JOIN</code> traz só as linhas que têm correspondência nas duas tabelas.
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">inner-join.sql</span>
+      </div>
+      <textarea class="code-input" data-id="p13" spellcheck="false">SELECT c.nome, p.nome AS produto, ped.quantidade
+FROM pedidos ped
+INNER JOIN clientes c ON c.id = ped.cliente_id
+INNER JOIN produtos p ON p.id = ped.produto_id;</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runQuery('p13')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('p13')">↺ Restaurar</button>
+      </div>
+      <div class="output-wrap" id="out-p13"></div>
+    </div>
+
+    <div class="sqlnote">
+      <strong>Sobre os apelidos (c, p, ped):</strong> quando você junta várias tabelas, é comum dar um apelido
+      curto pra cada uma (com ou sem <code class="inline">AS</code>) — isso deixa a query mais curta e evita
+      ambiguidade quando duas tabelas têm coluna com o mesmo nome, como <code class="inline">nome</code> aqui.
+    </div>
+
+    <div class="challenge">
+      <div class="challenge-tag">Mão na massa</div>
+      <h4>Adicione um filtro</h4>
+      <p style="margin:0; color:#c9d9cf; font-size:15px;">
+        Adicione <code class="inline">WHERE ped.quantidade > 1</code> no final da query acima (antes do ponto
+        e vírgula) e veja o resultado filtrar só pedidos com mais de uma unidade.
+      </p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="lesson" id="l12">
+    <div class="lesson-num">12</div>
+    <h2>LEFT JOIN</h2>
+    <p>
+      <code class="inline">LEFT JOIN</code> traz <strong>todas</strong> as linhas da tabela da esquerda, mesmo
+      que não tenham correspondência na tabela da direita — nesse caso, as colunas da direita vêm como
+      <code class="inline">NULL</code>.
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">left-join.sql</span>
+      </div>
+      <textarea class="code-input" data-id="p14" spellcheck="false">SELECT c.nome, ped.id AS pedido_id
+FROM clientes c
+LEFT JOIN pedidos ped ON ped.cliente_id = c.id;</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runQuery('p14')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('p14')">↺ Restaurar</button>
+      </div>
+      <div class="output-wrap" id="out-p14"></div>
+    </div>
+
+    <div class="callout">
+      <strong>Quando usar:</strong> LEFT JOIN é ótimo pra perguntas do tipo "quais clientes <em>nunca</em>
+      fizeram um pedido?" — algo que INNER JOIN não consegue responder, porque ele descarta linhas sem
+      correspondência.
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="lesson" id="l13">
+    <div class="lesson-num">13</div>
+    <h2>Subqueries</h2>
+    <p>
+      Uma subquery é uma consulta <code class="inline">SELECT</code> dentro de outra — usada quando o
+      resultado de uma consulta depende do resultado de outra.
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">subquery.sql</span>
+      </div>
+      <textarea class="code-input" data-id="p15" spellcheck="false">SELECT nome, preco
+FROM produtos
+WHERE preco > (SELECT AVG(preco) FROM produtos);</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runQuery('p15')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('p15')">↺ Restaurar</button>
+      </div>
+      <div class="output-wrap" id="out-p15"></div>
+    </div>
+
+    <p>
+      Essa query traz os produtos com preço <strong>acima da média</strong>. A subquery entre parênteses
+      roda primeiro (calcula a média), e o resultado dela é usado na condição do <code class="inline">WHERE</code>
+      de fora.
+    </p>
+  </section>
+
+  <hr class="divider">
+
+  <section class="lesson" id="l14">
+    <div class="lesson-num">14</div>
+    <h2>UNION</h2>
+    <p>
+      <code class="inline">UNION</code> combina o resultado de dois <code class="inline">SELECT</code>s num só,
+      removendo duplicados automaticamente. As duas consultas precisam ter o mesmo número de colunas.
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">union.sql</span>
+      </div>
+      <textarea class="code-input" data-id="p16" spellcheck="false">SELECT nome FROM clientes WHERE cidade = 'São Paulo'
+UNION
+SELECT nome FROM produtos WHERE cor = 'azul';</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runQuery('p16')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('p16')">↺ Restaurar</button>
+      </div>
+      <div class="output-wrap" id="out-p16"></div>
+    </div>
+
+    <div class="sqlnote">
+      <strong>UNION vs UNION ALL:</strong> <code class="inline">UNION</code> remove duplicados (mais lento).
+      <code class="inline">UNION ALL</code> mantém tudo, inclusive repetições (mais rápido). Use UNION ALL
+      quando souber que não vai ter duplicata, ou quando duplicatas não importam.
+    </div>
+  </section>
+
+  <div class="module-divider"><span class="tag">Módulo 4 · Modificando dados</span></div>
+
+  <section class="lesson" id="l15">
+    <div class="lesson-num">15</div>
+    <h2>INSERT, UPDATE, DELETE</h2>
+    <p>
+      Até aqui, só consultamos dados (<code class="inline">SELECT</code>). Esses três comandos
+      <strong>modificam</strong> o banco: inserir, atualizar e apagar linhas.
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">insert.sql</span>
+      </div>
+      <textarea class="code-input" data-id="p17" spellcheck="false">INSERT INTO clientes (nome, sobrenome, cidade)
+VALUES ('Marcos', 'Vieira', 'Belo Horizonte');
+
+SELECT * FROM clientes;</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runQuery('p17')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('p17')">↺ Restaurar</button>
+      </div>
+      <div class="output-wrap" id="out-p17"></div>
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">update.sql</span>
+      </div>
+      <textarea class="code-input" data-id="p18" spellcheck="false">UPDATE clientes
+SET cidade = 'Rio de Janeiro'
+WHERE nome = 'Marcos';
+
+SELECT * FROM clientes WHERE nome = 'Marcos';</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runQuery('p18')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('p18')">↺ Restaurar</button>
+      </div>
+      <div class="output-wrap" id="out-p18"></div>
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">delete.sql</span>
+      </div>
+      <textarea class="code-input" data-id="p19" spellcheck="false">DELETE FROM clientes
+WHERE nome = 'Marcos';
+
+SELECT * FROM clientes;</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runQuery('p19')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('p19')">↺ Restaurar</button>
+      </div>
+      <div class="output-wrap" id="out-p19"></div>
+    </div>
+
+    <div class="callout">
+      <strong>Cuidado sempre com o WHERE:</strong> um <code class="inline">UPDATE</code> ou <code class="inline">DELETE</code>
+      sem <code class="inline">WHERE</code> afeta <strong>todas</strong> as linhas da tabela. Isso é uma das causas
+      mais comuns de desastre em bancos de dados reais — sempre confira a condição antes de rodar.
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="lesson" id="l16">
+    <div class="lesson-num">16</div>
+    <h2>Chaves primárias e estrangeiras</h2>
+    <p>
+      <strong>Chave primária (PRIMARY KEY)</strong> identifica cada linha de forma única numa tabela — não pode
+      repetir nem ser nula. <strong>Chave estrangeira (FOREIGN KEY)</strong> é uma coluna que referencia a chave
+      primária de outra tabela, criando a ligação entre elas.
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">create-table.sql</span>
+      </div>
+      <textarea class="code-input" data-id="p20" spellcheck="false">CREATE TABLE fornecedores (
+  id INTEGER PRIMARY KEY,
+  nome TEXT NOT NULL,
+  contato TEXT
+);
+
+INSERT INTO fornecedores (id, nome, contato)
+VALUES (1, 'Distribuidora ABC', 'contato@abc.com');
+
+SELECT * FROM fornecedores;</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runQuery('p20')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('p20')">↺ Restaurar</button>
+      </div>
+      <div class="output-wrap" id="out-p20"></div>
+    </div>
+
+    <p>Na tabela <code class="inline">pedidos</code> deste notebook, <code class="inline">cliente_id</code> e
+    <code class="inline">produto_id</code> são chaves estrangeiras — cada uma aponta pra um <code class="inline">id</code>
+    (chave primária) nas tabelas <code class="inline">clientes</code> e <code class="inline">produtos</code>.</p>
+
+    <table class="compare">
+      <tr><th>Restrição</th><th>O que garante</th></tr>
+      <tr><td><code class="inline">NOT NULL</code></td><td>A coluna nunca pode ficar vazia</td></tr>
+      <tr><td><code class="inline">UNIQUE</code></td><td>Todos os valores da coluna são diferentes entre si</td></tr>
+      <tr><td><code class="inline">PRIMARY KEY</code></td><td>NOT NULL + UNIQUE — identifica a linha</td></tr>
+      <tr><td><code class="inline">FOREIGN KEY</code></td><td>Referencia a chave primária de outra tabela</td></tr>
+      <tr><td><code class="inline">DEFAULT</code></td><td>Valor usado quando nada é informado</td></tr>
+    </table>
+  </section>
+
+  <div class="module-divider"><span class="tag">Desafio final</span></div>
+
+  <section class="lesson" id="l17">
+    <div class="lesson-num">17</div>
+    <h2>Desafio final</h2>
+    <p>Escreva uma única query que traga: o nome do cliente, o nome do produto e a quantidade, mas <strong>somente</strong> pedidos de produtos com preço acima de 100, ordenados do pedido de maior quantidade pro menor.</p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">desafio.sql</span>
+      </div>
+      <textarea class="code-input" data-id="p21" spellcheck="false">-- escreva sua query aqui
+-- dica: você vai precisar de JOIN, WHERE e ORDER BY juntos
+
+SELECT *
+FROM pedidos;</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runQuery('p21')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('p21')">↺ Restaurar</button>
+      </div>
+      <div class="output-wrap" id="out-p21"></div>
+    </div>
+
+    <div class="callout">
+      <strong>Travou?</strong> Tente sozinho primeiro. A solução está abaixo.
+    </div>
+
+    <details style="margin-top: 12px;">
+      <summary style="cursor:pointer; color: var(--accent); font-family: var(--mono); font-size: 13px;">▶ ver solução</summary>
+      <div class="playground" style="margin-top: 12px;">
+        <div class="playground-header">
+          <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+          <span class="playground-label">solucao.sql</span>
+        </div>
+        <textarea class="code-input" data-id="p22" spellcheck="false">SELECT c.nome AS cliente, p.nome AS produto, ped.quantidade
+FROM pedidos ped
+INNER JOIN clientes c ON c.id = ped.cliente_id
+INNER JOIN produtos p ON p.id = ped.produto_id
+WHERE p.preco > 100
+ORDER BY ped.quantidade DESC;</textarea>
+        <div class="playground-actions">
+          <button class="run-btn" onclick="runQuery('p22')">▶ Executar</button>
+          <button class="reset-btn" onclick="resetCode('p22')">↺ Restaurar</button>
+        </div>
+        <div class="output-wrap" id="out-p22"></div>
+      </div>
+    </details>
+  </section>
+
+  <hr class="divider">
+
+  <footer>
+    Você passou por todo o essencial de SQL, de SELECT simples até JOINs e subqueries.
+    <span class="accent">Próximo passo:</span> tentar essas mesmas consultas num banco de dados real do seu próprio projeto.
+  </footer>
+
+</div>
+
+<script>
+  const originals = {};
+  document.querySelectorAll('.code-input').forEach(ta => {
+    originals[ta.dataset.id] = ta.value;
+  });
+
+  let db = null;
+  let dbReady = false;
+  const banner = document.getElementById('loadingBanner');
+  banner.classList.add('show');
+
+  // dados iniciais fixos, usados pra "resetar" o banco quando o usuário quiser
+  function seedDatabase(database) {
+    database.run(`
+      DROP TABLE IF EXISTS pedidos;
+      DROP TABLE IF EXISTS produtos;
+      DROP TABLE IF EXISTS clientes;
+      DROP TABLE IF EXISTS fornecedores;
+
+      CREATE TABLE clientes (
+        id INTEGER PRIMARY KEY,
+        nome TEXT NOT NULL,
+        sobrenome TEXT NOT NULL,
+        cidade TEXT
+      );
+
+      CREATE TABLE produtos (
+        id INTEGER PRIMARY KEY,
+        nome TEXT NOT NULL,
+        cor TEXT,
+        preco REAL
+      );
+
+      CREATE TABLE pedidos (
+        id INTEGER PRIMARY KEY,
+        cliente_id INTEGER,
+        produto_id INTEGER,
+        quantidade INTEGER,
+        data_pedido TEXT,
+        FOREIGN KEY (cliente_id) REFERENCES clientes(id),
+        FOREIGN KEY (produto_id) REFERENCES produtos(id)
+      );
+
+      INSERT INTO clientes (id, nome, sobrenome, cidade) VALUES
+        (1, 'Ana', 'Silva', 'São Paulo'),
+        (2, 'Bruno', 'Costa', 'Curitiba'),
+        (3, 'Camila', 'Souza', 'São Paulo'),
+        (4, 'Diego', 'Almeida', 'Belo Horizonte'),
+        (5, 'Elisa', 'Ferreira', 'Curitiba'),
+        (6, 'Anderson', 'Melo', 'Recife');
+
+      INSERT INTO produtos (id, nome, cor, preco) VALUES
+        (1, 'Teclado Mecânico', 'preto', 250.00),
+        (2, 'Mouse Sem Fio', 'preto', 89.90),
+        (3, 'Monitor 24pol', 'preto', 899.00),
+        (4, 'Luminária de Mesa', 'branco', 65.00),
+        (5, 'Cadeira Gamer', 'azul', 1200.00),
+        (6, 'Fone Bluetooth', 'azul', 199.90),
+        (7, 'Mousepad Grande', 'preto', 45.00),
+        (8, 'Webcam HD', 'branco', 180.00);
+
+      INSERT INTO pedidos (id, cliente_id, produto_id, quantidade, data_pedido) VALUES
+        (1, 1, 1, 1, '2026-01-10'),
+        (2, 1, 2, 2, '2026-01-10'),
+        (3, 2, 3, 1, '2026-02-05'),
+        (4, 3, 5, 1, '2026-02-14'),
+        (5, 4, 6, 3, '2026-03-01'),
+        (6, 1, 4, 1, '2026-03-08'),
+        (7, 5, 3, 1, '2026-03-15'),
+        (8, 2, 7, 4, '2026-04-02');
+    `);
+  }
+
+  initSqlJs({ locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/${file}` })
+    .then(SQL => {
+      db = new SQL.Database();
+      seedDatabase(db);
+      dbReady = true;
+      banner.classList.remove('show');
+    })
+    .catch(err => {
+      banner.textContent = 'erro ao carregar o banco de dados — recarregue a página';
+    });
+
+  function resetCode(id) {
+    const ta = document.querySelector(`.code-input[data-id="${id}"]`);
+    ta.value = originals[id];
+    document.getElementById('out-' + id).innerHTML = '';
+  }
+
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  function renderResults(outEl, results, statementCount) {
+    if (!results || results.length === 0) {
+      outEl.innerHTML = '<span style="color:var(--ok)">✓ Comando executado com sucesso (sem linhas de resultado pra exibir)</span>';
+      return;
+    }
+
+    let html = '';
+    results.forEach((res, idx) => {
+      const { columns, values } = res;
+      html += `<div class="result-meta">${values.length} linha${values.length !== 1 ? 's' : ''}</div>`;
+      html += '<div class="result-scroll"><table class="result-table"><thead><tr>';
+      columns.forEach(col => { html += `<th>${escapeHtml(col)}</th>`; });
+      html += '</tr></thead><tbody>';
+      values.forEach(row => {
+        html += '<tr>';
+        row.forEach(cell => {
+          html += `<td>${cell === null ? '<em style="color:var(--text-dim)">NULL</em>' : escapeHtml(cell)}</td>`;
+        });
+        html += '</tr>';
+      });
+      html += '</tbody></table></div>';
+    });
+    outEl.innerHTML = html;
+  }
+
+  function runQuery(id) {
+    const ta = document.querySelector(`.code-input[data-id="${id}"]`);
+    const outEl = document.getElementById('out-' + id);
+
+    if (!dbReady) {
+      outEl.innerHTML = '<span class="sql-err">⚠ banco de dados ainda carregando, aguarde um instante e tente novamente</span>';
+      return;
+    }
+
+    try {
+      const results = db.exec(ta.value);
+      renderResults(outEl, results);
+    } catch (e) {
+      outEl.innerHTML = `<span class="sql-err">✗ Erro SQL: ${escapeHtml(e.message)}</span>`;
+    }
+  }
+
+  document.querySelectorAll('.quiz').forEach(quiz => {
+    const optsWrap = quiz.querySelector('.quiz-options');
+    const answer = parseInt(optsWrap.dataset.answer, 10);
+    const feedback = quiz.querySelector('.quiz-feedback');
+    const buttons = optsWrap.querySelectorAll('.quiz-opt');
+
+    buttons.forEach((btn, idx) => {
+      btn.addEventListener('click', () => {
+        buttons.forEach(b => { b.disabled = true; });
+        if (idx === answer) {
+          btn.classList.add('correct');
+          feedback.textContent = '✓ Isso mesmo! Mandou bem.';
+        } else {
+          btn.classList.add('wrong');
+          buttons[answer].classList.add('correct');
+          feedback.textContent = '✗ Quase — a resposta certa está marcada em verde.';
+        }
+        feedback.classList.add('show');
+      });
+    });
+  });
+
+  window.addEventListener('scroll', () => {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    document.getElementById('progressFill').style.width = pct + '%';
+  });
+</script>
+
+</body>
+</html>

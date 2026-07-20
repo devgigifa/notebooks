@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSS — Notebook Interativo Completo</title>
+<style>
+  :root {
+    --bg: #0a0f1a;
+    --bg-panel: #0e1524;
+    --bg-code: #080c16;
+    --border: #1c2740;
+    --text: #dbe4f5;
+    --text-dim: #7688a8;
+    --accent: #6fa3ff;
+    --accent2: #f2c574;
+    --pink: #e394dc;
+    --err: #f47174;
+    --ok: #82e08c;
+    --css-blue: #2965f1;
+    --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    --serif: Georgia, 'Times New Roman', serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.65; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 0 24px 120px; }
+
+  header.hero {
+    padding: 72px 24px 48px; text-align: center; border-bottom: 1px solid var(--border); margin-bottom: 8px;
+    background: radial-gradient(ellipse at top, rgba(41,101,241,0.16), transparent 60%);
+  }
+  .hero-eyebrow { font-family: var(--mono); font-size: 13px; letter-spacing: 3px; color: var(--css-blue); text-transform: uppercase; }
+  .hero h1 { font-family: var(--serif); font-size: 46px; font-weight: 400; margin: 14px 0 10px; color: #fff; }
+  .hero h1 span { color: var(--accent); font-style: italic; }
+  .hero p { color: var(--text-dim); font-size: 16px; max-width: 520px; margin: 0 auto; }
+
+  .progress-bar { position: sticky; top: 0; z-index: 50; height: 3px; background: var(--border); }
+  .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--css-blue), var(--pink)); transition: width .15s ease; }
+
+  nav.toc { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; margin: 32px 0; }
+  nav.toc h3 { font-family: var(--mono); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); margin: 0 0 12px; }
+  nav.toc ol { margin: 0; padding-left: 20px; columns: 2; font-size: 13.5px; }
+  nav.toc a { color: var(--text); text-decoration: none; display: inline-block; padding: 3px 0; }
+  nav.toc a:hover { color: var(--accent); }
+
+  .module-divider { margin: 80px 0 40px; text-align: center; }
+  .module-divider .tag {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 3px; color: var(--css-blue);
+    text-transform: uppercase; background: rgba(41,101,241,0.14); padding: 6px 16px;
+    border-radius: 20px; border: 1px solid rgba(41,101,241,0.35);
+  }
+
+  section.lesson { margin: 56px 0; scroll-margin-top: 20px; }
+  .lesson-num { font-family: var(--mono); color: var(--accent); font-size: 14px; letter-spacing: 2px; }
+  .lesson h2 { font-family: var(--serif); font-size: 28px; font-weight: 400; color: #fff; margin: 6px 0 20px; }
+  .lesson p { font-size: 16px; color: #c4d0e5; }
+  .lesson ul, .lesson ol.explain { font-size: 16px; color: #c4d0e5; padding-left: 22px; }
+  .lesson li { margin-bottom: 6px; }
+
+  .callout { border-left: 3px solid var(--accent2); background: rgba(242,197,116,0.07); padding: 12px 18px; border-radius: 0 8px 8px 0; font-size: 14.5px; color: #e8dcc0; margin: 18px 0; }
+  .callout strong { color: var(--accent2); }
+  .analogy { border-left: 3px solid var(--pink); background: rgba(227,148,220,0.07); padding: 12px 18px; border-radius: 0 8px 8px 0; font-size: 14.5px; color: #ecd9ea; margin: 18px 0; }
+  .analogy strong { color: var(--pink); }
+  .cssnote { border-left: 3px solid var(--css-blue); background: rgba(41,101,241,0.08); padding: 12px 18px; border-radius: 0 8px 8px 0; font-size: 14.5px; color: #cfdcfa; margin: 18px 0; }
+  .cssnote strong { color: var(--accent); }
+
+  .playground { background: var(--bg-code); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin: 20px 0; }
+  .playground-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; background: #0b1120; border-bottom: 1px solid var(--border); }
+  .playground-header .dots { display: flex; gap: 6px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.r { background: #ff5f56; } .dot.y { background: #ffbd2e; } .dot.g { background: #27c93f; }
+  .playground-label { font-family: var(--mono); font-size: 12px; color: var(--text-dim); }
+
+  textarea.code-input {
+    width: 100%; background: transparent; color: #e6efff;
+    font-family: var(--mono); font-size: 14px; line-height: 1.6;
+    border: none; padding: 16px; resize: vertical; min-height: 130px;
+    outline: none; white-space: pre; tab-size: 2;
+  }
+  textarea.code-input.html-part { border-bottom: 1px solid var(--border); min-height: 70px; }
+
+  .playground-actions { display: flex; gap: 10px; padding: 0 16px 14px; flex-wrap: wrap; }
+
+  button.run-btn {
+    background: var(--css-blue); color: #fff; border: none;
+    font-family: var(--mono); font-weight: 700; font-size: 13px;
+    padding: 9px 18px; border-radius: 6px; cursor: pointer;
+    transition: transform .1s ease, background .15s ease;
+  }
+  button.run-btn:hover { background: #4a7dff; transform: translateY(-1px); }
+  button.run-btn:active { transform: translateY(0); }
+
+  button.reset-btn {
+    background: transparent; color: var(--text-dim); border: 1px solid var(--border);
+    font-family: var(--mono); font-size: 13px; padding: 9px 14px; border-radius: 6px; cursor: pointer;
+  }
+  button.reset-btn:hover { color: var(--text); border-color: var(--text-dim); }
+
+  .panel-label {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 1px; color: var(--text-dim);
+    padding: 8px 16px 0; text-transform: uppercase;
+  }
+
+  .render-output {
+    border-top: 1px solid var(--border);
+    background: #fff;
+    color: #111;
+    min-height: 90px;
+    padding: 18px;
+    font-family: -apple-system, sans-serif;
+    overflow: auto;
+  }
+
+  .render-output.resizable-demo {
+    resize: horizontal;
+    overflow: auto;
+    max-width: 100%;
+    border-right: 3px dashed var(--css-blue);
+  }
+
+  .quiz { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px; padding: 22px 24px; margin: 22px 0; }
+  .quiz-q { font-size: 15.5px; color: #fff; margin-bottom: 14px; }
+  .quiz-q .qtag { font-family: var(--mono); color: var(--pink); font-size: 12px; letter-spacing: 1px; display: block; margin-bottom: 6px; }
+  .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+  .quiz-opt { text-align: left; background: #0b1120; border: 1px solid var(--border); color: var(--text); padding: 11px 14px; border-radius: 7px; font-size: 14.5px; cursor: pointer; font-family: inherit; transition: border-color .15s ease, background .15s ease; }
+  .quiz-opt:hover { border-color: var(--accent); }
+  .quiz-opt.correct { border-color: var(--ok); background: rgba(130,224,140,0.08); color: var(--ok); }
+  .quiz-opt.wrong { border-color: var(--err); background: rgba(244,113,116,0.08); color: var(--err); }
+  .quiz-feedback { margin-top: 12px; font-size: 14px; color: var(--text-dim); display: none; }
+  .quiz-feedback.show { display: block; }
+
+  .challenge { border: 1px dashed var(--accent); border-radius: 10px; padding: 20px 24px; margin: 22px 0; background: rgba(111,163,255,0.05); }
+  .challenge-tag { font-family: var(--mono); color: var(--accent); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; }
+  .challenge h4 { margin: 8px 0 10px; color: #fff; font-weight: 500; }
+
+  code.inline { background: rgba(111,163,255,0.14); color: var(--accent); padding: 2px 6px; border-radius: 4px; font-family: var(--mono); font-size: 13.5px; }
+
+  table.compare { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 14px; }
+  table.compare th, table.compare td { border: 1px solid var(--border); padding: 10px 14px; text-align: left; }
+  table.compare th { background: var(--bg-panel); color: var(--accent); font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+  table.compare td { color: #c4d0e5; }
+  table.compare code.inline { font-size: 12.5px; }
+
+  hr.divider { border: none; border-top: 1px solid var(--border); margin: 56px 0 0; }
+  footer { text-align: center; padding: 60px 24px 20px; color: var(--text-dim); font-size: 14px; }
+  footer .accent { color: var(--accent); }
+
+  .resize-hint {
+    font-family: var(--mono); font-size: 11px; color: var(--text-dim);
+    padding: 6px 16px; background: #fff; border-top: 1px dashed #ccc;
+  }
+
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 30px; }
+    nav.toc ol { columns: 1; }
+    .lesson h2 { font-size: 22px; }
+    table.compare { font-size: 12.5px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<header class="hero">
+  <div class="hero-eyebrow">Notebook Interativo · CSS</div>
+  <h1>Estilizando com <span>CSS</span></h1>
+  <p>Do seletor mais simples até grid e responsividade. Edite HTML e CSS lado a lado e veja o resultado ao vivo.</p>
+</header>
+
+<div class="wrap">
+
+  <nav class="toc">
+    <h3>Neste notebook</h3>
+    <ol>
+      <li><a href="#l1">O que é CSS?</a></li>
+      <li><a href="#l2">Seletores básicos</a></li>
+      <li><a href="#l3">Cores e texto</a></li>
+      <li><a href="#l4">Unidades de medida</a></li>
+      <li><a href="#l5">Box model</a></li>
+      <li><a href="#l6">Display</a></li>
+      <li><a href="#l7">Position</a></li>
+      <li><a href="#l8">Pseudo-classes</a></li>
+      <li><a href="#l9">Pseudo-elementos</a></li>
+      <li><a href="#l10">Flexbox</a></li>
+      <li><a href="#l11">Grid</a></li>
+      <li><a href="#l12">Responsividade</a></li>
+      <li><a href="#l13">Transições e transform</a></li>
+      <li><a href="#l14">Desafio final</a></li>
+    </ol>
+  </nav>
+
+  <div class="module-divider"><span class="tag">Módulo 1 · Fundamentos</span></div>
+
+  <section class="lesson" id="l1">
+    <div class="lesson-num">01</div>
+    <h2>O que é CSS?</h2>
+    <p>
+      CSS significa <strong>Cascading Style Sheets</strong> — folhas de estilo em cascata. Se o HTML define
+      a estrutura de uma página, o CSS define a <strong>aparência</strong>: cores, tamanhos, espaçamentos,
+      posicionamento, tudo que é visual.
+    </p>
+
+    <div class="analogy">
+      <strong>Pensa assim:</strong> se o HTML é o esqueleto de uma casa, o CSS é a decoração — cor das paredes,
+      tipo de piso, onde cada móvel fica. A estrutura (HTML) não muda, mas o visual (CSS) pode ser completamente
+      diferente com o mesmo esqueleto.
+    </div>
+
+    <p>A sintaxe básica sempre segue esse formato:</p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">exemplo</span>
+      </div>
+      <div class="panel-label">HTML</div>
+      <textarea class="code-input html-part" data-id="p1-html" spellcheck="false"><p>Este texto vai ser estilizado.</p></textarea>
+      <div class="panel-label">CSS</div>
+      <textarea class="code-input" data-id="p1-css" spellcheck="false">p {
+  color: #2965f1;
+  font-size: 20px;
+}</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p1')">▶ Aplicar estilo</button>
+        <button class="reset-btn" onclick="resetCode('p1')">↺ Restaurar</button>
+      </div>
+      <div class="panel-label">Resultado</div>
+      <div class="render-output" id="out-p1"></div>
+    </div>
+
+    <p>
+      A estrutura é: <code class="inline">seletor { propriedade: valor; }</code>. O <strong>seletor</strong>
+      (<code class="inline">p</code>, nesse caso) escolhe quais elementos vão receber o estilo. Dentro das chaves,
+      cada linha define uma propriedade e seu valor, sempre terminando com ponto e vírgula.
+    </p>
+  </section>
+
+  <hr class="divider">
+
+  <section class="lesson" id="l2">
+    <div class="lesson-num">02</div>
+    <h2>Seletores básicos</h2>
+    <p>Existem várias formas de "escolher" quais elementos um estilo vai afetar:</p>
+
+    <table class="compare">
+      <tr><th>Seletor</th><th>Escolhe</th></tr>
+      <tr><td><code class="inline">*</code></td><td>Todos os elementos da página</td></tr>
+      <tr><td><code class="inline">div</code></td><td>Todos os elementos dessa tag</td></tr>
+      <tr><td><code class="inline">.classe</code></td><td>Todos com essa classe (ponto antes do nome)</td></tr>
+      <tr><td><code class="inline">#id</code></td><td>O elemento com esse id (cerquilha antes do nome)</td></tr>
+    </table>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">seletores</span>
+      </div>
+      <div class="panel-label">HTML</div>
+      <textarea class="code-input html-part" data-id="p2-html" spellcheck="false"><p class="destaque">Parágrafo com classe "destaque"</p>
+<p>Parágrafo comum</p>
+<p id="unico">Parágrafo com id "unico"</p></textarea>
+      <div class="panel-label">CSS</div>
+      <textarea class="code-input" data-id="p2-css" spellcheck="false">p {
+  font-family: sans-serif;
+}
+
+.destaque {
+  background: #dbe9ff;
+  padding: 6px;
+}
+
+#unico {
+  color: #2965f1;
+  font-weight: bold;
+}</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p2')">▶ Aplicar estilo</button>
+        <button class="reset-btn" onclick="resetCode('p2')">↺ Restaurar</button>
+      </div>
+      <div class="panel-label">Resultado</div>
+      <div class="render-output" id="out-p2"></div>
+    </div>
+
+    <div class="cssnote">
+      <strong>Diferença importante:</strong> <code class="inline">class</code> pode ser usada em vários elementos
+      e um elemento pode ter várias classes. <code class="inline">id</code> deve ser único na página — use pra
+      um elemento específico e sozinho.
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="lesson" id="l3">
+    <div class="lesson-num">03</div>
+    <h2>Cores e texto</h2>
+    <p>
+      Cores podem ser escritas de várias formas — nome (<code class="inline">red</code>), hexadecimal
+      (<code class="inline">#ff0000</code>) ou RGB (<code class="inline">rgb(255, 0, 0)</code>). Propriedades de
+      texto controlam fonte, tamanho, alinhamento e mais.
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">texto</span>
+      </div>
+      <div class="panel-label">HTML</div>
+      <textarea class="code-input html-part" data-id="p3-html" spellcheck="false"><h2>Título estilizado</h2>
+<p>Um parágrafo com várias propriedades de texto aplicadas.</p></textarea>
+      <div class="panel-label">CSS</div>
+      <textarea class="code-input" data-id="p3-css" spellcheck="false">h2 {
+  color: #2965f1;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+p {
+  font-family: Georgia, serif;
+  font-size: 18px;
+  font-weight: 300;
+  line-height: 1.6;
+  color: #444;
+}</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p3')">▶ Aplicar estilo</button>
+        <button class="reset-btn" onclick="resetCode('p3')">↺ Restaurar</button>
+      </div>
+      <div class="panel-label">Resultado</div>
+      <div class="render-output" id="out-p3"></div>
+    </div>
+
+    <div class="challenge">
+      <div class="challenge-tag">Mão na massa</div>
+      <h4>Edite o CSS acima</h4>
+      <p style="margin:0; color:#c4d0e5; font-size:15px;">
+        Troque <code class="inline">text-align: center</code> por <code class="inline">left</code> ou <code class="inline">right</code>,
+        e mude a cor do parágrafo pra alguma cor hexadecimal de sua escolha.
+      </p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="lesson" id="l4">
+    <div class="lesson-num">04</div>
+    <h2>Unidades de medida</h2>
+    <p>CSS tem várias unidades pra tamanhos — cada uma se comporta diferente:</p>
+
+    <table class="compare">
+      <tr><th>Unidade</th><th>O que significa</th></tr>
+      <tr><td><code class="inline">px</code></td><td>Pixel — medida fixa, não muda com nada</td></tr>
+      <tr><td><code class="inline">%</code></td><td>Porcentagem relativa ao elemento pai</td></tr>
+      <tr><td><code class="inline">em</code></td><td>Relativa ao tamanho da fonte do próprio elemento (ou pai)</td></tr>
+      <tr><td><code class="inline">rem</code></td><td>Relativa ao tamanho da fonte raiz do documento (mais previsível que em)</td></tr>
+      <tr><td><code class="inline">vw</code></td><td>1% da largura da janela do navegador</td></tr>
+      <tr><td><code class="inline">vh</code></td><td>1% da altura da janela do navegador</td></tr>
+    </table>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">unidades</span>
+      </div>
+      <div class="panel-label">HTML</div>
+      <textarea class="code-input html-part" data-id="p4-html" spellcheck="false"><div class="caixa-px">160px de largura fixa</div>
+<div class="caixa-pct">50% da largura do pai</div>
+<div class="caixa-rem">Fonte em rem (2rem)</div></textarea>
+      <div class="panel-label">CSS</div>
+      <textarea class="code-input" data-id="p4-css" spellcheck="false">div {
+  background: #dbe9ff;
+  margin-bottom: 8px;
+  padding: 8px;
+}
+
+.caixa-px {
+  width: 160px;
+}
+
+.caixa-pct {
+  width: 50%;
+}
+
+.caixa-rem {
+  font-size: 2rem;
+}</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p4')">▶ Aplicar estilo</button>
+        <button class="reset-btn" onclick="resetCode('p4')">↺ Restaurar</button>
+      </div>
+      <div class="panel-label">Resultado</div>
+      <div class="render-output" id="out-p4"></div>
+    </div>
+
+    <div class="cssnote">
+      <strong>Regra prática:</strong> use <code class="inline">rem</code> pra tamanhos de fonte (mais previsível
+      e acessível — respeita a configuração de fonte do usuário), <code class="inline">%</code> pra larguras
+      fluidas, e <code class="inline">px</code> pra coisas que realmente precisam de tamanho fixo, como bordas.
+    </div>
+  </section>
+
+  <div class="module-divider"><span class="tag">Módulo 2 · Layout</span></div>
+
+  <section class="lesson" id="l5">
+    <div class="lesson-num">05</div>
+    <h2>Box model</h2>
+    <p>
+      Todo elemento HTML é, visualmente, uma caixa retangular. Essa caixa tem quatro camadas, de dentro pra fora:
+    </p>
+    <ul>
+      <li><strong>content</strong> — o conteúdo em si (texto, imagem)</li>
+      <li><strong>padding</strong> — espaço interno, entre o conteúdo e a borda</li>
+      <li><strong>border</strong> — a borda da caixa</li>
+      <li><strong>margin</strong> — espaço externo, entre essa caixa e as vizinhas</li>
+    </ul>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">box-model</span>
+      </div>
+      <div class="panel-label">HTML</div>
+      <textarea class="code-input html-part" data-id="p5-html" spellcheck="false"><div class="caixa">Conteúdo</div></textarea>
+      <div class="panel-label">CSS</div>
+      <textarea class="code-input" data-id="p5-css" spellcheck="false">.caixa {
+  background: #dbe9ff;
+  padding: 20px;
+  border: 4px solid #2965f1;
+  margin: 30px;
+}</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p5')">▶ Aplicar estilo</button>
+        <button class="reset-btn" onclick="resetCode('p5')">↺ Restaurar</button>
+      </div>
+      <div class="panel-label">Resultado (o fundo cinza representa o elemento pai)</div>
+      <div class="render-output" id="out-p5" style="background:#eee;"></div>
+    </div>
+
+    <div class="analogy">
+      <strong>Pensa assim:</strong> content é a foto, padding é a moldura branca ao redor da foto, border é a
+      moldura de madeira, e margin é o espaço na parede entre esse quadro e o próximo.
+    </div>
+
+    <div class="challenge">
+      <div class="challenge-tag">Mão na massa</div>
+      <h4>Edite os valores</h4>
+      <p style="margin:0; color:#c4d0e5; font-size:15px;">
+        Aumente o <code class="inline">padding</code> pra 40px e diminua a <code class="inline">margin</code> pra 5px.
+        Veja como o espaço interno e externo mudam de forma independente.
+      </p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="lesson" id="l6">
+    <div class="lesson-num">06</div>
+    <h2>Display</h2>
+    <p>
+      A propriedade <code class="inline">display</code> define como um elemento se comporta no layout. Os
+      valores mais comuns são <code class="inline">block</code> (ocupa a linha toda), <code class="inline">inline</code>
+      (só o espaço do conteúdo, na mesma linha) e <code class="inline">none</code> (some da tela completamente).
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">display</span>
+      </div>
+      <div class="panel-label">HTML</div>
+      <textarea class="code-input html-part" data-id="p6-html" spellcheck="false"><span class="a">span 1</span>
+<span class="a">span 2</span>
+<div class="b">div 1</div>
+<div class="b">div 2</div>
+<div class="c">Isso está escondido (display: none)</div></textarea>
+      <div class="panel-label">CSS</div>
+      <textarea class="code-input" data-id="p6-css" spellcheck="false">.a {
+  background: #dbe9ff;
+  display: inline; /* fica lado a lado */
+}
+
+.b {
+  background: #ffe4dc;
+  display: block; /* quebra linha */
+  margin-bottom: 4px;
+}
+
+.c {
+  display: none; /* some completamente */
+}</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p6')">▶ Aplicar estilo</button>
+        <button class="reset-btn" onclick="resetCode('p6')">↺ Restaurar</button>
+      </div>
+      <div class="panel-label">Resultado</div>
+      <div class="render-output" id="out-p6"></div>
+    </div>
+
+    <div class="cssnote">
+      <strong>Diferente de <code class="inline">visibility: hidden</code>:</strong> <code class="inline">display: none</code>
+      remove o elemento completamente do layout, como se ele nem existisse. <code class="inline">visibility: hidden</code>
+      esconde visualmente, mas ainda ocupa o espaço.
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="lesson" id="l7">
+    <div class="lesson-num">07</div>
+    <h2>Position</h2>
+    <p>
+      <code class="inline">position</code> controla como um elemento é posicionado em relação ao fluxo normal
+      da página ou a outros elementos.
+    </p>
+
+    <table class="compare">
+      <tr><th>Valor</th><th>Comportamento</th></tr>
+      <tr><td><code class="inline">static</code></td><td>Padrão — segue o fluxo normal da página</td></tr>
+      <tr><td><code class="inline">relative</code></td><td>Desloca em relação à posição original, sem tirar do fluxo</td></tr>
+      <tr><td><code class="inline">absolute</code></td><td>Sai do fluxo, posiciona em relação ao pai mais próximo posicionado</td></tr>
+      <tr><td><code class="inline">fixed</code></td><td>Fica fixo na tela, mesmo com scroll</td></tr>
+    </table>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">position</span>
+      </div>
+      <div class="panel-label">HTML</div>
+      <textarea class="code-input html-part" data-id="p7-html" spellcheck="false"><div class="pai">
+  Elemento pai (position: relative)
+  <div class="filho">Filho (position: absolute)</div>
+</div></textarea>
+      <div class="panel-label">CSS</div>
+      <textarea class="code-input" data-id="p7-css" spellcheck="false">.pai {
+  position: relative;
+  background: #eee;
+  height: 100px;
+  padding: 8px;
+}
+
+.filho {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: #2965f1;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 4px;
+}</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p7')">▶ Aplicar estilo</button>
+        <button class="reset-btn" onclick="resetCode('p7')">↺ Restaurar</button>
+      </div>
+      <div class="panel-label">Resultado</div>
+      <div class="render-output" id="out-p7"></div>
+    </div>
+
+    <div class="cssnote">
+      <strong>A dupla mais comum:</strong> <code class="inline">position: absolute</code> só funciona de forma
+      previsível se algum elemento pai tiver <code class="inline">position: relative</code> — é isso que "ancora"
+      o posicionamento absoluto. Sem isso, ele se posiciona em relação à página inteira.
+    </div>
+  </section>
+
+  <div class="module-divider"><span class="tag">Módulo 3 · Interatividade e detalhes</span></div>
+
+  <section class="lesson" id="l8">
+    <div class="lesson-num">08</div>
+    <h2>Pseudo-classes</h2>
+    <p>
+      Pseudo-classes aplicam estilo baseado num <strong>estado</strong> do elemento — como ele está sendo usado
+      naquele momento (passando o mouse, focado, desabilitado etc).
+    </p>
+
+    <table class="compare">
+      <tr><th>Pseudo-classe</th><th>Quando ativa</th></tr>
+      <tr><td><code class="inline">:hover</code></td><td>Mouse sobre o elemento</td></tr>
+      <tr><td><code class="inline">:active</code></td><td>Enquanto está sendo clicado</td></tr>
+      <tr><td><code class="inline">:focus</code></td><td>Elemento em foco (ex: input selecionado)</td></tr>
+      <tr><td><code class="inline">:disabled</code></td><td>Elemento desabilitado</td></tr>
+      <tr><td><code class="inline">:first-child</code></td><td>Primeiro filho dentro do pai</td></tr>
+      <tr><td><code class="inline">:nth-child(n)</code></td><td>O n-ésimo filho</td></tr>
+    </table>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">pseudo-classes</span>
+      </div>
+      <div class="panel-label">HTML</div>
+      <textarea class="code-input html-part" data-id="p8-html" spellcheck="false"><button class="botao">Passe o mouse aqui</button><br><br>
+<input type="text" placeholder="Clique pra focar"><br><br>
+<button class="botao" disabled>Desabilitado</button></textarea>
+      <div class="panel-label">CSS</div>
+      <textarea class="code-input" data-id="p8-css" spellcheck="false">.botao {
+  background: #2965f1;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.botao:hover {
+  background: #1a4fd6;
+}
+
+.botao:active {
+  background: #0d3ab8;
+}
+
+.botao:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+input:focus {
+  outline: 3px solid #6fa3ff;
+  border-color: #2965f1;
+}</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p8')">▶ Aplicar estilo</button>
+        <button class="reset-btn" onclick="resetCode('p8')">↺ Restaurar</button>
+      </div>
+      <div class="panel-label">Resultado (interaja com os elementos!)</div>
+      <div class="render-output" id="out-p8"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="lesson" id="l9">
+    <div class="lesson-num">09</div>
+    <h2>Pseudo-elementos</h2>
+    <p>
+      Diferente de pseudo-classes (que dependem de um estado), pseudo-elementos criam ou estilizam uma
+      <strong>parte específica</strong> do elemento — como se fosse um elemento extra "fantasma", com dois-pontos duplos (<code class="inline">::</code>).
+    </p>
+
+    <table class="compare">
+      <tr><th>Pseudo-elemento</th><th>O que faz</th></tr>
+      <tr><td><code class="inline">::before</code></td><td>Insere conteúdo antes do elemento</td></tr>
+      <tr><td><code class="inline">::after</code></td><td>Insere conteúdo depois do elemento</td></tr>
+      <tr><td><code class="inline">::first-letter</code></td><td>Estiliza só a primeira letra</td></tr>
+      <tr><td><code class="inline">::placeholder</code></td><td>Estiliza o texto de placeholder de um input</td></tr>
+      <tr><td><code class="inline">::selection</code></td><td>Estiliza o texto quando selecionado pelo usuário</td></tr>
+    </table>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">pseudo-elementos</span>
+      </div>
+      <div class="panel-label">HTML</div>
+      <textarea class="code-input html-part" data-id="p9-html" spellcheck="false"><p class="citacao">Isso é uma citação importante.</p>
+<p class="capitular">Um parágrafo com letra capitular no início.</p></textarea>
+      <div class="panel-label">CSS</div>
+      <textarea class="code-input" data-id="p9-css" spellcheck="false">.citacao::before {
+  content: "❝ ";
+  color: #2965f1;
+  font-size: 20px;
+}
+
+.citacao::after {
+  content: " ❞";
+  color: #2965f1;
+  font-size: 20px;
+}
+
+.capitular::first-letter {
+  font-size: 2.2em;
+  font-weight: bold;
+  color: #2965f1;
+}</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p9')">▶ Aplicar estilo</button>
+        <button class="reset-btn" onclick="resetCode('p9')">↺ Restaurar</button>
+      </div>
+      <div class="panel-label">Resultado</div>
+      <div class="render-output" id="out-p9"></div>
+    </div>
+
+    <div class="cssnote">
+      <strong>Sobre <code class="inline">content</code>:</strong> <code class="inline">::before</code> e
+      <code class="inline">::after</code> só funcionam se você definir a propriedade <code class="inline">content</code>
+      — mesmo que vazia (<code class="inline">content: "";</code>). Sem ela, nada aparece.
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="lesson" id="l10">
+    <div class="lesson-num">10</div>
+    <h2>Flexbox</h2>
+    <p>
+      Flexbox é um sistema de layout feito pra organizar elementos em <strong>uma linha ou coluna</strong>,
+      distribuindo espaço e alinhamento de forma flexível. É o jeito mais comum de alinhar coisas hoje em dia.
+    </p>
+
+    <div class="analogy">
+      <strong>Pensa assim:</strong> flexbox é como organizar livros numa prateleira — você decide se ficam
+      um do lado do outro ou empilhados, e como o espaço sobrando é distribuído entre eles.
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">flexbox</span>
+      </div>
+      <div class="panel-label">HTML</div>
+      <textarea class="code-input html-part" data-id="p10-html" spellcheck="false"><div class="container">
+  <div class="item">1</div>
+  <div class="item">2</div>
+  <div class="item">3</div>
+</div></textarea>
+      <div class="panel-label">CSS</div>
+      <textarea class="code-input" data-id="p10-css" spellcheck="false">.container {
+  display: flex;
+  justify-content: space-between; /* alinhamento no eixo principal */
+  align-items: center;            /* alinhamento no eixo cruzado */
+  gap: 10px;
+  background: #eee;
+  padding: 12px;
+  height: 100px;
+}
+
+.item {
+  background: #2965f1;
+  color: white;
+  padding: 16px;
+  border-radius: 6px;
+}</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p10')">▶ Aplicar estilo</button>
+        <button class="reset-btn" onclick="resetCode('p10')">↺ Restaurar</button>
+      </div>
+      <div class="panel-label">Resultado</div>
+      <div class="render-output" id="out-p10"></div>
+    </div>
+
+    <table class="compare">
+      <tr><th>Propriedade</th><th>Controla</th></tr>
+      <tr><td><code class="inline">display: flex</code></td><td>Ativa o flexbox no elemento pai</td></tr>
+      <tr><td><code class="inline">flex-direction</code></td><td>Direção: row (padrão) ou column</td></tr>
+      <tr><td><code class="inline">justify-content</code></td><td>Alinhamento no eixo principal (horizontal, se row)</td></tr>
+      <tr><td><code class="inline">align-items</code></td><td>Alinhamento no eixo cruzado (vertical, se row)</td></tr>
+      <tr><td><code class="inline">gap</code></td><td>Espaço entre os itens</td></tr>
+    </table>
+
+    <div class="challenge">
+      <div class="challenge-tag">Mão na massa</div>
+      <h4>Edite o CSS acima</h4>
+      <p style="margin:0; color:#c4d0e5; font-size:15px;">
+        Troque <code class="inline">justify-content: space-between</code> por <code class="inline">center</code>
+        e depois por <code class="inline">flex-end</code>. Veja os itens se moverem.
+      </p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="lesson" id="l11">
+    <div class="lesson-num">11</div>
+    <h2>Grid</h2>
+    <p>
+      Enquanto flexbox organiza em uma dimensão (linha OU coluna), <strong>Grid</strong> organiza em duas
+      dimensões ao mesmo tempo — linhas E colunas juntas. É ideal pra layouts de página inteira.
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">grid</span>
+      </div>
+      <div class="panel-label">HTML</div>
+      <textarea class="code-input html-part" data-id="p11-html" spellcheck="false"><div class="grid">
+  <div class="celula">1</div>
+  <div class="celula">2</div>
+  <div class="celula">3</div>
+  <div class="celula">4</div>
+  <div class="celula">5</div>
+  <div class="celula">6</div>
+</div></textarea>
+      <div class="panel-label">CSS</div>
+      <textarea class="code-input" data-id="p11-css" spellcheck="false">.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 colunas de tamanho igual */
+  gap: 10px;
+}
+
+.celula {
+  background: #2965f1;
+  color: white;
+  padding: 20px;
+  text-align: center;
+  border-radius: 6px;
+}</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p11')">▶ Aplicar estilo</button>
+        <button class="reset-btn" onclick="resetCode('p11')">↺ Restaurar</button>
+      </div>
+      <div class="panel-label">Resultado</div>
+      <div class="render-output" id="out-p11"></div>
+    </div>
+
+    <div class="cssnote">
+      <strong>A unidade <code class="inline">fr</code>:</strong> significa "fração" do espaço disponível.
+      <code class="inline">repeat(3, 1fr)</code> cria 3 colunas de tamanho igual. Se você quisesse uma coluna
+      maior, poderia escrever <code class="inline">grid-template-columns: 2fr 1fr 1fr</code> — a primeira
+      coluna fica com o dobro do espaço das outras.
+    </div>
+
+    <div class="challenge">
+      <div class="challenge-tag">Mão na massa</div>
+      <h4>Edite o CSS acima</h4>
+      <p style="margin:0; color:#c4d0e5; font-size:15px;">
+        Mude <code class="inline">repeat(3, 1fr)</code> pra <code class="inline">repeat(2, 1fr)</code> e veja o
+        grid reorganizar automaticamente em 2 colunas.
+      </p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="lesson" id="l12">
+    <div class="lesson-num">12</div>
+    <h2>Responsividade</h2>
+    <p>
+      Responsividade é fazer a página se adaptar a diferentes tamanhos de tela — celular, tablet, desktop.
+      A ferramenta principal pra isso são as <strong>media queries</strong>: blocos de CSS que só se aplicam
+      quando a tela atende a uma condição.
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">responsividade</span>
+      </div>
+      <div class="panel-label">HTML</div>
+      <textarea class="code-input html-part" data-id="p12-html" spellcheck="false"><div class="caixa-responsiva">
+  Redimensione o painel abaixo (arraste a borda direita) e veja a cor mudar quando ficar estreito
+</div></textarea>
+      <div class="panel-label">CSS</div>
+      <textarea class="code-input" data-id="p12-css" spellcheck="false">.caixa-responsiva {
+  background: #2965f1;
+  color: white;
+  padding: 20px;
+  border-radius: 6px;
+}
+
+/* essa regra só se aplica quando a largura for até 400px */
+@media (max-width: 400px) {
+  .caixa-responsiva {
+    background: #e34c26;
+  }
+}</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p12')">▶ Aplicar estilo</button>
+        <button class="reset-btn" onclick="resetCode('p12')">↺ Restaurar</button>
+      </div>
+      <div class="panel-label">Resultado — arraste a borda pontilhada da direita pra redimensionar</div>
+      <div class="render-output resizable-demo" id="out-p12" style="width: 500px;"></div>
+    </div>
+
+    <div class="cssnote">
+      <strong>Mobile-first:</strong> uma prática comum é escrever o CSS pensando primeiro no celular (telas
+      pequenas), e usar <code class="inline">min-width</code> nas media queries pra ir adicionando estilo
+      conforme a tela cresce — em vez do caminho inverso.
+    </div>
+
+    <table class="compare">
+      <tr><th>Media query</th><th>Se aplica quando</th></tr>
+      <tr><td><code class="inline">@media (max-width: 600px)</code></td><td>Largura da tela ≤ 600px</td></tr>
+      <tr><td><code class="inline">@media (min-width: 600px)</code></td><td>Largura da tela ≥ 600px</td></tr>
+      <tr><td><code class="inline">@media (orientation: portrait)</code></td><td>Tela mais alta que larga</td></tr>
+    </table>
+  </section>
+
+  <hr class="divider">
+
+  <section class="lesson" id="l13">
+    <div class="lesson-num">13</div>
+    <h2>Transições e transform</h2>
+    <p>
+      <code class="inline">transition</code> anima suavemente a mudança de uma propriedade CSS ao longo do tempo.
+      <code class="inline">transform</code> aplica transformações visuais como rotação, escala e movimento —
+      sem afetar o layout ao redor.
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">transicoes</span>
+      </div>
+      <div class="panel-label">HTML</div>
+      <textarea class="code-input html-part" data-id="p13-html" spellcheck="false"><div class="cartao">Passe o mouse aqui</div></textarea>
+      <div class="panel-label">CSS</div>
+      <textarea class="code-input" data-id="p13-css" spellcheck="false">.cartao {
+  background: #2965f1;
+  color: white;
+  padding: 30px;
+  border-radius: 8px;
+  text-align: center;
+  width: 200px;
+  transition: transform 0.25s ease, background 0.25s ease;
+}
+
+.cartao:hover {
+  transform: scale(1.08) rotate(-2deg);
+  background: #1a4fd6;
+}</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p13')">▶ Aplicar estilo</button>
+        <button class="reset-btn" onclick="resetCode('p13')">↺ Restaurar</button>
+      </div>
+      <div class="panel-label">Resultado (passe o mouse!)</div>
+      <div class="render-output" id="out-p13"></div>
+    </div>
+
+    <div class="cssnote">
+      <strong>A ordem importa:</strong> <code class="inline">transition</code> define <em>o que</em> vai animar
+      e por quanto tempo — mas precisa de outra regra (como <code class="inline">:hover</code>) mudando o valor
+      real da propriedade pra ter algo pra animar.
+    </div>
+  </section>
+
+  <div class="module-divider"><span class="tag">Desafio final</span></div>
+
+  <section class="lesson" id="l14">
+    <div class="lesson-num">14</div>
+    <h2>Desafio final</h2>
+    <p>Construa um pequeno cartão de produto usando flexbox. Ele deve:</p>
+    <ol class="explain">
+      <li>Usar <code class="inline">display: flex</code> com <code class="inline">flex-direction: column</code>;</li>
+      <li>Ter <code class="inline">padding</code>, <code class="inline">border-radius</code> e uma sombra (<code class="inline">box-shadow</code>);</li>
+      <li>Mudar de aparência no <code class="inline">:hover</code> com uma <code class="inline">transition</code> suave.</li>
+    </ol>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">desafio</span>
+      </div>
+      <div class="panel-label">HTML</div>
+      <textarea class="code-input html-part" data-id="p14-html" spellcheck="false"><div class="produto">
+  <h3>Fone de Ouvido</h3>
+  <p>R$ 199,90</p>
+</div></textarea>
+      <div class="panel-label">CSS</div>
+      <textarea class="code-input" data-id="p14-css" spellcheck="false">.produto {
+  /* complete o estilo aqui */
+
+}</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p14')">▶ Aplicar estilo</button>
+        <button class="reset-btn" onclick="resetCode('p14')">↺ Restaurar</button>
+      </div>
+      <div class="panel-label">Resultado</div>
+      <div class="render-output" id="out-p14"></div>
+    </div>
+
+    <div class="callout">
+      <strong>Travou?</strong> Tente sozinho primeiro. A solução está abaixo.
+    </div>
+
+    <details style="margin-top: 12px;">
+      <summary style="cursor:pointer; color: var(--accent); font-family: var(--mono); font-size: 13px;">▶ ver solução</summary>
+      <div class="playground" style="margin-top: 12px;">
+        <div class="playground-header">
+          <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+          <span class="playground-label">solucao</span>
+        </div>
+        <div class="panel-label">HTML</div>
+        <textarea class="code-input html-part" data-id="p15-html" spellcheck="false"><div class="produto">
+  <h3>Fone de Ouvido</h3>
+  <p>R$ 199,90</p>
+</div></textarea>
+        <div class="panel-label">CSS</div>
+        <textarea class="code-input" data-id="p15-css" spellcheck="false">.produto {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 20px;
+  border-radius: 10px;
+  width: 200px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.produto:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.18);
+}</textarea>
+        <div class="playground-actions">
+          <button class="run-btn" onclick="runCode('p15')">▶ Aplicar estilo</button>
+          <button class="reset-btn" onclick="resetCode('p15')">↺ Restaurar</button>
+        </div>
+        <div class="panel-label">Resultado</div>
+        <div class="render-output" id="out-p15"></div>
+      </div>
+    </details>
+  </section>
+
+  <hr class="divider">
+
+  <footer>
+    Você passou por todo o essencial de CSS, do seletor mais simples até grid e responsividade.
+    <span class="accent">Continue praticando</span> estilizando pequenos componentes.
+  </footer>
+
+</div>
+
+<script>
+  const originals = {};
+  document.querySelectorAll('.code-input').forEach(ta => {
+    originals[ta.dataset.id] = ta.value;
+  });
+
+  function pairIdFromHtmlId(id) {
+    // id vindo do botão é tipo "p1" -> textareas são "p1-html" e "p1-css"
+    return { html: id + '-html', css: id + '-css' };
+  }
+
+  function resetCode(id) {
+    const { html, css } = pairIdFromHtmlId(id);
+    document.querySelector(`.code-input[data-id="${html}"]`).value = originals[html];
+    document.querySelector(`.code-input[data-id="${css}"]`).value = originals[css];
+    runCode(id);
+  }
+
+  function runCode(id) {
+    const { html, css } = pairIdFromHtmlId(id);
+    const htmlTa = document.querySelector(`.code-input[data-id="${html}"]`);
+    const cssTa = document.querySelector(`.code-input[data-id="${css}"]`);
+    const outEl = document.getElementById('out-' + id);
+
+    // Usamos um iframe isolado pra não vazar estilos entre exemplos
+    outEl.innerHTML = '';
+    const iframe = document.createElement('iframe');
+    iframe.style.width = '100%';
+    iframe.style.border = 'none';
+    iframe.style.display = 'block';
+    outEl.appendChild(iframe);
+
+    const doc = iframe.contentDocument || iframe.contentWindow.document;
+    doc.open();
+    doc.write(`<!DOCTYPE html><html><head><style>
+      body { margin: 0; font-family: -apple-system, sans-serif; color: #111; }
+      ${cssTa.value}
+    </style></head><body>${htmlTa.value}</body></html>`);
+    doc.close();
+
+    // Ajusta altura do iframe ao conteúdo
+    const resizeIframe = () => {
+      try {
+        const h = doc.body.scrollHeight;
+        iframe.style.height = Math.max(h + 20, 40) + 'px';
+      } catch(e) {}
+    };
+    iframe.onload = resizeIframe;
+    setTimeout(resizeIframe, 50);
+    setTimeout(resizeIframe, 300);
+  }
+
+  // Renderiza todos os exemplos ao carregar a página
+  document.querySelectorAll('.code-input').forEach(ta => {
+    const id = ta.dataset.id;
+    if (id.endsWith('-html')) {
+      const baseId = id.replace('-html', '');
+      runCode(baseId);
+    }
+  });
+
+  document.querySelectorAll('.quiz').forEach(quiz => {
+    const optsWrap = quiz.querySelector('.quiz-options');
+    const answer = parseInt(optsWrap.dataset.answer, 10);
+    const feedback = quiz.querySelector('.quiz-feedback');
+    const buttons = optsWrap.querySelectorAll('.quiz-opt');
+
+    buttons.forEach((btn, idx) => {
+      btn.addEventListener('click', () => {
+        buttons.forEach(b => { b.disabled = true; });
+        if (idx === answer) {
+          btn.classList.add('correct');
+          feedback.textContent = '✓ Isso mesmo! Mandou bem.';
+        } else {
+          btn.classList.add('wrong');
+          buttons[answer].classList.add('correct');
+          feedback.textContent = '✗ Quase — a resposta certa está marcada em verde.';
+        }
+        feedback.classList.add('show');
+      });
+    });
+  });
+
+  window.addEventListener('scroll', () => {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    document.getElementById('progressFill').style.width = pct + '%';
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TypeScript — Notebook Interativo Completo</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/typescript/5.4.5/typescript.min.js"></script>
+<style>
+  :root {
+    --bg: #0b0e17;
+    --bg-panel: #10141f;
+    --bg-code: #090b12;
+    --border: #1e2536;
+    --text: #d6deeb;
+    --text-dim: #7a8399;
+    --accent: #6fa8dc;
+    --accent2: #f2c574;
+    --pink: #e394dc;
+    --err: #f47174;
+    --ok: #82e08c;
+    --ts-blue: #3178c6;
+    --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    --serif: Georgia, 'Times New Roman', serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 1.65;
+  }
+
+  .wrap { max-width: 840px; margin: 0 auto; padding: 0 24px 120px; }
+
+  header.hero {
+    padding: 72px 24px 48px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 8px;
+    background: radial-gradient(ellipse at top, rgba(49,120,198,0.12), transparent 60%);
+  }
+  .hero-eyebrow {
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 3px;
+    color: var(--ts-blue);
+    text-transform: uppercase;
+  }
+  .hero h1 {
+    font-family: var(--serif);
+    font-size: 46px;
+    font-weight: 400;
+    margin: 14px 0 10px;
+    color: #fff;
+  }
+  .hero h1 span { color: var(--accent); font-style: italic; }
+  .hero p { color: var(--text-dim); font-size: 16px; max-width: 500px; margin: 0 auto; }
+
+  .progress-bar { position: sticky; top: 0; z-index: 50; height: 3px; background: var(--border); }
+  .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--ts-blue), var(--pink)); transition: width .15s ease; }
+
+  nav.toc {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin: 32px 0;
+  }
+  nav.toc h3 { font-family: var(--mono); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); margin: 0 0 12px; }
+  nav.toc ol { margin: 0; padding-left: 20px; columns: 2; font-size: 13.5px; }
+  nav.toc a { color: var(--text); text-decoration: none; display: inline-block; padding: 3px 0; }
+  nav.toc a:hover { color: var(--accent); }
+
+  .module-divider {
+    margin: 80px 0 40px;
+    text-align: center;
+  }
+  .module-divider .tag {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: var(--ts-blue);
+    text-transform: uppercase;
+    background: rgba(49,120,198,0.1);
+    padding: 6px 16px;
+    border-radius: 20px;
+    border: 1px solid rgba(49,120,198,0.3);
+  }
+
+  section.lesson { margin: 56px 0; scroll-margin-top: 20px; }
+  .lesson-num { font-family: var(--mono); color: var(--accent); font-size: 14px; letter-spacing: 2px; }
+  .lesson h2 { font-family: var(--serif); font-size: 28px; font-weight: 400; color: #fff; margin: 6px 0 20px; }
+  .lesson p { font-size: 16px; color: #c2cdd9; }
+  .lesson ul, .lesson ol.explain { font-size: 16px; color: #c2cdd9; padding-left: 22px; }
+  .lesson li { margin-bottom: 6px; }
+
+  .callout { border-left: 3px solid var(--accent2); background: rgba(242,197,116,0.06); padding: 12px 18px; border-radius: 0 8px 8px 0; font-size: 14.5px; color: #e8dcc0; margin: 18px 0; }
+  .callout strong { color: var(--accent2); }
+
+  .analogy { border-left: 3px solid var(--pink); background: rgba(227,148,220,0.06); padding: 12px 18px; border-radius: 0 8px 8px 0; font-size: 14.5px; color: #ecd9ea; margin: 18px 0; }
+  .analogy strong { color: var(--pink); }
+
+  .jsvsts { border-left: 3px solid var(--ts-blue); background: rgba(49,120,198,0.06); padding: 12px 18px; border-radius: 0 8px 8px 0; font-size: 14.5px; color: #cfe0f2; margin: 18px 0; }
+  .jsvsts strong { color: var(--accent); }
+
+  .playground { background: var(--bg-code); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin: 20px 0; }
+  .playground-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; background: #0d111a; border-bottom: 1px solid var(--border); }
+  .playground-header .dots { display: flex; gap: 6px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.r { background: #ff5f56; } .dot.y { background: #ffbd2e; } .dot.g { background: #27c93f; }
+  .playground-label { font-family: var(--mono); font-size: 12px; color: var(--text-dim); }
+
+  textarea.code-input {
+    width: 100%; background: transparent; color: #e6f1ff;
+    font-family: var(--mono); font-size: 14px; line-height: 1.6;
+    border: none; padding: 16px; resize: vertical; min-height: 100px;
+    outline: none; white-space: pre; tab-size: 2;
+  }
+
+  .playground-actions { display: flex; gap: 10px; padding: 0 16px 14px; flex-wrap: wrap; }
+
+  button.run-btn {
+    background: var(--ts-blue); color: #fff; border: none;
+    font-family: var(--mono); font-weight: 700; font-size: 13px;
+    padding: 9px 18px; border-radius: 6px; cursor: pointer;
+    transition: transform .1s ease, background .15s ease;
+  }
+  button.run-btn:hover { background: #4589d4; transform: translateY(-1px); }
+  button.run-btn:active { transform: translateY(0); }
+
+  button.reset-btn {
+    background: transparent; color: var(--text-dim); border: 1px solid var(--border);
+    font-family: var(--mono); font-size: 13px; padding: 9px 14px; border-radius: 6px; cursor: pointer;
+  }
+  button.reset-btn:hover { color: var(--text); border-color: var(--text-dim); }
+
+  button.toggle-js-btn {
+    background: transparent; color: var(--accent); border: 1px solid rgba(111,168,220,0.4);
+    font-family: var(--mono); font-size: 13px; padding: 9px 14px; border-radius: 6px; cursor: pointer;
+  }
+  button.toggle-js-btn:hover { background: rgba(111,168,220,0.08); }
+
+  .compiled-js {
+    display: none;
+    border-top: 1px solid var(--border);
+    background: #0a0d14;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    padding: 14px 16px;
+    color: #8a97ab;
+    white-space: pre-wrap;
+  }
+  .compiled-js.show { display: block; }
+  .compiled-js .cjs-label { color: var(--accent); display: block; margin-bottom: 8px; font-size: 11px; letter-spacing: 1px; }
+
+  .output {
+    border-top: 1px solid var(--border); background: #070a10;
+    font-family: var(--mono); font-size: 13.5px; padding: 14px 16px;
+    min-height: 20px; color: var(--ok); white-space: pre-wrap; word-break: break-word;
+  }
+  .output:empty::before { content: '// o resultado aparece aqui'; color: var(--text-dim); }
+  .output .err { color: var(--err); }
+  .output .ts-err { color: #ff9b7a; }
+  .output .log-line { display: block; }
+  .output .log-line + .log-line { margin-top: 2px; }
+
+  .quiz { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px; padding: 22px 24px; margin: 22px 0; }
+  .quiz-q { font-size: 15.5px; color: #fff; margin-bottom: 14px; }
+  .quiz-q .qtag { font-family: var(--mono); color: var(--pink); font-size: 12px; letter-spacing: 1px; display: block; margin-bottom: 6px; }
+  .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+  .quiz-opt { text-align: left; background: #0d111a; border: 1px solid var(--border); color: var(--text); padding: 11px 14px; border-radius: 7px; font-size: 14.5px; cursor: pointer; font-family: inherit; transition: border-color .15s ease, background .15s ease; }
+  .quiz-opt:hover { border-color: var(--accent); }
+  .quiz-opt.correct { border-color: var(--ok); background: rgba(130,224,140,0.08); color: var(--ok); }
+  .quiz-opt.wrong { border-color: var(--err); background: rgba(244,113,116,0.08); color: var(--err); }
+  .quiz-feedback { margin-top: 12px; font-size: 14px; color: var(--text-dim); display: none; }
+  .quiz-feedback.show { display: block; }
+
+  .challenge { border: 1px dashed var(--accent); border-radius: 10px; padding: 20px 24px; margin: 22px 0; background: rgba(111,168,220,0.04); }
+  .challenge-tag { font-family: var(--mono); color: var(--accent); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; }
+  .challenge h4 { margin: 8px 0 10px; color: #fff; font-weight: 500; }
+
+  code.inline { background: rgba(111,168,220,0.12); color: var(--accent); padding: 2px 6px; border-radius: 4px; font-family: var(--mono); font-size: 13.5px; }
+
+  table.compare {
+    width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 14px;
+  }
+  table.compare th, table.compare td {
+    border: 1px solid var(--border); padding: 10px 14px; text-align: left;
+  }
+  table.compare th { background: var(--bg-panel); color: var(--accent); font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+  table.compare td { color: #c2cdd9; }
+  table.compare code.inline { font-size: 12.5px; }
+
+  hr.divider { border: none; border-top: 1px solid var(--border); margin: 56px 0 0; }
+
+  footer { text-align: center; padding: 60px 24px 20px; color: var(--text-dim); font-size: 14px; }
+  footer .accent { color: var(--accent); }
+
+  .loading-banner {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: var(--ts-blue); color: #fff; text-align: center;
+    font-family: var(--mono); font-size: 13px; padding: 8px;
+    transform: translateY(-100%); transition: transform .3s ease;
+  }
+  .loading-banner.show { transform: translateY(0); }
+
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 30px; }
+    nav.toc ol { columns: 1; }
+    .lesson h2 { font-size: 22px; }
+    table.compare { font-size: 12.5px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="loading-banner" id="loadingBanner">carregando compilador TypeScript...</div>
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<header class="hero">
+  <div class="hero-eyebrow">Notebook Interativo · TypeScript</div>
+  <h1>Dominando <span>TypeScript</span></h1>
+  <p>Do básico ao avançado. Cada exemplo roda de verdade no navegador — o TypeScript é compilado pra JavaScript e executado na hora, igual num editor real.</p>
+</header>
+
+<div class="wrap">
+
+  <nav class="toc">
+    <h3>Neste notebook</h3>
+    <ol>
+      <li><a href="#l1">Por que TypeScript?</a></li>
+      <li><a href="#l2">Tipos básicos</a></li>
+      <li><a href="#l3">Arrays e tuplas</a></li>
+      <li><a href="#l4">Funções tipadas</a></li>
+      <li><a href="#l5">Interfaces</a></li>
+      <li><a href="#l6">Type aliases</a></li>
+      <li><a href="#l7">Union e intersection</a></li>
+      <li><a href="#l8">Literal types</a></li>
+      <li><a href="#l9">Enums</a></li>
+      <li><a href="#l10">any, unknown, never</a></li>
+      <li><a href="#l11">Classes tipadas</a></li>
+      <li><a href="#l12">Generics</a></li>
+      <li><a href="#l13">Utility types</a></li>
+      <li><a href="#l14">Type narrowing</a></li>
+      <li><a href="#l15">Decorators</a></li>
+      <li><a href="#l16">Desafio final</a></li>
+    </ol>
+  </nav>
+
+  <!-- MODULE: FUNDAMENTOS -->
+  <div class="module-divider"><span class="tag">Módulo 1 · Fundamentos</span></div>
+
+  <!-- LESSON 1 -->
+  <section class="lesson" id="l1">
+    <div class="lesson-num">01</div>
+    <h2>Por que TypeScript?</h2>
+    <p>
+      TypeScript é JavaScript com uma camada extra: <strong>tipos</strong>. Você já sabe escrever JS —
+      TypeScript adiciona a possibilidade de dizer explicitamente "essa variável é um número",
+      "essa função recebe uma string e devolve um boolean", etc.
+    </p>
+    <p>
+      O grande ganho é que o editor (e o compilador) passam a <strong>avisar erros antes de rodar o código</strong>,
+      em vez de você descobrir o problema só em produção.
+    </p>
+
+    <div class="jsvsts">
+      <strong>JS vs TS:</strong> todo código JavaScript válido já é, tecnicamente, código TypeScript válido
+      (com tipos implícitos). TypeScript não substitui o JS — ele é compilado <em>para</em> JS antes de rodar
+      no navegador ou no Node. Ninguém "roda" .ts diretamente; sempre existe uma etapa de compilação.
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">exemplo.ts</span>
+      </div>
+      <textarea class="code-input" data-id="p1" spellcheck="false">function saudacao(nome: string) {
+  return `Olá, ${nome}!`;
+}
+
+console.log(saudacao("Ana"));
+
+// tente descomentar a linha abaixo e rodar de novo:
+// console.log(saudacao(42));</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p1')">▶ Rodar</button>
+        <button class="toggle-js-btn" onclick="toggleJs('p1')">{ } ver JS gerado</button>
+        <button class="reset-btn" onclick="resetCode('p1')">↺ Restaurar</button>
+      </div>
+      <div class="compiled-js" id="js-p1"></div>
+      <div class="output" id="out-p1"></div>
+    </div>
+
+    <div class="callout">
+      <strong>Experimente:</strong> descomente a linha com <code class="inline">saudacao(42)</code> e rode.
+      O compilador vai recusar, porque <code class="inline">42</code> é número e a função espera uma string.
+      Isso é TypeScript "pegando" o erro antes mesmo de executar.
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- LESSON 2 -->
+  <section class="lesson" id="l2">
+    <div class="lesson-num">02</div>
+    <h2>Tipos básicos</h2>
+    <p>
+      Você anota o tipo de uma variável colocando <code class="inline">: tipo</code> depois do nome dela.
+      Os tipos mais comuns são:
+    </p>
+
+    <table class="compare">
+      <tr><th>Tipo</th><th>Exemplo</th><th>Guarda</th></tr>
+      <tr><td><code class="inline">string</code></td><td><code class="inline">"olá"</code></td><td>texto</td></tr>
+      <tr><td><code class="inline">number</code></td><td><code class="inline">42</code>, <code class="inline">3.14</code></td><td>qualquer número</td></tr>
+      <tr><td><code class="inline">boolean</code></td><td><code class="inline">true</code>, <code class="inline">false</code></td><td>verdadeiro/falso</td></tr>
+      <tr><td><code class="inline">null</code> / <code class="inline">undefined</code></td><td>-</td><td>ausência de valor</td></tr>
+      <tr><td><code class="inline">void</code></td><td>-</td><td>função que não retorna nada</td></tr>
+    </table>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">tipos-basicos.ts</span>
+      </div>
+      <textarea class="code-input" data-id="p2" spellcheck="false">let nome: string = "Nicolas";
+let idade: number = 25;
+let ativo: boolean = true;
+
+console.log(nome, idade, ativo);
+
+// o TypeScript também consegue "adivinhar" o tipo sozinho:
+let cidade = "São Paulo"; // ele já sabe que isso é string
+// cidade = 10; // se descomentar, dá erro: number não é string</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p2')">▶ Rodar</button>
+        <button class="toggle-js-btn" onclick="toggleJs('p2')">{ } ver JS gerado</button>
+        <button class="reset-btn" onclick="resetCode('p2')">↺ Restaurar</button>
+      </div>
+      <div class="compiled-js" id="js-p2"></div>
+      <div class="output" id="out-p2"></div>
+    </div>
+
+    <div class="callout">
+      <strong>Inferência de tipo:</strong> na maior parte do tempo você não precisa escrever <code class="inline">: string</code>
+      em toda variável — o TypeScript "infere" (deduz) o tipo pelo valor inicial. Escrever o tipo é mais útil
+      em parâmetros de função e quando a variável começa sem valor definido.
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-q">
+        <span class="qtag">TESTE RÁPIDO</span>
+        Se eu escrevo <code class="inline">let x = 5;</code> sem anotar o tipo, o TypeScript...
+      </div>
+      <div class="quiz-options" data-answer="0">
+        <button class="quiz-opt">Já sabe que x é number, mesmo sem eu escrever</button>
+        <button class="quiz-opt">Trata x como any (qualquer tipo)</button>
+        <button class="quiz-opt">Dá erro porque falta o tipo</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- LESSON 3 -->
+  <section class="lesson" id="l3">
+    <div class="lesson-num">03</div>
+    <h2>Arrays e tuplas</h2>
+    <p>
+      Pra tipar um array, você escreve o tipo dos elementos seguido de <code class="inline">[]</code>.
+      Já uma <strong>tupla</strong> é um array de tamanho fixo onde cada posição tem um tipo específico —
+      útil quando a ordem e a quantidade de itens importam.
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">arrays-tuplas.ts</span>
+      </div>
+      <textarea class="code-input" data-id="p3" spellcheck="false">// array comum: todos os elementos são números
+let notas: number[] = [8, 9.5, 7, 10];
+console.log(notas);
+
+// array de strings
+let nomes: string[] = ["Ana", "Bruno", "Carla"];
+console.log(nomes);
+
+// tupla: exatamente 2 posições, com tipos fixos nessa ordem
+let usuario: [string, number] = ["Ana", 25];
+console.log(usuario);
+
+// usuario = [25, "Ana"]; // erro! ordem dos tipos está trocada</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p3')">▶ Rodar</button>
+        <button class="toggle-js-btn" onclick="toggleJs('p3')">{ } ver JS gerado</button>
+        <button class="reset-btn" onclick="resetCode('p3')">↺ Restaurar</button>
+      </div>
+      <div class="compiled-js" id="js-p3"></div>
+      <div class="output" id="out-p3"></div>
+    </div>
+
+    <div class="analogy">
+      <strong>Pensa assim:</strong> um array tipado é uma caixa que só aceita um tipo de item, em qualquer
+      quantidade. Uma tupla é mais como uma ficha de cadastro com campos fixos: posição 0 sempre é nome,
+      posição 1 sempre é idade — a estrutura é rígida.
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- LESSON 4 -->
+  <section class="lesson" id="l4">
+    <div class="lesson-num">04</div>
+    <h2>Funções tipadas</h2>
+    <p>
+      Em uma função, você pode tipar tanto os <strong>parâmetros</strong> quanto o <strong>valor de retorno</strong>.
+      Isso deixa claro, só de ler a assinatura da função, o que ela espera receber e o que devolve.
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">funcoes-tipadas.ts</span>
+      </div>
+      <textarea class="code-input" data-id="p4" spellcheck="false">// (n1: number, n2: number) são os parâmetros tipados
+// : number depois dos parênteses é o tipo do retorno
+function soma(n1: number, n2: number): number {
+  return n1 + n2;
+}
+
+console.log(soma(2, 3));
+
+// parâmetro opcional: o "?" diz que pode não vir
+function saudar(nome: string, sobrenome?: string): string {
+  if (sobrenome) {
+    return `Olá, ${nome} ${sobrenome}`;
+  }
+  return `Olá, ${nome}`;
+}
+
+console.log(saudar("Ana"));
+console.log(saudar("Ana", "Silva"));
+
+// arrow function tipada
+const multiplica = (a: number, b: number): number => a * b;
+console.log(multiplica(4, 5));</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p4')">▶ Rodar</button>
+        <button class="toggle-js-btn" onclick="toggleJs('p4')">{ } ver JS gerado</button>
+        <button class="reset-btn" onclick="resetCode('p4')">↺ Restaurar</button>
+      </div>
+      <div class="compiled-js" id="js-p4"></div>
+      <div class="output" id="out-p4"></div>
+    </div>
+
+    <div class="callout">
+      <strong>Clique em "ver JS gerado":</strong> repare que todas as anotações de tipo somem no JavaScript final.
+      Tipos existem <em>só durante o desenvolvimento</em> — eles não afetam o código que roda de verdade.
+    </div>
+
+    <div class="challenge">
+      <div class="challenge-tag">Mão na massa</div>
+      <h4>Edite o código acima</h4>
+      <p style="margin:0; color:#c2cdd9; font-size:15px;">
+        Crie uma função <code class="inline">dividir(a: number, b: number): number</code> que retorna a divisão,
+        e chame ela com dois números.
+      </p>
+    </div>
+  </section>
+
+  <!-- MODULE: ESTRUTURAS DE TIPOS -->
+  <div class="module-divider"><span class="tag">Módulo 2 · Estruturas de tipos</span></div>
+
+  <!-- LESSON 5 -->
+  <section class="lesson" id="l5">
+    <div class="lesson-num">05</div>
+    <h2>Interfaces</h2>
+    <p>
+      Uma <strong>interface</strong> descreve o "formato" que um objeto deve ter: quais chaves existem
+      e qual o tipo de cada uma. É como um contrato — qualquer objeto que "assinar" essa interface
+      precisa seguir exatamente essa estrutura.
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">interfaces.ts</span>
+      </div>
+      <textarea class="code-input" data-id="p5" spellcheck="false">interface Usuario {
+  nome: string;
+  email: string;
+  idade: number;
+  ativo?: boolean; // o "?" torna o campo opcional
+}
+
+function exibirUsuario(u: Usuario) {
+  console.log(`${u.nome} (${u.email}) - ${u.idade} anos`);
+}
+
+const usuario1: Usuario = {
+  nome: "Larissa",
+  email: "larissa@email.com",
+  idade: 22
+};
+
+exibirUsuario(usuario1);
+
+// se faltar um campo obrigatório, o TypeScript recusa:
+// const usuarioInvalido: Usuario = { nome: "Ana" }; // erro!</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p5')">▶ Rodar</button>
+        <button class="toggle-js-btn" onclick="toggleJs('p5')">{ } ver JS gerado</button>
+        <button class="reset-btn" onclick="resetCode('p5')">↺ Restaurar</button>
+      </div>
+      <div class="compiled-js" id="js-p5"></div>
+      <div class="output" id="out-p5"></div>
+    </div>
+
+    <div class="jsvsts">
+      <strong>Repare no JS gerado:</strong> a <code class="inline">interface</code> inteira desaparece na compilação.
+      Ela existe só pra checagem de tipos — não gera nenhum código real em tempo de execução, diferente de uma classe.
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- LESSON 6 -->
+  <section class="lesson" id="l6">
+    <div class="lesson-num">06</div>
+    <h2>Type aliases</h2>
+    <p>
+      <code class="inline">type</code> permite dar um nome pra qualquer tipo — não só objetos, mas também
+      uniões, tuplas, funções, o que for. É parecido com interface, mas mais flexível.
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">type-aliases.ts</span>
+      </div>
+      <textarea class="code-input" data-id="p6" spellcheck="false">type ID = string | number; // um "apelido" pra esse tipo composto
+
+type Produto = {
+  id: ID;
+  nome: string;
+  preco: number;
+};
+
+function formatarPreco(p: Produto): string {
+  return `${p.nome}: R$ ${p.preco.toFixed(2)}`;
+}
+
+const produto1: Produto = { id: 1, nome: "Ventilador", preco: 69.99 };
+const produto2: Produto = { id: "sku-abc", nome: "Luminária", preco: 45.5 };
+
+console.log(formatarPreco(produto1));
+console.log(formatarPreco(produto2));</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p6')">▶ Rodar</button>
+        <button class="toggle-js-btn" onclick="toggleJs('p6')">{ } ver JS gerado</button>
+        <button class="reset-btn" onclick="resetCode('p6')">↺ Restaurar</button>
+      </div>
+      <div class="compiled-js" id="js-p6"></div>
+      <div class="output" id="out-p6"></div>
+    </div>
+
+    <table class="compare">
+      <tr><th>Interface</th><th>Type</th></tr>
+      <tr><td>Só descreve formato de objetos</td><td>Descreve qualquer tipo (união, tupla, primitivo...)</td></tr>
+      <tr><td>Pode ser "reaberta" e estendida depois</td><td>Não pode ser reaberta</td></tr>
+      <tr><td>Convenção comum pra objetos/classes públicas</td><td>Convenção comum pra unions e tipos utilitários</td></tr>
+    </table>
+
+    <div class="callout">
+      <strong>Na prática:</strong> pra objetos simples, tanto faz usar <code class="inline">interface</code> quanto
+      <code class="inline">type</code>. A maioria dos times escolhe uma convenção e segue — o importante é entender
+      que <code class="inline">type</code> é obrigatório quando você precisa de union types, como no exemplo acima.
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- LESSON 7 -->
+  <section class="lesson" id="l7">
+    <div class="lesson-num">07</div>
+    <h2>Union e intersection types</h2>
+    <p>
+      <strong>Union</strong> (<code class="inline">|</code>) significa "esse tipo pode ser A <em>ou</em> B".
+      <strong>Intersection</strong> (<code class="inline">&amp;</code>) significa "esse tipo precisa ser A <em>e</em> B ao mesmo tempo" —
+      combina dois tipos em um só.
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">union-intersection.ts</span>
+      </div>
+      <textarea class="code-input" data-id="p7" spellcheck="false">// UNION: pode ser string OU number
+function formatarId(id: string | number): string {
+  return `ID: ${id}`;
+}
+console.log(formatarId(42));
+console.log(formatarId("abc-123"));
+
+// INTERSECTION: precisa ter os campos dos dois tipos juntos
+type ComNome = { nome: string };
+type ComIdade = { idade: number };
+type Pessoa = ComNome & ComIdade;
+
+const pessoa1: Pessoa = { nome: "Pedro", idade: 30 };
+console.log(pessoa1);</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p7')">▶ Rodar</button>
+        <button class="toggle-js-btn" onclick="toggleJs('p7')">{ } ver JS gerado</button>
+        <button class="reset-btn" onclick="resetCode('p7')">↺ Restaurar</button>
+      </div>
+      <div class="compiled-js" id="js-p7"></div>
+      <div class="output" id="out-p7"></div>
+    </div>
+
+    <div class="analogy">
+      <strong>Pensa assim:</strong> union é um cardápio "escolha A ou B". Intersection é um combo
+      "você leva A e B juntos, obrigatoriamente".
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- LESSON 8 -->
+  <section class="lesson" id="l8">
+    <div class="lesson-num">08</div>
+    <h2>Literal types</h2>
+    <p>
+      Além de tipos genéricos como <code class="inline">string</code>, o TypeScript permite restringir
+      um valor a <strong>opções exatas</strong> — por exemplo, só aceitar as strings "pequeno", "médio" ou "grande".
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">literal-types.ts</span>
+      </div>
+      <textarea class="code-input" data-id="p8" spellcheck="false">type Tamanho = "pequeno" | "medio" | "grande";
+
+function calcularPreco(tamanho: Tamanho): number {
+  if (tamanho === "pequeno") return 10;
+  if (tamanho === "medio") return 15;
+  return 20;
+}
+
+console.log(calcularPreco("medio"));
+
+// calcularPreco("gigante"); // erro! "gigante" não é uma opção válida</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p8')">▶ Rodar</button>
+        <button class="toggle-js-btn" onclick="toggleJs('p8')">{ } ver JS gerado</button>
+        <button class="reset-btn" onclick="resetCode('p8')">↺ Restaurar</button>
+      </div>
+      <div class="compiled-js" id="js-p8"></div>
+      <div class="output" id="out-p8"></div>
+    </div>
+
+    <div class="callout">
+      <strong>Por que isso é útil:</strong> em vez de usar uma <code class="inline">string</code> qualquer
+      (que aceita literalmente qualquer texto, incluindo erros de digitação), literal types garantem que só
+      valores válidos e previstos passem pelo compilador.
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- LESSON 9 -->
+  <section class="lesson" id="l9">
+    <div class="lesson-num">09</div>
+    <h2>Enums</h2>
+    <p>
+      <code class="inline">enum</code> é outra forma de representar um conjunto fixo de valores nomeados —
+      parecido com literal types, mas vira uma estrutura de verdade no JavaScript gerado (diferente de interface/type).
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">enums.ts</span>
+      </div>
+      <textarea class="code-input" data-id="p9" spellcheck="false">enum StatusPedido {
+  Pendente,
+  Enviado,
+  Entregue,
+  Cancelado
+}
+
+function descreverStatus(status: StatusPedido): string {
+  switch (status) {
+    case StatusPedido.Pendente: return "Aguardando confirmação";
+    case StatusPedido.Enviado: return "A caminho";
+    case StatusPedido.Entregue: return "Já chegou!";
+    case StatusPedido.Cancelado: return "Pedido cancelado";
+  }
+}
+
+console.log(descreverStatus(StatusPedido.Enviado));
+console.log(StatusPedido.Enviado); // por baixo dos panos, é um número (1)</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p9')">▶ Rodar</button>
+        <button class="toggle-js-btn" onclick="toggleJs('p9')">{ } ver JS gerado</button>
+        <button class="reset-btn" onclick="resetCode('p9')">↺ Restaurar</button>
+      </div>
+      <div class="compiled-js" id="js-p9"></div>
+      <div class="output" id="out-p9"></div>
+    </div>
+
+    <div class="jsvsts">
+      <strong>Diferente de interface/type:</strong> clique em "ver JS gerado" e note que o <code class="inline">enum</code>
+      vira um objeto de verdade no JavaScript final. Por isso enums têm um pequeno custo em tempo de execução —
+      muitos projetos modernos preferem literal types (<code class="inline">"pendente" | "enviado"</code>) justamente
+      por não gerarem nenhum código extra.
+    </div>
+  </section>
+
+  <!-- MODULE: TIPOS ESPECIAIS -->
+  <div class="module-divider"><span class="tag">Módulo 3 · Tipos especiais</span></div>
+
+  <!-- LESSON 10 -->
+  <section class="lesson" id="l10">
+    <div class="lesson-num">10</div>
+    <h2><code class="inline">any</code>, <code class="inline">unknown</code> e <code class="inline">never</code></h2>
+    <p>
+      Três tipos especiais que representam situações diferentes de "eu não sei o tipo exato":
+    </p>
+    <ul>
+      <li><code class="inline">any</code> — desliga a checagem de tipos completamente pra essa variável. Use o mínimo possível.</li>
+      <li><code class="inline">unknown</code> — também aceita qualquer valor, mas te obriga a checar o tipo antes de usar. É o "any seguro".</li>
+      <li><code class="inline">never</code> — representa um valor que nunca vai existir, geralmente usado em funções que sempre lançam erro ou nunca terminam.</li>
+    </ul>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">any-unknown-never.ts</span>
+      </div>
+      <textarea class="code-input" data-id="p10" spellcheck="false">// any: sem checagem nenhuma (evite quando possível)
+let qualquerCoisa: any = "texto";
+qualquerCoisa = 42; // não dá erro, mas perdemos a segurança
+
+// unknown: mais seguro, precisa checar antes de usar
+let valorDesconhecido: unknown = "42";
+
+if (typeof valorDesconhecido === "string") {
+  console.log(valorDesconhecido.toUpperCase()); // aqui já sei que é string
+}
+
+// never: função que sempre lança erro nunca "retorna" normalmente
+function lancarErro(mensagem: string): never {
+  throw new Error(mensagem);
+}
+
+try {
+  lancarErro("algo deu errado");
+} catch (e) {
+  console.log("Erro capturado:", (e as Error).message);
+}</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p10')">▶ Rodar</button>
+        <button class="toggle-js-btn" onclick="toggleJs('p10')">{ } ver JS gerado</button>
+        <button class="reset-btn" onclick="resetCode('p10')">↺ Restaurar</button>
+      </div>
+      <div class="compiled-js" id="js-p10"></div>
+      <div class="output" id="out-p10"></div>
+    </div>
+
+    <div class="callout">
+      <strong>Regra prática:</strong> se você não sabe o tipo de algo (dados vindos de uma API, por exemplo),
+      prefira sempre <code class="inline">unknown</code> a <code class="inline">any</code>. O <code class="inline">unknown</code>
+      te obriga a validar antes de usar, evitando bugs silenciosos.
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-q">
+        <span class="qtag">TESTE RÁPIDO</span>
+        Qual a principal diferença entre <code class="inline">any</code> e <code class="inline">unknown</code>?
+      </div>
+      <div class="quiz-options" data-answer="1">
+        <button class="quiz-opt">Não existe diferença, são sinônimos</button>
+        <button class="quiz-opt"><code class="inline">unknown</code> exige checagem de tipo antes de usar o valor</button>
+        <button class="quiz-opt"><code class="inline">any</code> é mais rápido em tempo de execução</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- LESSON 11 -->
+  <section class="lesson" id="l11">
+    <div class="lesson-num">11</div>
+    <h2>Classes tipadas</h2>
+    <p>
+      TypeScript adiciona modificadores de acesso (<code class="inline">public</code>, <code class="inline">private</code>,
+      <code class="inline">protected</code>) e tipagem completa às classes do JavaScript.
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">classes.ts</span>
+      </div>
+      <textarea class="code-input" data-id="p11" spellcheck="false">class ContaBancaria {
+  private saldo: number; // só acessível dentro da própria classe
+  public titular: string; // acessível de fora também
+
+  constructor(titular: string, saldoInicial: number = 0) {
+    this.titular = titular;
+    this.saldo = saldoInicial;
+  }
+
+  depositar(valor: number): void {
+    this.saldo += valor;
+  }
+
+  consultarSaldo(): number {
+    return this.saldo;
+  }
+}
+
+const conta = new ContaBancaria("Giovanna", 100);
+conta.depositar(50);
+console.log(`${conta.titular} tem R$ ${conta.consultarSaldo()}`);
+
+// conta.saldo; // erro! saldo é private, não pode acessar de fora</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p11')">▶ Rodar</button>
+        <button class="toggle-js-btn" onclick="toggleJs('p11')">{ } ver JS gerado</button>
+        <button class="reset-btn" onclick="resetCode('p11')">↺ Restaurar</button>
+      </div>
+      <div class="compiled-js" id="js-p11"></div>
+      <div class="output" id="out-p11"></div>
+    </div>
+
+    <table class="compare">
+      <tr><th>Modificador</th><th>Quem acessa</th></tr>
+      <tr><td><code class="inline">public</code> (padrão)</td><td>Qualquer lugar</td></tr>
+      <tr><td><code class="inline">private</code></td><td>Só dentro da própria classe</td></tr>
+      <tr><td><code class="inline">protected</code></td><td>A própria classe e classes que a estendem</td></tr>
+    </table>
+  </section>
+
+  <!-- MODULE: AVANÇADO -->
+  <div class="module-divider"><span class="tag">Módulo 4 · Avançado</span></div>
+
+  <!-- LESSON 12 -->
+  <section class="lesson" id="l12">
+    <div class="lesson-num">12</div>
+    <h2>Generics</h2>
+    <p>
+      Generics permitem escrever uma função (ou classe) que funciona com <strong>qualquer tipo</strong>,
+      mas mantendo a segurança de tipos — em vez de usar <code class="inline">any</code> e perder toda checagem.
+      A letra <code class="inline">T</code> é convenção (poderia ser qualquer nome) e representa "um tipo a ser definido depois".
+    </p>
+
+    <div class="analogy">
+      <strong>Pensa assim:</strong> uma função genérica é como uma forma de bolo universal — funciona pra
+      qualquer massa (número, string, objeto), mas garante que o que sai é do mesmo tipo do que entrou.
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">generics.ts</span>
+      </div>
+      <textarea class="code-input" data-id="p12" spellcheck="false">// T é um "tipo variável" - descoberto no momento da chamada
+function primeiroItem<T>(lista: T[]): T {
+  return lista[0];
+}
+
+console.log(primeiroItem<number>([1, 2, 3]));       // T vira number
+console.log(primeiroItem<string>(["a", "b", "c"])); // T vira string
+
+// na prática, o TypeScript costuma inferir o T sozinho:
+console.log(primeiroItem([10, 20, 30])); // nem precisei escrever <number>
+
+// generics também funcionam com múltiplos tipos
+function criarPar<A, B>(a: A, b: B): [A, B] {
+  return [a, b];
+}
+
+console.log(criarPar("idade", 25));
+console.log(criarPar(true, "ativo"));</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p12')">▶ Rodar</button>
+        <button class="toggle-js-btn" onclick="toggleJs('p12')">{ } ver JS gerado</button>
+        <button class="reset-btn" onclick="resetCode('p12')">↺ Restaurar</button>
+      </div>
+      <div class="compiled-js" id="js-p12"></div>
+      <div class="output" id="out-p12"></div>
+    </div>
+
+    <div class="jsvsts">
+      <strong>Clique em "ver JS gerado":</strong> generics, assim como interfaces, somem completamente na
+      compilação. Eles só existem pra garantir consistência de tipos durante o desenvolvimento.
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">generics-interface.ts</span>
+      </div>
+      <textarea class="code-input" data-id="p13" spellcheck="false">// generics também funcionam em interfaces - muito comum em respostas de API
+interface Resposta<T> {
+  sucesso: boolean;
+  dados: T;
+}
+
+interface Produto {
+  nome: string;
+  preco: number;
+}
+
+const respostaProduto: Resposta<Produto> = {
+  sucesso: true,
+  dados: { nome: "Teclado", preco: 150 }
+};
+
+const respostaLista: Resposta<string[]> = {
+  sucesso: true,
+  dados: ["item1", "item2", "item3"]
+};
+
+console.log(respostaProduto.dados.nome);
+console.log(respostaLista.dados);</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p13')">▶ Rodar</button>
+        <button class="toggle-js-btn" onclick="toggleJs('p13')">{ } ver JS gerado</button>
+        <button class="reset-btn" onclick="resetCode('p13')">↺ Restaurar</button>
+      </div>
+      <div class="compiled-js" id="js-p13"></div>
+      <div class="output" id="out-p13"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- LESSON 13 -->
+  <section class="lesson" id="l13">
+    <div class="lesson-num">13</div>
+    <h2>Utility types</h2>
+    <p>
+      TypeScript vem com tipos prontos que transformam outros tipos automaticamente. Os mais usados no dia a dia:
+    </p>
+
+    <table class="compare">
+      <tr><th>Utility type</th><th>O que faz</th></tr>
+      <tr><td><code class="inline">Partial&lt;T&gt;</code></td><td>Torna todos os campos de T opcionais</td></tr>
+      <tr><td><code class="inline">Required&lt;T&gt;</code></td><td>Torna todos os campos de T obrigatórios</td></tr>
+      <tr><td><code class="inline">Readonly&lt;T&gt;</code></td><td>Torna todos os campos de T somente-leitura</td></tr>
+      <tr><td><code class="inline">Pick&lt;T, K&gt;</code></td><td>Cria um tipo só com as chaves K escolhidas de T</td></tr>
+      <tr><td><code class="inline">Omit&lt;T, K&gt;</code></td><td>Cria um tipo com todas as chaves de T, exceto K</td></tr>
+    </table>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">utility-types.ts</span>
+      </div>
+      <textarea class="code-input" data-id="p14" spellcheck="false">interface Usuario {
+  nome: string;
+  email: string;
+  senha: string;
+  idade: number;
+}
+
+// Partial: útil pra funções de "atualizar", onde nem todo campo vem preenchido
+function atualizarUsuario(id: number, dados: Partial<Usuario>) {
+  console.log(`Atualizando usuário ${id} com:`, dados);
+}
+
+atualizarUsuario(1, { nome: "Novo Nome" }); // só um campo, e funciona!
+
+// Pick: pega só algumas chaves - ótimo pra não expor senha, por exemplo
+type UsuarioPublico = Pick<Usuario, "nome" | "email">;
+
+const perfilPublico: UsuarioPublico = {
+  nome: "Athos",
+  email: "athos@email.com"
+};
+console.log(perfilPublico);
+
+// Omit: o oposto - todas as chaves, exceto as que eu tirar
+type UsuarioSemSenha = Omit<Usuario, "senha">;
+
+const usuarioSeguro: UsuarioSemSenha = {
+  nome: "Larissa",
+  email: "larissa@email.com",
+  idade: 22
+};
+console.log(usuarioSeguro);
+
+// Readonly: impede alteração depois de criado
+const config: Readonly<{ apiUrl: string }> = { apiUrl: "https://api.com" };
+// config.apiUrl = "outra coisa"; // erro! é readonly</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p14')">▶ Rodar</button>
+        <button class="toggle-js-btn" onclick="toggleJs('p14')">{ } ver JS gerado</button>
+        <button class="reset-btn" onclick="resetCode('p14')">↺ Restaurar</button>
+      </div>
+      <div class="compiled-js" id="js-p14"></div>
+      <div class="output" id="out-p14"></div>
+    </div>
+
+    <div class="callout">
+      <strong>Por que isso importa:</strong> em vez de duplicar uma interface inteira só pra remover ou tornar
+      opcional um campo, utility types deixam você <em>derivar</em> um novo tipo a partir de um já existente.
+      Isso evita repetição e mantém tudo sincronizado — se <code class="inline">Usuario</code> mudar, os tipos derivados acompanham.
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- LESSON 14 -->
+  <section class="lesson" id="l14">
+    <div class="lesson-num">14</div>
+    <h2>Type narrowing (estreitamento de tipo)</h2>
+    <p>
+      Quando uma variável pode ser de mais de um tipo (union), o TypeScript consegue "estreitar" o tipo
+      dentro de um bloco <code class="inline">if</code>, com base em checagens que você já usa em JS puro,
+      como <code class="inline">typeof</code> e <code class="inline">instanceof</code>.
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">narrowing.ts</span>
+      </div>
+      <textarea class="code-input" data-id="p15" spellcheck="false">function formatarValor(valor: string | number): string {
+  if (typeof valor === "string") {
+    // aqui dentro, o TypeScript já sabe que valor é string
+    return valor.toUpperCase();
+  } else {
+    // aqui, ele sabe que só pode ser number
+    return valor.toFixed(2);
+  }
+}
+
+console.log(formatarValor("olá"));
+console.log(formatarValor(3.14159));
+
+// narrowing com checagem de propriedade (in)
+interface Cachorro { latir: () => string; }
+interface Gato { miar: () => string; }
+
+function fazerSom(animal: Cachorro | Gato): string {
+  if ("latir" in animal) {
+    return animal.latir();
+  }
+  return animal.miar();
+}
+
+const rex: Cachorro = { latir: () => "Au au!" };
+console.log(fazerSom(rex));</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p15')">▶ Rodar</button>
+        <button class="toggle-js-btn" onclick="toggleJs('p15')">{ } ver JS gerado</button>
+        <button class="reset-btn" onclick="resetCode('p15')">↺ Restaurar</button>
+      </div>
+      <div class="compiled-js" id="js-p15"></div>
+      <div class="output" id="out-p15"></div>
+    </div>
+
+    <div class="callout">
+      <strong>Isso é o que torna union types práticos:</strong> você declara que algo "pode ser A ou B",
+      e dentro de cada checagem o compilador te dá acesso só aos métodos/propriedades válidos daquele tipo específico.
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- LESSON 15 -->
+  <section class="lesson" id="l15">
+    <div class="lesson-num">15</div>
+    <h2>Decorators</h2>
+    <p>
+      Decorators são funções especiais que "decoram" (modificam ou observam) classes e seus membros,
+      usando a sintaxe <code class="inline">@nomeDoDecorator</code>. São muito usados em frameworks como
+      Angular e NestJS. É um recurso mais avançado — bom conhecer, mas menos comum no dia a dia comparado ao resto deste notebook.
+    </p>
+
+    <div class="callout">
+      <strong>Antes de rodar:</strong> decorators precisam de uma configuração especial do compilador
+      (<code class="inline">experimentalDecorators</code>). O editor abaixo já está configurado pra isso funcionar.
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">decorators.ts</span>
+      </div>
+      <textarea class="code-input" data-id="p16" spellcheck="false">// um decorator de classe simples: roda quando a classe é definida
+function Log(constructor: Function) {
+  console.log(`Classe criada: ${constructor.name}`);
+}
+
+@Log
+class Produto {
+  constructor(public nome: string) {}
+}
+
+const p = new Produto("Mouse");
+console.log(p.nome);
+
+// decorator de método: intercepta chamadas
+function medirTempo(target: any, nome: string, descriptor: PropertyDescriptor) {
+  const original = descriptor.value;
+  descriptor.value = function (...args: any[]) {
+    console.log(`Chamando ${nome}...`);
+    return original.apply(this, args);
+  };
+}
+
+class Calculadora {
+  @medirTempo
+  somar(a: number, b: number) {
+    return a + b;
+  }
+}
+
+const calc = new Calculadora();
+console.log(calc.somar(2, 3));</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p16', true)">▶ Rodar</button>
+        <button class="toggle-js-btn" onclick="toggleJs('p16')">{ } ver JS gerado</button>
+        <button class="reset-btn" onclick="resetCode('p16')">↺ Restaurar</button>
+      </div>
+      <div class="compiled-js" id="js-p16"></div>
+      <div class="output" id="out-p16"></div>
+    </div>
+
+    <div class="jsvsts">
+      <strong>Vale notar:</strong> decorators de classe/método/propriedade (como acima) são um recurso mais antigo
+      e ainda em evolução na linguagem. Você vai encontrá-los principalmente em frameworks específicos —
+      não é algo que se usa em todo projeto TypeScript.
+    </div>
+  </section>
+
+  <!-- MODULE: DESAFIO -->
+  <div class="module-divider"><span class="tag">Módulo final</span></div>
+
+  <!-- LESSON 16 -->
+  <section class="lesson" id="l16">
+    <div class="lesson-num">16</div>
+    <h2>Desafio final</h2>
+    <p>Hora de juntar bastante coisa que você aprendeu. No editor abaixo, complete o código pra que:</p>
+    <ol class="explain">
+      <li>A interface <code class="inline">Tarefa</code> tenha os campos: <code class="inline">id</code> (number), <code class="inline">titulo</code> (string) e <code class="inline">concluida</code> (boolean);</li>
+      <li>A função <code class="inline">filtrarConcluidas</code> receba um array de <code class="inline">Tarefa</code> e devolva só as que estão concluídas;</li>
+      <li>Use generics na função <code class="inline">contarItens&lt;T&gt;</code> pra que ela funcione com qualquer tipo de array.</li>
+    </ol>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">desafio.ts</span>
+      </div>
+      <textarea class="code-input" data-id="p17" spellcheck="false">// 1. defina a interface Tarefa aqui
+
+
+// 2. complete a função abaixo
+function filtrarConcluidas(tarefas /* : Tarefa[] */) /* : Tarefa[] */ {
+  // dica: use .filter()
+
+}
+
+// 3. complete a função genérica
+function contarItens/* <T> */(lista /* : T[] */) /* : number */ {
+
+}
+
+const tarefas = [
+  { id: 1, titulo: "Estudar TypeScript", concluida: true },
+  { id: 2, titulo: "Fazer exercícios", concluida: false },
+  { id: 3, titulo: "Revisar generics", concluida: true }
+];
+
+console.log(filtrarConcluidas(tarefas));
+console.log(contarItens(tarefas));</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('p17')">▶ Rodar</button>
+        <button class="toggle-js-btn" onclick="toggleJs('p17')">{ } ver JS gerado</button>
+        <button class="reset-btn" onclick="resetCode('p17')">↺ Restaurar</button>
+      </div>
+      <div class="compiled-js" id="js-p17"></div>
+      <div class="output" id="out-p17"></div>
+    </div>
+
+    <div class="callout">
+      <strong>Travou?</strong> Tente sozinho primeiro. A solução está logo abaixo, escondida.
+    </div>
+
+    <details style="margin-top: 12px;">
+      <summary style="cursor:pointer; color: var(--accent); font-family: var(--mono); font-size: 13px;">▶ ver solução</summary>
+      <div class="playground" style="margin-top: 12px;">
+        <div class="playground-header">
+          <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+          <span class="playground-label">solucao.ts</span>
+        </div>
+        <textarea class="code-input" data-id="p18" spellcheck="false">interface Tarefa {
+  id: number;
+  titulo: string;
+  concluida: boolean;
+}
+
+function filtrarConcluidas(tarefas: Tarefa[]): Tarefa[] {
+  return tarefas.filter(t => t.concluida);
+}
+
+function contarItens<T>(lista: T[]): number {
+  return lista.length;
+}
+
+const tarefas: Tarefa[] = [
+  { id: 1, titulo: "Estudar TypeScript", concluida: true },
+  { id: 2, titulo: "Fazer exercícios", concluida: false },
+  { id: 3, titulo: "Revisar generics", concluida: true }
+];
+
+console.log(filtrarConcluidas(tarefas));
+console.log(contarItens(tarefas));</textarea>
+        <div class="playground-actions">
+          <button class="run-btn" onclick="runCode('p18')">▶ Rodar</button>
+          <button class="toggle-js-btn" onclick="toggleJs('p18')">{ } ver JS gerado</button>
+          <button class="reset-btn" onclick="resetCode('p18')">↺ Restaurar</button>
+        </div>
+        <div class="compiled-js" id="js-p18"></div>
+        <div class="output" id="out-p18"></div>
+      </div>
+    </details>
+  </section>
+
+  <hr class="divider">
+
+  <footer>
+    Você passou por todo o essencial de TypeScript, do básico ao avançado.
+    <span class="accent">Agora é praticar</span> — tente tipar seu próximo projeto em JS, um pedacinho de cada vez.
+  </footer>
+
+</div>
+
+<script>
+  const originals = {};
+  document.querySelectorAll('.code-input').forEach(ta => {
+    originals[ta.dataset.id] = ta.value;
+  });
+
+  let tsReady = false;
+  const banner = document.getElementById('loadingBanner');
+
+  function checkTsReady() {
+    if (window.ts) {
+      tsReady = true;
+      banner.classList.remove('show');
+    } else {
+      banner.classList.add('show');
+      setTimeout(checkTsReady, 200);
+    }
+  }
+  checkTsReady();
+
+  function resetCode(id) {
+    const ta = document.querySelector(`.code-input[data-id="${id}"]`);
+    ta.value = originals[id];
+    document.getElementById('out-' + id).innerHTML = '';
+    const jsPanel = document.getElementById('js-' + id);
+    jsPanel.classList.remove('show');
+    jsPanel.innerHTML = '';
+  }
+
+  function toggleJs(id) {
+    const ta = document.querySelector(`.code-input[data-id="${id}"]`);
+    const jsPanel = document.getElementById('js-' + id);
+
+    if (jsPanel.classList.contains('show')) {
+      jsPanel.classList.remove('show');
+      return;
+    }
+
+    if (!tsReady) {
+      jsPanel.innerHTML = '<span class="cjs-label">JS COMPILADO</span>compilador ainda carregando, tente de novo em instantes...';
+      jsPanel.classList.add('show');
+      return;
+    }
+
+    try {
+      const result = ts.transpileModule(ta.value, {
+        compilerOptions: {
+          target: ts.ScriptTarget.ES2017,
+          module: ts.ModuleKind.None,
+          experimentalDecorators: true
+        }
+      });
+      jsPanel.innerHTML = '<span class="cjs-label">JS COMPILADO</span>' + escapeHtml(result.outputText.trim());
+    } catch (e) {
+      jsPanel.innerHTML = '<span class="cjs-label">JS COMPILADO</span>Erro ao compilar: ' + escapeHtml(e.message);
+    }
+    jsPanel.classList.add('show');
+  }
+
+  function runCode(id) {
+    const ta = document.querySelector(`.code-input[data-id="${id}"]`);
+    const outEl = document.getElementById('out-' + id);
+    outEl.innerHTML = '';
+
+    if (!tsReady) {
+      outEl.innerHTML = '<span class="log-line err">⚠ compilador TypeScript ainda carregando, aguarde um instante e tente novamente</span>';
+      return;
+    }
+
+    let compiledJs;
+    try {
+      const result = ts.transpileModule(ta.value, {
+        compilerOptions: {
+          target: ts.ScriptTarget.ES2017,
+          module: ts.ModuleKind.None,
+          experimentalDecorators: true
+        },
+        reportDiagnostics: true
+      });
+
+      if (result.diagnostics && result.diagnostics.length > 0) {
+        const messages = result.diagnostics.map(d => {
+          const msg = ts.flattenDiagnosticMessageText(d.messageText, '\n');
+          if (d.file && d.start !== undefined) {
+            const pos = d.file.getLineAndCharacterOfPosition(d.start);
+            return `Linha ${pos.line + 1}: ${msg}`;
+          }
+          return msg;
+        });
+        outEl.innerHTML = messages.map(m => `<span class="log-line ts-err">✗ TS: ${escapeHtml(m)}</span>`).join('');
+        return;
+      }
+
+      compiledJs = result.outputText;
+    } catch (e) {
+      outEl.innerHTML = `<span class="log-line ts-err">✗ Erro de compilação: ${escapeHtml(e.message)}</span>`;
+      return;
+    }
+
+    const logs = [];
+    const fakeConsole = {
+      log: (...args) => {
+        logs.push(args.map(a => {
+          if (typeof a === 'object' && a !== null) {
+            try { return JSON.stringify(a); } catch(e) { return String(a); }
+          }
+          return String(a);
+        }).join(' '));
+      },
+      error: (...args) => {
+        logs.push('ERR:' + args.join(' '));
+      }
+    };
+
+    try {
+      const fn = new Function('console', compiledJs);
+      fn(fakeConsole);
+
+      if (logs.length === 0) {
+        outEl.innerHTML = '<span class="log-line" style="color:var(--text-dim)">// código rodou, mas nada foi impresso (use console.log)</span>';
+      } else {
+        outEl.innerHTML = logs.map(l => {
+          if (l.startsWith('ERR:')) {
+            return `<span class="log-line err">${escapeHtml(l.slice(4))}</span>`;
+          }
+          return `<span class="log-line">${escapeHtml(l)}</span>`;
+        }).join('');
+      }
+    } catch (e) {
+      outEl.innerHTML = `<span class="log-line err">⚠ ${escapeHtml(e.message)}</span>`;
+    }
+  }
+
+  function escapeHtml(str) {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  document.querySelectorAll('.quiz').forEach(quiz => {
+    const optsWrap = quiz.querySelector('.quiz-options');
+    const answer = parseInt(optsWrap.dataset.answer, 10);
+    const feedback = quiz.querySelector('.quiz-feedback');
+    const buttons = optsWrap.querySelectorAll('.quiz-opt');
+
+    buttons.forEach((btn, idx) => {
+      btn.addEventListener('click', () => {
+        buttons.forEach(b => { b.disabled = true; });
+        if (idx === answer) {
+          btn.classList.add('correct');
+          feedback.textContent = '✓ Isso mesmo! Mandou bem.';
+        } else {
+          btn.classList.add('wrong');
+          buttons[answer].classList.add('correct');
+          feedback.textContent = '✗ Quase — a resposta certa está marcada em verde.';
+        }
+        feedback.classList.add('show');
+      });
+    });
+  });
+
+  window.addEventListener('scroll', () => {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    document.getElementById('progressFill').style.width = pct + '%';
+  });
+</script>
+
+</body>
+</html>
