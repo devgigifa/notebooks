@@ -1,0 +1,1603 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Java Orientado a Objetos — Notebook Interativo</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --bg-panel: #12181f;
+    --bg-code: #0a0e14;
+    --border: #1f2833;
+    --text: #d6deeb;
+    --text-dim: #7a8899;
+    --accent: #7dd3c0;
+    --accent-soft: #2a4a45;
+    --accent2: #f2c574;
+    --pink: #e394dc;
+    --err: #f47174;
+    --ok: #82e08c;
+    --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    --serif: Georgia, 'Times New Roman', serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 1.65;
+  }
+
+  .wrap {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 0 24px 120px;
+  }
+
+  header.hero {
+    padding: 72px 24px 48px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 8px;
+    background:
+      radial-gradient(ellipse at top, rgba(125,211,192,0.08), transparent 60%);
+  }
+
+  .hero-eyebrow {
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+
+  .hero h1 {
+    font-family: var(--serif);
+    font-size: 48px;
+    font-weight: 400;
+    margin: 14px 0 10px;
+    color: #fff;
+  }
+
+  .hero h1 span {
+    color: var(--accent);
+    font-style: italic;
+  }
+
+  .hero p {
+    color: var(--text-dim);
+    font-size: 16px;
+    max-width: 460px;
+    margin: 0 auto;
+  }
+
+  .progress-bar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    height: 3px;
+    background: var(--border);
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--accent), var(--pink));
+    transition: width .15s ease;
+  }
+
+  nav.toc {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin: 32px 0;
+  }
+  nav.toc h3 {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin: 0 0 12px;
+  }
+  nav.toc ol {
+    margin: 0;
+    padding-left: 20px;
+    columns: 2;
+    font-size: 14px;
+  }
+  nav.toc a {
+    color: var(--text);
+    text-decoration: none;
+    display: inline-block;
+    padding: 3px 0;
+  }
+  nav.toc a:hover { color: var(--accent); }
+
+  section.lesson {
+    margin: 64px 0;
+    scroll-margin-top: 20px;
+  }
+
+  .lesson-num {
+    font-family: var(--mono);
+    color: var(--accent);
+    font-size: 14px;
+    letter-spacing: 2px;
+  }
+
+  .lesson h2 {
+    font-family: var(--serif);
+    font-size: 30px;
+    font-weight: 400;
+    color: #fff;
+    margin: 6px 0 20px;
+  }
+
+  .lesson p {
+    font-size: 16px;
+    color: #c2cdd9;
+  }
+
+  .lesson ul, .lesson ol.explain {
+    font-size: 16px;
+    color: #c2cdd9;
+    padding-left: 22px;
+  }
+  .lesson li { margin-bottom: 6px; }
+
+  .callout {
+    border-left: 3px solid var(--accent2);
+    background: rgba(242, 197, 116, 0.06);
+    padding: 12px 18px;
+    border-radius: 0 8px 8px 0;
+    font-size: 14.5px;
+    color: #e8dcc0;
+    margin: 18px 0;
+  }
+  .callout strong { color: var(--accent2); }
+
+  .analogy {
+    border-left: 3px solid var(--pink);
+    background: rgba(227, 148, 220, 0.06);
+    padding: 12px 18px;
+    border-radius: 0 8px 8px 0;
+    font-size: 14.5px;
+    color: #ecd9ea;
+    margin: 18px 0;
+  }
+  .analogy strong { color: var(--pink); }
+
+  /* Code playground */
+  .playground {
+    background: var(--bg-code);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 20px 0;
+  }
+  .playground-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px;
+    background: #0f151c;
+    border-bottom: 1px solid var(--border);
+  }
+  .playground-header .dots { display: flex; gap: 6px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.r { background: #ff5f56; }
+  .dot.y { background: #ffbd2e; }
+  .dot.g { background: #27c93f; }
+  .playground-label {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  textarea.code-input {
+    width: 100%;
+    background: transparent;
+    color: #e6f1ff;
+    font-family: var(--mono);
+    font-size: 14px;
+    line-height: 1.6;
+    border: none;
+    padding: 16px;
+    resize: vertical;
+    min-height: 90px;
+    outline: none;
+    white-space: pre;
+    tab-size: 2;
+  }
+
+  .playground-actions {
+    display: flex;
+    gap: 10px;
+    padding: 0 16px 14px;
+  }
+
+  button.run-btn {
+    background: var(--accent);
+    color: #06231d;
+    border: none;
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 13px;
+    padding: 9px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: transform .1s ease, background .15s ease;
+  }
+  button.run-btn:hover { background: #92e0cf; transform: translateY(-1px); }
+  button.run-btn:active { transform: translateY(0); }
+
+  button.reset-btn {
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 9px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  button.reset-btn:hover { color: var(--text); border-color: var(--text-dim); }
+
+  .output {
+    border-top: 1px solid var(--border);
+    background: #080b10;
+    font-family: var(--mono);
+    font-size: 13.5px;
+    padding: 14px 16px;
+    min-height: 20px;
+    color: var(--ok);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .output:empty::before {
+    content: '// o resultado aparece aqui';
+    color: var(--text-dim);
+  }
+  .output .err { color: var(--err); }
+  .output .log-line { display: block; }
+  .output .log-line + .log-line { margin-top: 2px; }
+
+  /* Quiz */
+  .quiz {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 22px 24px;
+    margin: 22px 0;
+  }
+  .quiz-q {
+    font-size: 15.5px;
+    color: #fff;
+    margin-bottom: 14px;
+  }
+  .quiz-q .qtag {
+    font-family: var(--mono);
+    color: var(--pink);
+    font-size: 12px;
+    letter-spacing: 1px;
+    display: block;
+    margin-bottom: 6px;
+  }
+  .quiz-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .quiz-opt {
+    text-align: left;
+    background: #0f151c;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 11px 14px;
+    border-radius: 7px;
+    font-size: 14.5px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .quiz-opt:hover { border-color: var(--accent); }
+  .quiz-opt.correct { border-color: var(--ok); background: rgba(130,224,140,0.08); color: var(--ok); }
+  .quiz-opt.wrong { border-color: var(--err); background: rgba(244,113,116,0.08); color: var(--err); }
+  .quiz-feedback {
+    margin-top: 12px;
+    font-size: 14px;
+    color: var(--text-dim);
+    display: none;
+  }
+  .quiz-feedback.show { display: block; }
+
+  /* Challenge */
+  .challenge {
+    border: 1px dashed var(--accent);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin: 22px 0;
+    background: rgba(125,211,192,0.04);
+  }
+  .challenge-tag {
+    font-family: var(--mono);
+    color: var(--accent);
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .challenge h4 {
+    margin: 8px 0 10px;
+    color: #fff;
+    font-weight: 500;
+  }
+
+  code.inline {
+    background: rgba(125,211,192,0.1);
+    color: var(--accent);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 13.5px;
+  }
+
+  hr.divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 64px 0 0;
+  }
+
+  footer {
+    text-align: center;
+    padding: 60px 24px 20px;
+    color: var(--text-dim);
+    font-size: 14px;
+  }
+  footer .accent { color: var(--accent); }
+
+  .badge-done {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ok);
+    margin-left: 10px;
+    opacity: 0;
+    transition: opacity .2s ease;
+  }
+  .badge-done.show { opacity: 1; }
+
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 34px; }
+    nav.toc ol { columns: 1; }
+    .lesson h2 { font-size: 24px; }
+  }
+
+  /* ── Extras do notebook Java (mesma linguagem visual) ── */
+  pre.code-view {
+    margin: 0; padding: 16px;
+    font-family: var(--mono); font-size: 14px; line-height: 1.6;
+    color: #e6f1ff; white-space: pre; overflow-x: auto; tab-size: 4;
+  }
+  .kw { color: var(--pink); }
+  .tp { color: var(--accent2); }
+  .fn { color: var(--accent); }
+  .st { color: var(--ok); }
+  .nm { color: #f78c6c; }
+  .cm { color: var(--text-dim); font-style: italic; }
+  .readonly-note {
+    border-top: 1px solid var(--border); background: #080b10;
+    font-family: var(--mono); font-size: 12.5px; color: var(--text-dim);
+    padding: 10px 16px;
+  }
+  .output.thinking { color: var(--text-dim); font-style: italic; }
+  .lesson h3 {
+    font-family: var(--serif); font-weight: 400; font-size: 21px;
+    color: #fff; margin: 36px 0 8px;
+  }
+  .lesson p code, .lesson li code, .callout code, .lesson h2 code {
+    background: rgba(125,211,192,0.1); color: var(--accent);
+    padding: 2px 6px; border-radius: 4px;
+    font-family: var(--mono); font-size: 13.5px;
+  }
+  .text-cell p { margin-top: 0; }
+  .table-wrap {
+    overflow-x: auto; margin: 18px 0;
+    border: 1px solid var(--border); border-radius: 10px; background: var(--bg-panel);
+  }
+  .table-wrap table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .table-wrap th {
+    font-family: var(--mono); font-size: 11.5px; font-weight: 400;
+    letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim);
+    text-align: left; padding: 11px 16px; border-bottom: 1px solid var(--border);
+    background: #0f151c;
+  }
+  .table-wrap td {
+    padding: 9px 16px; border-bottom: 1px solid var(--border);
+    font-family: var(--mono); font-size: 13.5px; color: #c2cdd9;
+  }
+  .table-wrap td:first-child { color: var(--accent); }
+  .table-wrap tr:last-child td { border-bottom: none; }
+  .table-wrap tr:hover td { background: rgba(125,211,192,0.04); }
+
+  /* ── Menu lateral retrátil ── */
+  html { scroll-behavior: smooth; }
+  .side-wrap { position: fixed; top: 0; left: 0; z-index: 60; }
+  .side-trigger {
+    position: fixed; top: 18px; left: 18px; z-index: 62;
+    width: 42px; height: 42px; border-radius: 10px;
+    background: var(--bg-panel); border: 1px solid var(--border);
+    color: var(--accent); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 18px rgba(0,0,0,.35);
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .side-trigger svg { width: 18px; height: 18px; }
+  .side-trigger:hover, .side-wrap.open .side-trigger { border-color: var(--accent); }
+  .side-nav {
+    position: fixed; top: 0; left: 0; z-index: 61;
+    width: 280px; max-width: 85vw; height: 100vh;
+    background: var(--bg-panel); border-right: 1px solid var(--border);
+    box-shadow: 8px 0 32px rgba(0,0,0,.45);
+    padding: 76px 0 28px; overflow-y: auto;
+    transform: translateX(-100%); visibility: hidden;
+    transition: transform .25s ease, visibility .25s;
+  }
+  @media (hover: hover) {
+    .side-wrap:hover .side-nav { transform: none; visibility: visible; }
+  }
+  .side-wrap.open .side-nav { transform: none; visibility: visible; }
+  .side-nav-title {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--text-dim); padding: 0 24px 10px;
+  }
+  .side-group {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--pink); padding: 16px 24px 6px;
+  }
+  .side-nav a {
+    display: flex; gap: 12px; align-items: baseline;
+    padding: 7px 24px; font-size: 14px; color: var(--text);
+    text-decoration: none; border-left: 2px solid transparent;
+    transition: color .15s ease, background .15s ease, border-color .15s ease;
+  }
+  .side-nav a .n { font-family: var(--mono); font-size: 12px; color: var(--text-dim); min-width: 18px; }
+  .side-nav a:hover { color: var(--accent); background: rgba(125,211,192,0.05); }
+  .side-nav a.active { color: var(--accent); border-left-color: var(--accent); background: rgba(125,211,192,0.07); }
+  .side-nav a.active .n { color: var(--accent); }
+  @media (max-width: 600px) {
+    .side-trigger { top: auto; bottom: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<div class="side-wrap" id="sideWrap">
+  <button class="side-trigger" id="sideTrigger" aria-label="Abrir menu de navegação">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+  </button>
+  <nav class="side-nav" aria-label="Navegação">
+    <div class="side-nav-title">Neste notebook</div>
+    <div class="side-group">Fundamentos</div>
+    <a href="#c1" data-target="c1"><span class="n">01</span>Estrutura e Tipos</a>
+    <a href="#c2" data-target="c2"><span class="n">02</span>Controle de Fluxo</a>
+    <a href="#c3" data-target="c3"><span class="n">03</span>Arrays e Strings</a>
+    <a href="#c4" data-target="c4"><span class="n">04</span>Métodos</a>
+    <div class="side-group">Orientação a Objetos</div>
+    <a href="#c5" data-target="c5"><span class="n">05</span>Classes e Objetos</a>
+    <a href="#c6" data-target="c6"><span class="n">06</span>Encapsulamento</a>
+    <a href="#c7" data-target="c7"><span class="n">07</span>Herança</a>
+    <a href="#c8" data-target="c8"><span class="n">08</span>Polimorfismo</a>
+    <a href="#c9" data-target="c9"><span class="n">09</span>Abstração</a>
+    <a href="#c10" data-target="c10"><span class="n">10</span>Interfaces</a>
+    <div class="side-group">Avançado</div>
+    <a href="#c11" data-target="c11"><span class="n">11</span>Exceções</a>
+    <a href="#c12" data-target="c12"><span class="n">12</span>Generics</a>
+    <a href="#c13" data-target="c13"><span class="n">13</span>Collections</a>
+    <a href="#c14" data-target="c14"><span class="n">14</span>Enum</a>
+    <a href="#c15" data-target="c15"><span class="n">15</span>Threads</a>
+    <a href="#c16" data-target="c16"><span class="n">16</span>JDBC</a>
+  </nav>
+</div>
+
+<header class="hero">
+  <div class="hero-eyebrow">Notebook Interativo · Java</div>
+  <h1>Java <span>orientado a objetos</span></h1>
+  <p>Dos fundamentos aos recursos avançados da linguagem. Leia o código, rode os exemplos e acompanhe a saída.</p>
+</header>
+
+<div class="wrap">
+
+  <nav class="toc">
+    <h3>Neste notebook</h3>
+    <ol>
+      <li><a href="#c1">Estrutura e Tipos</a></li>
+      <li><a href="#c2">Controle de Fluxo</a></li>
+      <li><a href="#c3">Arrays e Strings</a></li>
+      <li><a href="#c4">Métodos</a></li>
+      <li><a href="#c5">Classes e Objetos</a></li>
+      <li><a href="#c6">Encapsulamento</a></li>
+      <li><a href="#c7">Herança</a></li>
+      <li><a href="#c8">Polimorfismo</a></li>
+      <li><a href="#c9">Abstração</a></li>
+      <li><a href="#c10">Interfaces</a></li>
+      <li><a href="#c11">Exceções</a></li>
+      <li><a href="#c12">Generics</a></li>
+      <li><a href="#c13">Collections</a></li>
+      <li><a href="#c14">Enum</a></li>
+      <li><a href="#c15">Threads</a></li>
+      <li><a href="#c16">JDBC</a></li>
+    </ol>
+  </nav>
+
+
+
+<!-- CAPÍTULO 1 -->
+<section class="lesson" id="c1">
+  <div class="lesson-num">01</div>
+  <h2>Estrutura Básica, Variáveis e Tipos</h2>
+  <p>Todo programa Java parte de uma classe com um método <code>main</code>. Java é fortemente tipado — cada variável tem um tipo declarado em tempo de compilação.</p>
+
+  <div class="text-cell">
+    <h3>Tipos primitivos</h3>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <tr><th>Tipo</th><th>Bits</th><th>Intervalo / Exemplo</th></tr>
+      <tr><td>byte</td><td>8</td><td>-128 … 127</td></tr>
+      <tr><td>short</td><td>16</td><td>-32768 … 32767</td></tr>
+      <tr><td>int</td><td>32</td><td>-2³¹ … 2³¹-1</td></tr>
+      <tr><td>long</td><td>64</td><td>-2⁶³ … 2⁶³-1  → sufixo L</td></tr>
+      <tr><td>float</td><td>32</td><td>3.14f</td></tr>
+      <tr><td>double</td><td>64</td><td>3.14159 (padrão)</td></tr>
+      <tr><td>char</td><td>16</td><td>'A' (Unicode)</td></tr>
+      <tr><td>boolean</td><td>1</td><td>true / false</td></tr>
+    </table>
+  </div>
+
+  <div class="text-cell">
+    <h3>Olá, Mundo!</h3>
+    <p>O ponto de entrada de qualquer programa Java. O nome do arquivo deve ser igual ao nome da classe pública.</p>
+  </div>
+  <div class="playground" id="cell-1a">
+    <div class="playground-header">
+      <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <span class="playground-label">HelloWorld.java</span>
+    </div>
+    <pre class="code-view"><span class="kw">public class</span> <span class="tp">HelloWorld</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="tp">String</span>[] args) {
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"Olá, Mundo!"</span>);
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"Java é incrível!"</span>);
+    }
+}</pre>
+    <div class="playground-actions">
+      <button class="run-btn" onclick="runCell('cell-1a')">▶ Rodar</button>
+      <button class="reset-btn" onclick="clearCell('cell-1a')">↺ Limpar</button>
+    </div>
+    <div class="output" id="out-cell-1a"></div>
+  </div>
+
+  <div class="text-cell">
+    <h3>Variáveis e operadores</h3>
+    <p>Tipos primitivos vivem na pilha. <code>String</code> é um objeto e usa <code>equals()</code> para comparar valor.</p>
+  </div>
+  <div class="playground" id="cell-1b">
+    <div class="playground-header">
+      <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <span class="playground-label">Variaveis.java</span>
+    </div>
+    <pre class="code-view"><span class="kw">public class</span> <span class="tp">Variaveis</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="tp">String</span>[] args) {
+        <span class="kw">int</span> idade = <span class="nm">25</span>;
+        <span class="kw">double</span> salario = <span class="nm">4500.50</span>;
+        <span class="tp">String</span> nome = <span class="st">"Ana"</span>;
+        <span class="kw">boolean</span> ativo = <span class="kw">true</span>;
+
+        <span class="cm">// Operadores aritméticos</span>
+        <span class="kw">int</span> a = <span class="nm">10</span>, b = <span class="nm">3</span>;
+        <span class="tp">System</span>.out.<span class="fn">println</span>(a + b);    <span class="cm">// 13</span>
+        <span class="tp">System</span>.out.<span class="fn">println</span>(a / b);    <span class="cm">// 3 (inteiro)</span>
+        <span class="tp">System</span>.out.<span class="fn">println</span>(a % b);    <span class="cm">// 1 (resto)</span>
+
+        <span class="cm">// Conversão de tipos</span>
+        <span class="kw">double</span> d = idade;              <span class="cm">// widening automático</span>
+        <span class="kw">int</span> truncado = (<span class="kw">int</span>) <span class="nm">3.9</span>;    <span class="cm">// narrowing → 3</span>
+
+        <span class="tp">System</span>.out.<span class="fn">printf</span>(<span class="st">"%s tem %d anos, salário R$%.2f%n"</span>,
+            nome, idade, salario);
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"Ativo: "</span> + ativo);
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"Truncado: "</span> + truncado);
+    }
+}</pre>
+    <div class="playground-actions">
+      <button class="run-btn" onclick="runCell('cell-1b')">▶ Rodar</button>
+      <button class="reset-btn" onclick="clearCell('cell-1b')">↺ Limpar</button>
+    </div>
+    <div class="output" id="out-cell-1b"></div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- CAPÍTULO 2 -->
+<section class="lesson" id="c2">
+  <div class="lesson-num">02</div>
+  <h2>Controle de Fluxo</h2>
+  <p>Estruturas que controlam a ordem de execução: condicionais e laços.</p>
+
+  <div class="playground" id="cell-2a">
+    <div class="playground-header">
+      <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <span class="playground-label">if / else / switch</span>
+    </div>
+    <pre class="code-view"><span class="kw">public class</span> <span class="tp">Condicionais</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="tp">String</span>[] args) {
+        <span class="kw">int</span> nota = <span class="nm">75</span>;
+
+        <span class="kw">if</span> (nota >= <span class="nm">90</span>) <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"A"</span>);
+        <span class="kw">else if</span> (nota >= <span class="nm">70</span>) <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"B"</span>);
+        <span class="kw">else</span> <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"Reprovado"</span>);
+
+        <span class="cm">// Switch expression (Java 14+)</span>
+        <span class="kw">int</span> dia = <span class="nm">3</span>;
+        <span class="tp">String</span> nomeDia = <span class="kw">switch</span> (dia) {
+            <span class="kw">case</span> <span class="nm">1</span> -> <span class="st">"Segunda"</span>;
+            <span class="kw">case</span> <span class="nm">2</span> -> <span class="st">"Terça"</span>;
+            <span class="kw">case</span> <span class="nm">3</span> -> <span class="st">"Quarta"</span>;
+            <span class="kw">default</span> -> <span class="st">"Outro"</span>;
+        };
+        <span class="tp">System</span>.out.<span class="fn">println</span>(nomeDia);
+    }
+}</pre>
+    <div class="playground-actions">
+      <button class="run-btn" onclick="runCell('cell-2a')">▶ Rodar</button>
+      <button class="reset-btn" onclick="clearCell('cell-2a')">↺ Limpar</button>
+    </div>
+    <div class="output" id="out-cell-2a"></div>
+  </div>
+
+  <div class="playground" id="cell-2b">
+    <div class="playground-header">
+      <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <span class="playground-label">Laços</span>
+    </div>
+    <pre class="code-view"><span class="kw">public class</span> <span class="tp">Lacos</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="tp">String</span>[] args) {
+        <span class="cm">// for clássico</span>
+        <span class="tp">System</span>.out.<span class="fn">print</span>(<span class="st">"for: "</span>);
+        <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i < <span class="nm">5</span>; i++) <span class="tp">System</span>.out.<span class="fn">print</span>(i + <span class="st">" "</span>);
+
+        <span class="cm">// while</span>
+        <span class="tp">System</span>.out.<span class="fn">print</span>(<span class="st">"\nwhile: "</span>);
+        <span class="kw">int</span> j = <span class="nm">0</span>;
+        <span class="kw">while</span> (j < <span class="nm">5</span>) <span class="tp">System</span>.out.<span class="fn">print</span>(j++ + <span class="st">" "</span>);
+
+        <span class="cm">// break / continue</span>
+        <span class="tp">System</span>.out.<span class="fn">print</span>(<span class="st">"\nimpares&lt;7: "</span>);
+        <span class="kw">for</span> (<span class="kw">int</span> k = <span class="nm">0</span>; k < <span class="nm">10</span>; k++) {
+            <span class="kw">if</span> (k == <span class="nm">7</span>) <span class="kw">break</span>;
+            <span class="kw">if</span> (k % <span class="nm">2</span> == <span class="nm">0</span>) <span class="kw">continue</span>;
+            <span class="tp">System</span>.out.<span class="fn">print</span>(k + <span class="st">" "</span>);
+        }
+        <span class="tp">System</span>.out.<span class="fn">println</span>();
+    }
+}</pre>
+    <div class="playground-actions">
+      <button class="run-btn" onclick="runCell('cell-2b')">▶ Rodar</button>
+      <button class="reset-btn" onclick="clearCell('cell-2b')">↺ Limpar</button>
+    </div>
+    <div class="output" id="out-cell-2b"></div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- CAPÍTULO 3 -->
+<section class="lesson" id="c3">
+  <div class="lesson-num">03</div>
+  <h2>Arrays e Strings</h2>
+  <p><code>Array</code> tem tamanho fixo. <code>String</code> é imutável — cada operação cria um novo objeto. Use <code>StringBuilder</code> para concatenações em loop.</p>
+
+  <div class="playground" id="cell-3a">
+    <div class="playground-header">
+      <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <span class="playground-label">Arrays</span>
+    </div>
+    <pre class="code-view"><span class="kw">public class</span> <span class="tp">ArraysDemo</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="tp">String</span>[] args) {
+        <span class="kw">int</span>[] nums = {<span class="nm">5</span>, <span class="nm">10</span>, <span class="nm">15</span>, <span class="nm">20</span>};
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"Tamanho: "</span> + nums.length);
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"Índice 2: "</span> + nums[<span class="nm">2</span>]);
+
+        <span class="cm">// Matriz 2D</span>
+        <span class="kw">int</span>[][] grade = {{<span class="nm">1</span>,<span class="nm">2</span>,<span class="nm">3</span>},{<span class="nm">4</span>,<span class="nm">5</span>,<span class="nm">6</span>},{<span class="nm">7</span>,<span class="nm">8</span>,<span class="nm">9</span>}};
+        <span class="kw">for</span> (<span class="kw">int</span>[] row : grade) {
+            <span class="kw">for</span> (<span class="kw">int</span> v : row) <span class="tp">System</span>.out.<span class="fn">print</span>(v + <span class="st">" "</span>);
+            <span class="tp">System</span>.out.<span class="fn">println</span>();
+        }
+    }
+}</pre>
+    <div class="playground-actions">
+      <button class="run-btn" onclick="runCell('cell-3a')">▶ Rodar</button>
+      <button class="reset-btn" onclick="clearCell('cell-3a')">↺ Limpar</button>
+    </div>
+    <div class="output" id="out-cell-3a"></div>
+  </div>
+
+  <div class="playground" id="cell-3b">
+    <div class="playground-header">
+      <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <span class="playground-label">String e StringBuilder</span>
+    </div>
+    <pre class="code-view"><span class="kw">public class</span> <span class="tp">StringDemo</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="tp">String</span>[] args) {
+        <span class="tp">String</span> s = <span class="st">"  Olá, Java!  "</span>;
+        <span class="tp">System</span>.out.<span class="fn">println</span>(s.<span class="fn">trim</span>());
+        <span class="tp">System</span>.out.<span class="fn">println</span>(s.<span class="fn">toUpperCase</span>());
+        <span class="tp">System</span>.out.<span class="fn">println</span>(s.<span class="fn">contains</span>(<span class="st">"Java"</span>));
+        <span class="tp">System</span>.out.<span class="fn">println</span>(s.<span class="fn">replace</span>(<span class="st">"Java"</span>, <span class="st">"Mundo"</span>));
+
+        <span class="cm">// StringBuilder: eficiente para muitas concatenações</span>
+        <span class="tp">StringBuilder</span> sb = <span class="kw">new</span> <span class="tp">StringBuilder</span>();
+        <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">1</span>; i <= <span class="nm">5</span>; i++) {
+            sb.<span class="fn">append</span>(<span class="st">"item"</span>).append(i);
+            <span class="kw">if</span> (i < <span class="nm">5</span>) sb.<span class="fn">append</span>(<span class="st">", "</span>);
+        }
+        <span class="tp">System</span>.out.<span class="fn">println</span>(sb);
+    }
+}</pre>
+    <div class="playground-actions">
+      <button class="run-btn" onclick="runCell('cell-3b')">▶ Rodar</button>
+      <button class="reset-btn" onclick="clearCell('cell-3b')">↺ Limpar</button>
+    </div>
+    <div class="output" id="out-cell-3b"></div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- CAPÍTULO 4 -->
+<section class="lesson" id="c4">
+  <div class="lesson-num">04</div>
+  <h2>Métodos</h2>
+  <p>Métodos encapsulam comportamento reutilizável. Java passa primitivos <strong>por valor</strong> e referências de objeto também por valor — a referência é copiada, o objeto é compartilhado.</p>
+
+  <div class="playground" id="cell-4a">
+    <div class="playground-header">
+      <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <span class="playground-label">Métodos e Sobrecarga</span>
+    </div>
+    <pre class="code-view"><span class="kw">public class</span> <span class="tp">Metodos</span> {
+
+    <span class="cm">// Sobrecarga: mesmo nome, parâmetros diferentes</span>
+    <span class="kw">static int</span> <span class="fn">area</span>(<span class="kw">int</span> lado) { <span class="kw">return</span> lado * lado; }
+
+    <span class="kw">static double</span> <span class="fn">area</span>(<span class="kw">double</span> base, <span class="kw">double</span> altura) {
+        <span class="kw">return</span> base * altura / <span class="nm">2</span>;
+    }
+
+    <span class="cm">// Passagem por valor vs referência</span>
+    <span class="kw">static void</span> <span class="fn">dobrar</span>(<span class="kw">int</span> x) { x *= <span class="nm">2</span>; } <span class="cm">// não afeta original</span>
+    <span class="kw">static void</span> <span class="fn">dobrarArray</span>(<span class="kw">int</span>[] arr) { arr[<span class="nm">0</span>] *= <span class="nm">2</span>; } <span class="cm">// afeta</span>
+
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="tp">String</span>[] args) {
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="fn">area</span>(<span class="nm">5</span>));
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="fn">area</span>(<span class="nm">4.0</span>, <span class="nm">3.0</span>));
+
+        <span class="kw">int</span> n = <span class="nm">5</span>;
+        <span class="fn">dobrar</span>(n);
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"primitivo após dobrar: "</span> + n);
+
+        <span class="kw">int</span>[] arr = {<span class="nm">5</span>, <span class="nm">10</span>};
+        <span class="fn">dobrarArray</span>(arr);
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"array[0] após dobrar: "</span> + arr[<span class="nm">0</span>]);
+    }
+}</pre>
+    <div class="playground-actions">
+      <button class="run-btn" onclick="runCell('cell-4a')">▶ Rodar</button>
+      <button class="reset-btn" onclick="clearCell('cell-4a')">↺ Limpar</button>
+    </div>
+    <div class="output" id="out-cell-4a"></div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- CAPÍTULO 5 -->
+<section class="lesson" id="c5">
+  <div class="lesson-num">05</div>
+  <h2>Classes e Objetos</h2>
+  <p>Classe é o molde; objeto é a instância. Atributos guardam estado, métodos definem comportamento. <code>this</code> referencia o objeto atual. Membros <code>static</code> pertencem à classe, não a instâncias.</p>
+
+  <div class="playground" id="cell-5a">
+    <div class="playground-header">
+      <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <span class="playground-label">Carro.java — classe completa</span>
+    </div>
+    <pre class="code-view"><span class="kw">public class</span> <span class="tp">Carro</span> {
+    <span class="kw">private</span> <span class="tp">String</span> marca;
+    <span class="kw">private</span> <span class="tp">String</span> modelo;
+    <span class="kw">private int</span> ano;
+    <span class="kw">private double</span> velocidade;
+    <span class="kw">static int</span> totalCarros = <span class="nm">0</span>; <span class="cm">// compartilhado pela classe</span>
+
+    <span class="kw">public</span> <span class="fn">Carro</span>(<span class="tp">String</span> marca, <span class="tp">String</span> modelo, <span class="kw">int</span> ano) {
+        <span class="kw">this</span>.marca = marca;
+        <span class="kw">this</span>.modelo = modelo;
+        <span class="kw">this</span>.ano = ano;
+        totalCarros++;
+    }
+
+    <span class="kw">public void</span> <span class="fn">acelerar</span>(<span class="kw">double</span> delta) { velocidade += delta; }
+    <span class="kw">public void</span> <span class="fn">frear</span>(<span class="kw">double</span> delta) {
+        velocidade = <span class="tp">Math</span>.<span class="fn">max</span>(<span class="nm">0</span>, velocidade - delta);
+    }
+
+    <span class="kw">public</span> <span class="tp">String</span> <span class="fn">toString</span>() {
+        <span class="kw">return</span> marca + <span class="st">" "</span> + modelo + <span class="st">" ("</span> + ano + <span class="st">") — "</span>
+             + velocidade + <span class="st">" km/h"</span>;
+    }
+
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="tp">String</span>[] args) {
+        <span class="tp">Carro</span> c1 = <span class="kw">new</span> <span class="tp">Carro</span>(<span class="st">"Toyota"</span>, <span class="st">"Corolla"</span>, <span class="nm">2022</span>);
+        <span class="tp">Carro</span> c2 = <span class="kw">new</span> <span class="tp">Carro</span>(<span class="st">"Honda"</span>, <span class="st">"Civic"</span>, <span class="nm">2023</span>);
+
+        c1.<span class="fn">acelerar</span>(<span class="nm">60</span>);
+        c1.<span class="fn">frear</span>(<span class="nm">15</span>);
+
+        <span class="tp">System</span>.out.<span class="fn">println</span>(c1);
+        <span class="tp">System</span>.out.<span class="fn">println</span>(c2);
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"Total de carros: "</span> + <span class="tp">Carro</span>.totalCarros);
+    }
+}</pre>
+    <div class="playground-actions">
+      <button class="run-btn" onclick="runCell('cell-5a')">▶ Rodar</button>
+      <button class="reset-btn" onclick="clearCell('cell-5a')">↺ Limpar</button>
+    </div>
+    <div class="output" id="out-cell-5a"></div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- CAPÍTULO 6 -->
+<section class="lesson" id="c6">
+  <div class="lesson-num">06</div>
+  <h2>Encapsulamento</h2>
+  <p>Atributos <code>private</code> são acessados via getters/setters, que permitem validação. Encapsulamento protege o estado interno de alterações indevidas.</p>
+
+  <div class="table-wrap">
+    <table>
+      <tr><th>Modificador</th><th>Mesma classe</th><th>Mesmo pacote</th><th>Subclasse</th><th>Outros</th></tr>
+      <tr><td>private</td><td>✓</td><td>✗</td><td>✗</td><td>✗</td></tr>
+      <tr><td>(padrão)</td><td>✓</td><td>✓</td><td>✗</td><td>✗</td></tr>
+      <tr><td>protected</td><td>✓</td><td>✓</td><td>✓</td><td>✗</td></tr>
+      <tr><td>public</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td></tr>
+    </table>
+  </div>
+
+  <div class="playground" id="cell-6a">
+    <div class="playground-header">
+      <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <span class="playground-label">ContaBancaria.java</span>
+    </div>
+    <pre class="code-view"><span class="kw">public class</span> <span class="tp">ContaBancaria</span> {
+    <span class="kw">private</span> <span class="tp">String</span> titular;
+    <span class="kw">private double</span> saldo;
+
+    <span class="kw">public</span> <span class="fn">ContaBancaria</span>(<span class="tp">String</span> titular, <span class="kw">double</span> saldoInicial) {
+        <span class="kw">this</span>.titular = titular;
+        <span class="kw">this</span>.saldo = saldoInicial > <span class="nm">0</span> ? saldoInicial : <span class="nm">0</span>;
+    }
+
+    <span class="kw">public</span> <span class="tp">String</span> <span class="fn">getTitular</span>() { <span class="kw">return</span> titular; }
+    <span class="kw">public double</span> <span class="fn">getSaldo</span>()   { <span class="kw">return</span> saldo; }
+
+    <span class="kw">public void</span> <span class="fn">depositar</span>(<span class="kw">double</span> valor) {
+        <span class="kw">if</span> (valor > <span class="nm">0</span>) saldo += valor;
+    }
+
+    <span class="kw">public boolean</span> <span class="fn">sacar</span>(<span class="kw">double</span> valor) {
+        <span class="kw">if</span> (valor > <span class="nm">0</span> && valor <= saldo) { saldo -= valor; <span class="kw">return true</span>; }
+        <span class="kw">return false</span>;
+    }
+
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="tp">String</span>[] args) {
+        <span class="tp">ContaBancaria</span> c = <span class="kw">new</span> <span class="tp">ContaBancaria</span>(<span class="st">"Maria"</span>, <span class="nm">1000</span>);
+        c.<span class="fn">depositar</span>(<span class="nm">500</span>);
+        c.<span class="fn">sacar</span>(<span class="nm">200</span>);
+        <span class="tp">System</span>.out.<span class="fn">printf</span>(<span class="st">"Titular: %s | Saldo: R$%.2f%n"</span>,
+            c.<span class="fn">getTitular</span>(), c.<span class="fn">getSaldo</span>());
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"Tentando sacar R$2000: "</span> + c.<span class="fn">sacar</span>(<span class="nm">2000</span>));
+    }
+}</pre>
+    <div class="playground-actions">
+      <button class="run-btn" onclick="runCell('cell-6a')">▶ Rodar</button>
+      <button class="reset-btn" onclick="clearCell('cell-6a')">↺ Limpar</button>
+    </div>
+    <div class="output" id="out-cell-6a"></div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- CAPÍTULO 7 -->
+<section class="lesson" id="c7">
+  <div class="lesson-num">07</div>
+  <h2>Herança</h2>
+  <p><code>extends</code> cria uma hierarquia pai→filho. <code>super</code> acessa membros da superclasse. Java suporta herança simples — uma classe só pode estender uma outra.</p>
+
+  <div class="playground" id="cell-7a">
+    <div class="playground-header">
+      <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <span class="playground-label">Animal → Cachorro → Labrador</span>
+    </div>
+    <pre class="code-view"><span class="kw">class</span> <span class="tp">Animal</span> {
+    <span class="kw">protected</span> <span class="tp">String</span> nome;
+    <span class="kw">public</span> <span class="fn">Animal</span>(<span class="tp">String</span> nome) { <span class="kw">this</span>.nome = nome; }
+    <span class="kw">public void</span> <span class="fn">emitirSom</span>() { <span class="tp">System</span>.out.<span class="fn">println</span>(nome + <span class="st">" faz um som"</span>); }
+    <span class="kw">public</span> <span class="tp">String</span> <span class="fn">toString</span>()  { <span class="kw">return</span> <span class="st">"Animal: "</span> + nome; }
+}
+
+<span class="kw">class</span> <span class="tp">Cachorro</span> <span class="kw">extends</span> <span class="tp">Animal</span> {
+    <span class="kw">private</span> <span class="tp">String</span> raca;
+    <span class="kw">public</span> <span class="fn">Cachorro</span>(<span class="tp">String</span> nome, <span class="tp">String</span> raca) {
+        <span class="kw">super</span>(nome); <span class="cm">// chama construtor do pai</span>
+        <span class="kw">this</span>.raca = raca;
+    }
+    <span class="kw">@Override public void</span> <span class="fn">emitirSom</span>() {
+        <span class="tp">System</span>.out.<span class="fn">println</span>(nome + <span class="st">" late: Au au!"</span>);
+    }
+    <span class="kw">@Override public</span> <span class="tp">String</span> <span class="fn">toString</span>() {
+        <span class="kw">return super</span>.<span class="fn">toString</span>() + <span class="st">" ["</span> + raca + <span class="st">"]"</span>;
+    }
+}
+
+<span class="kw">public class</span> <span class="tp">HerancaDemo</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="tp">String</span>[] args) {
+        <span class="tp">Animal</span> a = <span class="kw">new</span> <span class="tp">Animal</span>(<span class="st">"Genérico"</span>);
+        <span class="tp">Cachorro</span> d = <span class="kw">new</span> <span class="tp">Cachorro</span>(<span class="st">"Rex"</span>, <span class="st">"Labrador"</span>);
+
+        a.<span class="fn">emitirSom</span>();
+        d.<span class="fn">emitirSom</span>();
+        <span class="tp">System</span>.out.<span class="fn">println</span>(a);
+        <span class="tp">System</span>.out.<span class="fn">println</span>(d);
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"Cachorro é Animal? "</span> + (d <span class="kw">instanceof</span> <span class="tp">Animal</span>));
+    }
+}</pre>
+    <div class="playground-actions">
+      <button class="run-btn" onclick="runCell('cell-7a')">▶ Rodar</button>
+      <button class="reset-btn" onclick="clearCell('cell-7a')">↺ Limpar</button>
+    </div>
+    <div class="output" id="out-cell-7a"></div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- CAPÍTULO 8 -->
+<section class="lesson" id="c8">
+  <div class="lesson-num">08</div>
+  <h2>Polimorfismo</h2>
+  <p>Objetos de tipos diferentes respondem ao mesmo método de formas distintas. O método correto é escolhido em <strong>tempo de execução</strong> (binding dinâmico), não em compilação.</p>
+
+  <div class="playground" id="cell-8a">
+    <div class="playground-header">
+      <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <span class="playground-label">Polimorfismo e instanceof</span>
+    </div>
+    <pre class="code-view"><span class="kw">class</span> <span class="tp">Forma</span>  { <span class="kw">double</span> <span class="fn">area</span>() { <span class="kw">return</span> <span class="nm">0</span>; } }
+
+<span class="kw">class</span> <span class="tp">Circulo</span> <span class="kw">extends</span> <span class="tp">Forma</span> {
+    <span class="kw">double</span> raio;
+    <span class="fn">Circulo</span>(<span class="kw">double</span> r) { raio = r; }
+    <span class="kw">@Override double</span> <span class="fn">area</span>() { <span class="kw">return</span> <span class="tp">Math</span>.PI * raio * raio; }
+}
+
+<span class="kw">class</span> <span class="tp">Retangulo</span> <span class="kw">extends</span> <span class="tp">Forma</span> {
+    <span class="kw">double</span> w, h;
+    <span class="fn">Retangulo</span>(<span class="kw">double</span> w, <span class="kw">double</span> h) { <span class="kw">this</span>.w=w; <span class="kw">this</span>.h=h; }
+    <span class="kw">@Override double</span> <span class="fn">area</span>() { <span class="kw">return</span> w * h; }
+}
+
+<span class="kw">public class</span> <span class="tp">PolimorfismoDemo</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="tp">String</span>[] args) {
+        <span class="tp">Forma</span>[] formas = {
+            <span class="kw">new</span> <span class="tp">Circulo</span>(<span class="nm">5</span>),
+            <span class="kw">new</span> <span class="tp">Retangulo</span>(<span class="nm">4</span>, <span class="nm">6</span>),
+            <span class="kw">new</span> <span class="tp">Circulo</span>(<span class="nm">3</span>)
+        };
+
+        <span class="kw">for</span> (<span class="tp">Forma</span> f : formas) {
+            <span class="tp">String</span> tipo = f.<span class="fn">getClass</span>().<span class="fn">getSimpleName</span>();
+            <span class="tp">System</span>.out.<span class="fn">printf</span>(<span class="st">"%s → área = %.2f%n"</span>, tipo, f.<span class="fn">area</span>());
+        }
+
+        <span class="cm">// Downcasting seguro (pattern matching Java 16+)</span>
+        <span class="tp">Forma</span> x = <span class="kw">new</span> <span class="tp">Circulo</span>(<span class="nm">7</span>);
+        <span class="kw">if</span> (x <span class="kw">instanceof</span> <span class="tp">Circulo</span> c) {
+            <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"Raio do círculo: "</span> + c.raio);
+        }
+    }
+}</pre>
+    <div class="playground-actions">
+      <button class="run-btn" onclick="runCell('cell-8a')">▶ Rodar</button>
+      <button class="reset-btn" onclick="clearCell('cell-8a')">↺ Limpar</button>
+    </div>
+    <div class="output" id="out-cell-8a"></div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- CAPÍTULO 9 -->
+<section class="lesson" id="c9">
+  <div class="lesson-num">09</div>
+  <h2>Abstração</h2>
+  <p>Classe abstrata não pode ser instanciada. Define um contrato parcial: métodos abstratos <em>obrigam</em> subclasses a fornecer implementação.</p>
+
+  <div class="playground" id="cell-9a">
+    <div class="playground-header">
+      <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <span class="playground-label">abstract class</span>
+    </div>
+    <pre class="code-view"><span class="kw">abstract class</span> <span class="tp">Veiculo</span> {
+    <span class="kw">protected</span> <span class="tp">String</span> nome;
+    <span class="fn">Veiculo</span>(<span class="tp">String</span> nome) { <span class="kw">this</span>.nome = nome; }
+
+    <span class="kw">abstract double</span> <span class="fn">calcularConsumo</span>(<span class="kw">double</span> km); <span class="cm">// sem corpo</span>
+
+    <span class="kw">void</span> <span class="fn">exibir</span>() { <span class="cm">// método concreto herdado</span>
+        <span class="tp">System</span>.out.<span class="fn">printf</span>(<span class="st">"%s: %.2f L/100km%n"</span>,
+            nome, <span class="fn">calcularConsumo</span>(<span class="nm">100</span>));
+    }
+}
+
+<span class="kw">class</span> <span class="tp">Moto</span> <span class="kw">extends</span> <span class="tp">Veiculo</span> {
+    <span class="kw">double</span> consumoPorKm;
+    <span class="fn">Moto</span>(<span class="tp">String</span> n, <span class="kw">double</span> c) { <span class="kw">super</span>(n); consumoPorKm = c; }
+    <span class="kw">@Override double</span> <span class="fn">calcularConsumo</span>(<span class="kw">double</span> km) { <span class="kw">return</span> consumoPorKm * km; }
+}
+
+<span class="kw">class</span> <span class="tp">Caminhao</span> <span class="kw">extends</span> <span class="tp">Veiculo</span> {
+    <span class="kw">double</span> consumoPorKm;
+    <span class="fn">Caminhao</span>(<span class="tp">String</span> n, <span class="kw">double</span> c) { <span class="kw">super</span>(n); consumoPorKm = c; }
+    <span class="kw">@Override double</span> <span class="fn">calcularConsumo</span>(<span class="kw">double</span> km) { <span class="kw">return</span> consumoPorKm * km; }
+}
+
+<span class="kw">public class</span> <span class="tp">AbstracaoDemo</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="tp">String</span>[] args) {
+        <span class="tp">Veiculo</span>[] frota = {
+            <span class="kw">new</span> <span class="tp">Moto</span>(<span class="st">"Honda CB 500"</span>, <span class="nm">0.04</span>),
+            <span class="kw">new</span> <span class="tp">Caminhao</span>(<span class="st">"Volvo FH"</span>, <span class="nm">0.35</span>)
+        };
+        <span class="kw">for</span> (<span class="tp">Veiculo</span> v : frota) v.<span class="fn">exibir</span>();
+    }
+}</pre>
+    <div class="playground-actions">
+      <button class="run-btn" onclick="runCell('cell-9a')">▶ Rodar</button>
+      <button class="reset-btn" onclick="clearCell('cell-9a')">↺ Limpar</button>
+    </div>
+    <div class="output" id="out-cell-9a"></div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- CAPÍTULO 10 -->
+<section class="lesson" id="c10">
+  <div class="lesson-num">10</div>
+  <h2>Interfaces</h2>
+  <p>Interface é um contrato 100% abstrato. Uma classe pode implementar <em>múltiplas</em> interfaces, resolvendo a limitação da herança simples.</p>
+
+  <div class="playground" id="cell-10a">
+    <div class="playground-header">
+      <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <span class="playground-label">interface + implements</span>
+    </div>
+    <pre class="code-view"><span class="kw">interface</span> <span class="tp">Pagavel</span> {
+    <span class="kw">double</span> <span class="fn">calcularTotal</span>();
+    <span class="kw">default</span> <span class="tp">String</span> <span class="fn">descricao</span>() {
+        <span class="kw">return</span> <span class="st">"Total: R$"</span> + <span class="tp">String</span>.<span class="fn">format</span>(<span class="st">"%.2f"</span>, <span class="fn">calcularTotal</span>());
+    }
+    <span class="kw">static double</span> <span class="fn">comDesconto</span>(<span class="kw">double</span> v, <span class="kw">double</span> pct) { <span class="kw">return</span> v*(1-pct/<span class="nm">100</span>); }
+}
+
+<span class="kw">interface</span> <span class="tp">Imprimivel</span> { <span class="kw">void</span> <span class="fn">imprimir</span>(); }
+
+<span class="kw">class</span> <span class="tp">Pedido</span> <span class="kw">implements</span> <span class="tp">Pagavel</span>, <span class="tp">Imprimivel</span> {
+    <span class="tp">String</span> produto; <span class="kw">int</span> qtd; <span class="kw">double</span> preco;
+    <span class="fn">Pedido</span>(<span class="tp">String</span> p, <span class="kw">int</span> q, <span class="kw">double</span> u) { produto=p; qtd=q; preco=u; }
+    <span class="kw">@Override public double</span> <span class="fn">calcularTotal</span>() { <span class="kw">return</span> qtd * preco; }
+    <span class="kw">@Override public void</span> <span class="fn">imprimir</span>() {
+        <span class="tp">System</span>.out.<span class="fn">println</span>(produto + <span class="st">" x"</span> + qtd + <span class="st">" — "</span> + <span class="fn">descricao</span>());
+    }
+}
+
+<span class="kw">public class</span> <span class="tp">InterfacesDemo</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="tp">String</span>[] args) {
+        <span class="tp">Pedido</span> p = <span class="kw">new</span> <span class="tp">Pedido</span>(<span class="st">"Notebook"</span>, <span class="nm">2</span>, <span class="nm">3500.0</span>);
+        p.<span class="fn">imprimir</span>();
+        <span class="kw">double</span> desc = <span class="tp">Pagavel</span>.<span class="fn">comDesconto</span>(p.<span class="fn">calcularTotal</span>(), <span class="nm">10</span>);
+        <span class="tp">System</span>.out.<span class="fn">printf</span>(<span class="st">"Com 10%% desconto: R$%.2f%n"</span>, desc);
+    }
+}</pre>
+    <div class="playground-actions">
+      <button class="run-btn" onclick="runCell('cell-10a')">▶ Rodar</button>
+      <button class="reset-btn" onclick="clearCell('cell-10a')">↺ Limpar</button>
+    </div>
+    <div class="output" id="out-cell-10a"></div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- CAPÍTULO 11 -->
+<section class="lesson" id="c11">
+  <div class="lesson-num">11</div>
+  <h2>Exceções</h2>
+  <p><code>RuntimeException</code> e subclasses são <strong>unchecked</strong>. As demais são <strong>checked</strong> e devem ser tratadas ou declaradas com <code>throws</code>.</p>
+
+  <div class="playground" id="cell-11a">
+    <div class="playground-header">
+      <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <span class="playground-label">try / catch / finally / custom exception</span>
+    </div>
+    <pre class="code-view"><span class="kw">class</span> <span class="tp">SaldoInsuficienteException</span> <span class="kw">extends</span> <span class="tp">RuntimeException</span> {
+    <span class="kw">double</span> valor;
+    <span class="fn">SaldoInsuficienteException</span>(<span class="kw">double</span> v) {
+        <span class="kw">super</span>(<span class="st">"Saldo insuficiente. Solicitado: R$"</span> + v);
+        valor = v;
+    }
+}
+
+<span class="kw">public class</span> <span class="tp">ExcecaoDemo</span> {
+
+    <span class="kw">static int</span> <span class="fn">dividir</span>(<span class="kw">int</span> a, <span class="kw">int</span> b) {
+        <span class="kw">if</span> (b == <span class="nm">0</span>) <span class="kw">throw new</span> <span class="tp">ArithmeticException</span>(<span class="st">"Divisão por zero!"</span>);
+        <span class="kw">return</span> a / b;
+    }
+
+    <span class="kw">static void</span> <span class="fn">sacar</span>(<span class="kw">double</span> saldo, <span class="kw">double</span> valor) {
+        <span class="kw">if</span> (valor > saldo) <span class="kw">throw new</span> <span class="tp">SaldoInsuficienteException</span>(valor);
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"Saque de R$"</span> + valor + <span class="st">" efetuado."</span>);
+    }
+
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="tp">String</span>[] args) {
+        <span class="kw">try</span> {
+            <span class="fn">dividir</span>(<span class="nm">10</span>, <span class="nm">0</span>);
+        } <span class="kw">catch</span> (<span class="tp">ArithmeticException</span> e) {
+            <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"Erro: "</span> + e.<span class="fn">getMessage</span>());
+        } <span class="kw">finally</span> {
+            <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"finally sempre executa"</span>);
+        }
+
+        <span class="kw">try</span> {
+            <span class="fn">sacar</span>(<span class="nm">500</span>, <span class="nm">200</span>);
+            <span class="fn">sacar</span>(<span class="nm">500</span>, <span class="nm">800</span>); <span class="cm">// lança exceção</span>
+        } <span class="kw">catch</span> (<span class="tp">SaldoInsuficienteException</span> e) {
+            <span class="tp">System</span>.out.<span class="fn">println</span>(e.<span class="fn">getMessage</span>());
+        }
+    }
+}</pre>
+    <div class="playground-actions">
+      <button class="run-btn" onclick="runCell('cell-11a')">▶ Rodar</button>
+      <button class="reset-btn" onclick="clearCell('cell-11a')">↺ Limpar</button>
+    </div>
+    <div class="output" id="out-cell-11a"></div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- CAPÍTULO 12 -->
+<section class="lesson" id="c12">
+  <div class="lesson-num">12</div>
+  <h2>Generics</h2>
+  <p>Generics permitem escrever código type-safe e reutilizável para qualquer tipo, eliminando casts desnecessários e erros em tempo de execução.</p>
+
+  <div class="playground" id="cell-12a">
+    <div class="playground-header">
+      <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <span class="playground-label">Classe genérica e método genérico</span>
+    </div>
+    <pre class="code-view"><span class="kw">class</span> <span class="tp">Par</span>&lt;<span class="tp">A</span>, <span class="tp">B</span>&gt; {
+    <span class="kw">private final</span> A primeiro;
+    <span class="kw">private final</span> B segundo;
+    <span class="fn">Par</span>(A a, B b) { primeiro=a; segundo=b; }
+    A <span class="fn">getPrimeiro</span>() { <span class="kw">return</span> primeiro; }
+    B <span class="fn">getSegundo</span>()  { <span class="kw">return</span> segundo; }
+    <span class="kw">@Override public</span> <span class="tp">String</span> <span class="fn">toString</span>() {
+        <span class="kw">return</span> <span class="st">"("</span> + primeiro + <span class="st">", "</span> + segundo + <span class="st">")"</span>;
+    }
+}
+
+<span class="kw">public class</span> <span class="tp">GenericsDemo</span> {
+
+    <span class="kw">static</span> &lt;<span class="tp">T</span> <span class="kw">extends</span> <span class="tp">Comparable</span>&lt;<span class="tp">T</span>&gt;&gt; T <span class="fn">maximo</span>(T a, T b) {
+        <span class="kw">return</span> a.<span class="fn">compareTo</span>(b) >= <span class="nm">0</span> ? a : b;
+    }
+
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="tp">String</span>[] args) {
+        <span class="tp">Par</span>&lt;<span class="tp">String</span>, <span class="tp">Integer</span>&gt; p = <span class="kw">new</span> <span class="tp">Par</span>&lt;&gt;(<span class="st">"Java"</span>, <span class="nm">21</span>);
+        <span class="tp">System</span>.out.<span class="fn">println</span>(p);
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"Primeiro: "</span> + p.<span class="fn">getPrimeiro</span>());
+
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"Máximo int: "</span> + <span class="fn">maximo</span>(<span class="nm">42</span>, <span class="nm">17</span>));
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"Máximo str: "</span> + <span class="fn">maximo</span>(<span class="st">"banana"</span>, <span class="st">"abacaxi"</span>));
+    }
+}</pre>
+    <div class="playground-actions">
+      <button class="run-btn" onclick="runCell('cell-12a')">▶ Rodar</button>
+      <button class="reset-btn" onclick="clearCell('cell-12a')">↺ Limpar</button>
+    </div>
+    <div class="output" id="out-cell-12a"></div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- CAPÍTULO 13 -->
+<section class="lesson" id="c13">
+  <div class="lesson-num">13</div>
+  <h2>Collections</h2>
+  <p>O Java Collections Framework oferece estruturas de dados genéricas e prontas: <code>List</code> (ordenada, com duplicatas), <code>Set</code> (sem duplicatas), <code>Map</code> (chave/valor).</p>
+
+  <div class="playground" id="cell-13a">
+    <div class="playground-header">
+      <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <span class="playground-label">List, Set, Map e ordenação</span>
+    </div>
+    <pre class="code-view"><span class="kw">import</span> java.util.*;
+
+<span class="kw">public class</span> <span class="tp">CollectionsDemo</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="tp">String</span>[] args) {
+
+        <span class="cm">// List — mantém ordem, permite duplicatas</span>
+        <span class="tp">List</span>&lt;<span class="tp">String</span>&gt; nomes = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(
+            <span class="tp">Arrays</span>.<span class="fn">asList</span>(<span class="st">"Ana"</span>, <span class="st">"Bruno"</span>, <span class="st">"Ana"</span>));
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"List: "</span> + nomes);
+
+        <span class="cm">// Set — sem duplicatas</span>
+        <span class="tp">Set</span>&lt;<span class="tp">String</span>&gt; cidades = <span class="kw">new</span> <span class="tp">HashSet</span>&lt;&gt;(
+            <span class="tp">Arrays</span>.<span class="fn">asList</span>(<span class="st">"SP"</span>, <span class="st">"RJ"</span>, <span class="st">"SP"</span>));
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"Set size: "</span> + cidades.size());
+
+        <span class="cm">// Map — chave/valor</span>
+        <span class="tp">Map</span>&lt;<span class="tp">String</span>, <span class="tp">Integer</span>&gt; estoque = <span class="kw">new</span> <span class="tp">HashMap</span>&lt;&gt;();
+        estoque.<span class="fn">put</span>(<span class="st">"Caneta"</span>, <span class="nm">50</span>);
+        estoque.<span class="fn">put</span>(<span class="st">"Papel"</span>, <span class="nm">200</span>);
+        estoque.<span class="fn">put</span>(<span class="st">"Caneta"</span>, <span class="nm">60</span>); <span class="cm">// substitui</span>
+        estoque.<span class="fn">forEach</span>((k,v) ->
+            <span class="tp">System</span>.out.<span class="fn">println</span>(k + <span class="st">": "</span> + v));
+
+        <span class="cm">// Ordenação com Comparator (lambda)</span>
+        <span class="tp">List</span>&lt;<span class="tp">String</span>&gt; frutas = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(
+            <span class="tp">Arrays</span>.<span class="fn">asList</span>(<span class="st">"banana"</span>, <span class="st">"uva"</span>, <span class="st">"abacaxi"</span>));
+        frutas.<span class="fn">sort</span>(<span class="tp">Comparator</span>.<span class="fn">comparingInt</span>(<span class="tp">String</span>::length));
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"Ordenado por tamanho: "</span> + frutas);
+    }
+}</pre>
+    <div class="playground-actions">
+      <button class="run-btn" onclick="runCell('cell-13a')">▶ Rodar</button>
+      <button class="reset-btn" onclick="clearCell('cell-13a')">↺ Limpar</button>
+    </div>
+    <div class="output" id="out-cell-13a"></div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- CAPÍTULO 14 -->
+<section class="lesson" id="c14">
+  <div class="lesson-num">14</div>
+  <h2>Enum</h2>
+  <p><code>enum</code> define um conjunto fixo de constantes nomeadas. Pode ter atributos, construtores e métodos — é uma classe especial.</p>
+
+  <div class="playground" id="cell-14a">
+    <div class="playground-header">
+      <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <span class="playground-label">DiaSemana enum</span>
+    </div>
+    <pre class="code-view"><span class="kw">enum</span> <span class="tp">DiaSemana</span> {
+    SEGUNDA(<span class="st">"Seg"</span>, <span class="kw">false</span>), TERCA(<span class="st">"Ter"</span>, <span class="kw">false</span>),
+    QUARTA(<span class="st">"Qua"</span>, <span class="kw">false</span>),  QUINTA(<span class="st">"Qui"</span>, <span class="kw">false</span>),
+    SEXTA(<span class="st">"Sex"</span>, <span class="kw">false</span>),   SABADO(<span class="st">"Sáb"</span>, <span class="kw">true</span>),
+    DOMINGO(<span class="st">"Dom"</span>, <span class="kw">true</span>);
+
+    <span class="kw">final</span> <span class="tp">String</span> abrev;
+    <span class="kw">final boolean</span> fds;
+    <span class="fn">DiaSemana</span>(<span class="tp">String</span> a, <span class="kw">boolean</span> f) { abrev=a; fds=f; }
+}
+
+<span class="kw">public class</span> <span class="tp">EnumDemo</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="tp">String</span>[] args) {
+        <span class="kw">for</span> (<span class="tp">DiaSemana</span> d : <span class="tp">DiaSemana</span>.<span class="fn">values</span>()) {
+            <span class="tp">System</span>.out.<span class="fn">printf</span>(<span class="st">"%s (%s) fds=%b ordinal=%d%n"</span>,
+                d.<span class="fn">name</span>(), d.abrev, d.fds, d.<span class="fn">ordinal</span>());
+        }
+
+        <span class="tp">DiaSemana</span> hoje = <span class="tp">DiaSemana</span>.QUARTA;
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"\nHoje: "</span> + hoje.abrev +
+            (hoje.fds ? <span class="st">" 🎉"</span> : <span class="st">" 😐"</span>));
+    }
+}</pre>
+    <div class="playground-actions">
+      <button class="run-btn" onclick="runCell('cell-14a')">▶ Rodar</button>
+      <button class="reset-btn" onclick="clearCell('cell-14a')">↺ Limpar</button>
+    </div>
+    <div class="output" id="out-cell-14a"></div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- CAPÍTULO 15 -->
+<section class="lesson" id="c15">
+  <div class="lesson-num">15</div>
+  <h2>Threads e Concorrência</h2>
+  <p>Uma <strong>thread</strong> é uma linha de execução independente. <code>synchronized</code> garante que apenas uma thread execute um bloco por vez, evitando condições de corrida.</p>
+
+  <div class="playground" id="cell-15a">
+    <div class="playground-header">
+      <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <span class="playground-label">Thread, Runnable e synchronized</span>
+    </div>
+    <pre class="code-view"><span class="kw">public class</span> <span class="tp">ThreadsDemo</span> {
+
+    <span class="kw">static class</span> <span class="tp">Contador</span> {
+        <span class="kw">private int</span> valor = <span class="nm">0</span>;
+        <span class="kw">synchronized void</span> <span class="fn">incrementar</span>() { valor++; }
+        <span class="kw">int</span> <span class="fn">getValor</span>() { <span class="kw">return</span> valor; }
+    }
+
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="tp">String</span>[] args) <span class="kw">throws</span> <span class="tp">InterruptedException</span> {
+
+        <span class="cm">// Criando thread com lambda (Runnable)</span>
+        <span class="tp">Thread</span> t1 = <span class="kw">new</span> <span class="tp">Thread</span>(() ->
+            <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"Thread "</span> + <span class="tp">Thread</span>.<span class="fn">currentThread</span>().<span class="fn">getName</span>() + <span class="st">" rodando"</span>));
+        t1.<span class="fn">start</span>();
+        t1.<span class="fn">join</span>(); <span class="cm">// aguarda terminar</span>
+
+        <span class="cm">// Contador com sincronização</span>
+        <span class="tp">Contador</span> c = <span class="kw">new</span> <span class="tp">Contador</span>();
+        <span class="tp">Thread</span> ta = <span class="kw">new</span> <span class="tp">Thread</span>(() -> { <span class="kw">for</span>(<span class="kw">int</span> i=<span class="nm">0</span>;i<<span class="nm">5000</span>;i++) c.<span class="fn">incrementar</span>(); });
+        <span class="tp">Thread</span> tb = <span class="kw">new</span> <span class="tp">Thread</span>(() -> { <span class="kw">for</span>(<span class="kw">int</span> i=<span class="nm">0</span>;i<<span class="nm">5000</span>;i++) c.<span class="fn">incrementar</span>(); });
+        ta.<span class="fn">start</span>(); tb.<span class="fn">start</span>();
+        ta.<span class="fn">join</span>();  tb.<span class="fn">join</span>();
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"Contador (esperado 10000): "</span> + c.<span class="fn">getValor</span>());
+
+        <span class="cm">// sleep</span>
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"Dormindo 100ms..."</span>);
+        <span class="tp">Thread</span>.<span class="fn">sleep</span>(<span class="nm">100</span>);
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"Acordou!"</span>);
+    }
+}</pre>
+    <div class="playground-actions">
+      <button class="run-btn" onclick="runCell('cell-15a')">▶ Rodar</button>
+      <button class="reset-btn" onclick="clearCell('cell-15a')">↺ Limpar</button>
+    </div>
+    <div class="output" id="out-cell-15a"></div>
+  </div>
+</section>
+
+<!-- ══════════════ CAP 16 — JDBC ══════════════ -->
+<section class="lesson" id="c16">
+  <div class="lesson-num">16</div>
+  <h2>JDBC — Conexão com Banco de Dados</h2>
+  <p>JDBC (Java Database Connectivity) é a API padrão para comunicação com bancos relacionais. Requer um banco real em execução — os exemplos abaixo são para referência.</p>
+
+  <div class="callout">
+    <strong>⚠️ Execução local necessária.</strong> JDBC precisa de um banco de dados real (MySQL, PostgreSQL, etc.) rodando localmente. Os exemplos desta seção são apenas para leitura — copie e rode no seu IDE com o banco configurado.
+  </div>
+
+  <div class="text-cell">
+    <h3>Dependência Maven (MySQL)</h3>
+  </div>
+  <div class="playground">
+    <div class="playground-header">
+      <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <span class="playground-label">pom.xml</span>
+    </div>
+    <pre class="code-view"><span class="kw">&lt;dependency&gt;</span>
+    <span class="kw">&lt;groupId&gt;</span>com.mysql<span class="kw">&lt;/groupId&gt;</span>
+    <span class="kw">&lt;artifactId&gt;</span>mysql-connector-j<span class="kw">&lt;/artifactId&gt;</span>
+    <span class="kw">&lt;version&gt;</span>8.3.0<span class="kw">&lt;/version&gt;</span>
+<span class="kw">&lt;/dependency&gt;</span></pre>
+    <div class="readonly-note">// XML · somente leitura — rode no seu IDE</div>
+  </div>
+
+  <div class="text-cell">
+    <h3>Conexão e consulta básica</h3>
+  </div>
+  <div class="playground">
+    <div class="playground-header">
+      <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <span class="playground-label">JdbcBasico.java</span>
+    </div>
+    <pre class="code-view"><span class="kw">import</span> java.sql.*;
+
+<span class="kw">public class</span> <span class="tp">JdbcBasico</span> {
+    <span class="kw">static final</span> <span class="tp">String</span> URL  = <span class="st">"jdbc:mysql://localhost:3306/loja"</span>;
+    <span class="kw">static final</span> <span class="tp">String</span> USER = <span class="st">"root"</span>;
+    <span class="kw">static final</span> <span class="tp">String</span> PASS = <span class="st">"senha"</span>;
+
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="tp">String</span>[] args) <span class="kw">throws</span> <span class="tp">SQLException</span> {
+        <span class="kw">try</span> (<span class="tp">Connection</span> conn = <span class="tp">DriverManager</span>.<span class="fn">getConnection</span>(URL, USER, PASS);
+             <span class="tp">Statement</span>  st   = conn.<span class="fn">createStatement</span>();
+             <span class="tp">ResultSet</span>  rs   = st.<span class="fn">executeQuery</span>(
+                 <span class="st">"SELECT id, nome, preco FROM produtos"</span>)) {
+
+            <span class="kw">while</span> (rs.<span class="fn">next</span>()) {
+                <span class="tp">System</span>.out.<span class="fn">printf</span>(<span class="st">"%d | %-20s | R$%.2f%n"</span>,
+                    rs.<span class="fn">getInt</span>(<span class="st">"id"</span>),
+                    rs.<span class="fn">getString</span>(<span class="st">"nome"</span>),
+                    rs.<span class="fn">getDouble</span>(<span class="st">"preco"</span>));
+            }
+        }
+    }
+}</pre>
+    <div class="readonly-note">// Java · somente leitura — rode no seu IDE</div>
+  </div>
+
+  <div class="text-cell">
+    <h3>PreparedStatement — a forma segura (evita SQL Injection)</h3>
+  </div>
+  <div class="playground">
+    <div class="playground-header">
+      <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <span class="playground-label">PreparedStatement</span>
+    </div>
+    <pre class="code-view"><span class="tp">String</span> sql = <span class="st">"INSERT INTO produtos (nome, preco) VALUES (?, ?)"</span>;
+<span class="kw">try</span> (<span class="tp">PreparedStatement</span> ps = conn.<span class="fn">prepareStatement</span>(sql,
+        <span class="tp">Statement</span>.RETURN_GENERATED_KEYS)) {
+    ps.<span class="fn">setString</span>(<span class="nm">1</span>, <span class="st">"Caneta Azul"</span>);
+    ps.<span class="fn">setDouble</span>(<span class="nm">2</span>, <span class="nm">2.50</span>);
+    ps.<span class="fn">executeUpdate</span>();
+    <span class="tp">ResultSet</span> keys = ps.<span class="fn">getGeneratedKeys</span>();
+    <span class="kw">if</span> (keys.<span class="fn">next</span>()) <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"ID: "</span> + keys.<span class="fn">getInt</span>(<span class="nm">1</span>));
+}</pre>
+    <div class="readonly-note">// Java · somente leitura — rode no seu IDE</div>
+  </div>
+
+  <div class="text-cell">
+    <h3>Padrão DAO (Data Access Object)</h3>
+    <p>Isola toda a lógica de banco em uma classe dedicada. O restante da aplicação só conhece a interface do DAO — independente do JDBC.</p>
+  </div>
+  <div class="playground">
+    <div class="playground-header">
+      <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <span class="playground-label">ProdutoDAO.java</span>
+    </div>
+    <pre class="code-view"><span class="kw">public class</span> <span class="tp">ProdutoDAO</span> {
+    <span class="kw">private final</span> <span class="tp">Connection</span> conn;
+    <span class="kw">public</span> <span class="fn">ProdutoDAO</span>(<span class="tp">Connection</span> c) { conn = c; }
+
+    <span class="kw">public void</span> <span class="fn">inserir</span>(<span class="tp">Produto</span> p) <span class="kw">throws</span> <span class="tp">SQLException</span> {
+        <span class="kw">try</span> (<span class="tp">PreparedStatement</span> ps = conn.<span class="fn">prepareStatement</span>(
+                <span class="st">"INSERT INTO produtos (nome,preco) VALUES (?,?)"</span>)) {
+            ps.<span class="fn">setString</span>(<span class="nm">1</span>, p.<span class="fn">getNome</span>());
+            ps.<span class="fn">setDouble</span>(<span class="nm">2</span>, p.<span class="fn">getPreco</span>());
+            ps.<span class="fn">executeUpdate</span>();
+        }
+    }
+
+    <span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">Produto</span>&gt; <span class="fn">listarTodos</span>() <span class="kw">throws</span> <span class="tp">SQLException</span> {
+        <span class="tp">List</span>&lt;<span class="tp">Produto</span>&gt; lista = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+        <span class="kw">try</span> (<span class="tp">ResultSet</span> rs = conn.<span class="fn">createStatement</span>()
+                .<span class="fn">executeQuery</span>(<span class="st">"SELECT * FROM produtos"</span>)) {
+            <span class="kw">while</span> (rs.<span class="fn">next</span>())
+                lista.<span class="fn">add</span>(<span class="kw">new</span> <span class="tp">Produto</span>(rs.<span class="fn">getInt</span>(<span class="st">"id"</span>),
+                    rs.<span class="fn">getString</span>(<span class="st">"nome"</span>), rs.<span class="fn">getDouble</span>(<span class="st">"preco"</span>)));
+        }
+        <span class="kw">return</span> lista;
+    }
+}</pre>
+    <div class="readonly-note">// Java · somente leitura — rode no seu IDE</div>
+  </div>
+</section>
+
+  <hr class="divider">
+
+  <footer>
+    Você chegou ao fim. Orientação a objetos é a base de praticamente tudo em Java —
+    <span class="accent">continue praticando</span> criando suas próprias classes.
+  </footer>
+
+</div>
+
+<script>
+  // Saídas pré-definidas de cada célula (Java não roda direto no navegador,
+  // então a execução é simulada com a saída real desses programas)
+  const OUTPUTS = {
+    'cell-1a': `Olá, Mundo!\nJava é incrível!`,
+    'cell-1b': `Ana tem 25 anos, salário R$4500,50\nAtivo: true\nTruncado: 3`,
+    'cell-2a': `B\nQuarta`,
+    'cell-2b': `for: 0 1 2 3 4 \nwhile: 0 1 2 3 4 \nimpares<7: 1 3 5 `,
+    'cell-3a': `Tamanho: 4\nÍndice 2: 15\n1 2 3 \n4 5 6 \n7 8 9 `,
+    'cell-3b': `Olá, Java!\n  OLÁ, JAVA!  \ntrue\n  Olá, Mundo!  \nitem1, item2, item3, item4, item5`,
+    'cell-4a': `25\n6.0\nprimitivo após dobrar: 5\narray[0] após dobrar: 10`,
+    'cell-5a': `Toyota Corolla (2022) — 45.0 km/h\nHonda Civic (2023) — 0.0 km/h\nTotal de carros: 2`,
+    'cell-6a': `Titular: Maria | Saldo: R$1300,00\nTentando sacar R$2000: false`,
+    'cell-7a': `Genérico faz um som\nRex late: Au au!\nAnimal: Genérico\nAnimal: Rex [Labrador]\nCachorro é Animal? true`,
+    'cell-8a': `Circulo → área = 78,54\nRetangulo → área = 24,00\nCirculo → área = 28,27\nRaio do círculo: 7.0`,
+    'cell-9a': `Honda CB 500: 4,00 L/100km\nVolvo FH: 35,00 L/100km`,
+    'cell-10a': `Notebook x2 — Total: R$7000,00\nCom 10% desconto: R$6300,00`,
+    'cell-11a': `Erro: Divisão por zero!\nfinally sempre executa\nSaque de R$200.0 efetuado.\nSaldo insuficiente. Solicitado: R$800.0`,
+    'cell-12a': `(Java, 21)\nPrimeiro: Java\nMáximo int: 42\nMáximo str: banana`,
+    'cell-13a': `List: [Ana, Bruno, Ana]\nSet size: 2\nCaneta: 60\nPapel: 200\nOrdenado por tamanho: [uva, banana, abacaxi]`,
+    'cell-14a': `SEGUNDA (Seg) fds=false ordinal=0\nTERCA (Ter) fds=false ordinal=1\nQUARTA (Qua) fds=false ordinal=2\nQUINTA (Qui) fds=false ordinal=3\nSEXTA (Sex) fds=false ordinal=4\nSABADO (Sáb) fds=true ordinal=5\nDOMINGO (Dom) fds=true ordinal=6\n\nHoje: Qua 😐`,
+    'cell-15a': `Thread Thread-0 rodando\nContador (esperado 10000): 10000\nDormindo 100ms...\nAcordou!`,
+  };
+
+  function escapeHtml(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  async function runCell(id) {
+    const outEl = document.getElementById('out-' + id);
+    const btn = document.querySelector(`#${id} .run-btn`);
+    btn.disabled = true;
+    outEl.classList.add('thinking');
+    outEl.innerHTML = '<span class="log-line">// compilando...</span>';
+
+    const delay = 350 + Math.random() * 350;
+    await new Promise(r => setTimeout(r, delay));
+
+    const output = OUTPUTS[id];
+    outEl.classList.remove('thinking');
+    if (output === undefined) {
+      outEl.innerHTML = '<span class="log-line" style="color:var(--text-dim)">// sem saída definida para esta célula</span>';
+    } else {
+      outEl.innerHTML = output.split('\n')
+        .map(l => `<span class="log-line">${escapeHtml(l) || '&nbsp;'}</span>`).join('');
+    }
+    btn.disabled = false;
+  }
+
+  function clearCell(id) {
+    document.getElementById('out-' + id).innerHTML = '';
+  }
+
+  // Progress bar based on scroll
+  window.addEventListener('scroll', () => {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    document.getElementById('progressFill').style.width = pct + '%';
+  });
+
+  // ── Menu lateral retrátil ──
+  (function () {
+    const wrap = document.getElementById('sideWrap');
+    const trigger = document.getElementById('sideTrigger');
+    const links = [...wrap.querySelectorAll('.side-nav a')];
+    const sections = links.map(a => document.getElementById(a.dataset.target));
+
+    // clique/toque no ícone abre e fecha (útil no celular, onde não existe "passar o mouse")
+    trigger.addEventListener('click', e => { e.stopPropagation(); wrap.classList.toggle('open'); });
+    links.forEach(a => a.addEventListener('click', () => wrap.classList.remove('open')));
+    document.addEventListener('click', e => { if (!wrap.contains(e.target)) wrap.classList.remove('open'); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') wrap.classList.remove('open'); });
+
+    // destaca no menu a seção que está na tela
+    function markActive() {
+      let current = 0;
+      sections.forEach((s, i) => { if (s && s.getBoundingClientRect().top <= 140) current = i; });
+      links.forEach((a, i) => a.classList.toggle('active', i === current));
+    }
+    window.addEventListener('scroll', markActive, { passive: true });
+    markActive();
+  })();
+</script>
+
+</body>
+</html>
