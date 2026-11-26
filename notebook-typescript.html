@@ -213,12 +213,103 @@
     .lesson h2 { font-size: 22px; }
     table.compare { font-size: 12.5px; }
   }
+
+  /* ── Menu lateral retrátil ── */
+  html { scroll-behavior: smooth; }
+  .side-wrap { position: fixed; top: 0; left: 0; z-index: 60; }
+  .side-trigger {
+    position: fixed; top: 18px; left: 18px; z-index: 62;
+    width: 42px; height: 42px; border-radius: 10px;
+    background: var(--bg-panel); border: 1px solid var(--border);
+    color: var(--accent); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 18px rgba(0,0,0,.35);
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .side-trigger svg { width: 18px; height: 18px; }
+  .side-trigger:hover, .side-wrap.open .side-trigger { border-color: var(--accent); }
+  .side-nav {
+    position: fixed; top: 0; left: 0; z-index: 61;
+    width: 280px; max-width: 85vw; height: 100vh;
+    background: var(--bg-panel); border-right: 1px solid var(--border);
+    box-shadow: 8px 0 32px rgba(0,0,0,.45);
+    padding: 76px 0 28px; overflow-y: auto;
+    transform: translateX(-100%); visibility: hidden;
+    transition: transform .25s ease, visibility .25s;
+  }
+  @media (hover: hover) {
+    .side-wrap:hover .side-nav { transform: none; visibility: visible; }
+  }
+  .side-wrap.open .side-nav { transform: none; visibility: visible; }
+  .side-nav-title {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--text-dim); padding: 0 24px 10px;
+  }
+  .side-group {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--pink); padding: 16px 24px 6px;
+  }
+  .side-nav a {
+    display: flex; gap: 12px; align-items: baseline;
+    padding: 7px 24px; font-size: 14px; color: var(--text);
+    text-decoration: none; border-left: 2px solid transparent;
+    transition: color .15s ease, background .15s ease, border-color .15s ease;
+  }
+  .side-nav a .n { font-family: var(--mono); font-size: 12px; color: var(--text-dim); min-width: 18px; }
+  .side-nav a:hover { color: var(--accent); background: rgba(111,168,220,0.07); }
+  .side-nav a.active { color: var(--accent); border-left-color: var(--accent); background: rgba(111,168,220,0.10); }
+  .side-nav a.active .n { color: var(--accent); }
+  @media (max-width: 600px) {
+    .side-trigger { top: auto; bottom: 18px; }
+  }
+
+  /* ── Barra de rolagem do menu ── */
+  .side-nav::-webkit-scrollbar { width: 8px; }
+  .side-nav::-webkit-scrollbar-track { background: transparent; }
+  .side-nav::-webkit-scrollbar-thumb {
+    background: #26324a; border-radius: 10px;
+    border: 2px solid var(--bg-panel);
+  }
+  .side-nav::-webkit-scrollbar-thumb:hover { background: var(--ts-blue); }
+  @supports (-moz-appearance: none) {
+    .side-nav { scrollbar-width: thin; scrollbar-color: #26324a transparent; }
+  }
 </style>
 </head>
 <body>
 
 <div class="loading-banner" id="loadingBanner">carregando compilador TypeScript...</div>
 <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<div class="side-wrap" id="sideWrap">
+  <button class="side-trigger" id="sideTrigger" aria-label="Abrir menu de navegação">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+  </button>
+  <nav class="side-nav" aria-label="Navegação">
+    <div class="side-nav-title">Neste notebook</div>
+    <div class="side-group">Módulo 1 · Fundamentos</div>
+    <a href="#l1" data-target="l1"><span class="n">01</span>Por que TypeScript?</a>
+    <a href="#l2" data-target="l2"><span class="n">02</span>Tipos básicos</a>
+    <a href="#l3" data-target="l3"><span class="n">03</span>Arrays e tuplas</a>
+    <a href="#l4" data-target="l4"><span class="n">04</span>Funções tipadas</a>
+    <div class="side-group">Módulo 2 · Estruturas de tipos</div>
+    <a href="#l5" data-target="l5"><span class="n">05</span>Interfaces</a>
+    <a href="#l6" data-target="l6"><span class="n">06</span>Type aliases</a>
+    <a href="#l7" data-target="l7"><span class="n">07</span>Union e intersection</a>
+    <a href="#l8" data-target="l8"><span class="n">08</span>Literal types</a>
+    <a href="#l9" data-target="l9"><span class="n">09</span>Enums</a>
+    <div class="side-group">Módulo 3 · Tipos especiais</div>
+    <a href="#l10" data-target="l10"><span class="n">10</span>any, unknown, never</a>
+    <a href="#l11" data-target="l11"><span class="n">11</span>Classes tipadas</a>
+    <div class="side-group">Módulo 4 · Avançado</div>
+    <a href="#l12" data-target="l12"><span class="n">12</span>Generics</a>
+    <a href="#l13" data-target="l13"><span class="n">13</span>Utility types</a>
+    <a href="#l14" data-target="l14"><span class="n">14</span>Type narrowing</a>
+    <a href="#l15" data-target="l15"><span class="n">15</span>Decorators</a>
+    <div class="side-group">Módulo final</div>
+    <a href="#l16" data-target="l16"><span class="n">16</span>Desafio final</a>
+  </nav>
+</div>
 
 <header class="hero">
   <div class="hero-eyebrow">Notebook Interativo · TypeScript</div>
@@ -1417,6 +1508,31 @@ console.log(contarItens(tarefas));</textarea>
     const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
     document.getElementById('progressFill').style.width = pct + '%';
   });
+</script>
+
+<script>
+  // ── Menu lateral retrátil ──
+  (function () {
+    const wrap = document.getElementById('sideWrap');
+    const trigger = document.getElementById('sideTrigger');
+    const links = [...wrap.querySelectorAll('.side-nav a')];
+    const sections = links.map(a => document.getElementById(a.dataset.target));
+
+    // clique/toque no ícone abre e fecha (útil no celular, onde não existe "passar o mouse")
+    trigger.addEventListener('click', e => { e.stopPropagation(); wrap.classList.toggle('open'); });
+    links.forEach(a => a.addEventListener('click', () => wrap.classList.remove('open')));
+    document.addEventListener('click', e => { if (!wrap.contains(e.target)) wrap.classList.remove('open'); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') wrap.classList.remove('open'); });
+
+    // destaca no menu a seção que está na tela
+    function markActive() {
+      let current = 0;
+      sections.forEach((s, i) => { if (s && s.getBoundingClientRect().top <= 140) current = i; });
+      links.forEach((a, i) => a.classList.toggle('active', i === current));
+    }
+    window.addEventListener('scroll', markActive, { passive: true });
+    markActive();
+  })();
 </script>
 
 </body>
