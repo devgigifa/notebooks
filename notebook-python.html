@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python do Zero — Notebook Interativo Completo</title>
+<style>
+  :root {
+    --bg: #0b1220;
+    --bg-panel: #101b2e;
+    --bg-code: #08111f;
+    --border: #1e3150;
+    --text: #e4ecf7;
+    --text-dim: #7f95b3;
+    --accent: #7cb8ee;
+    --accent2: #ffb454;
+    --pink: #5aa0d6;
+    --err: #f47174;
+    --ok: #82e08c;
+    --py-yellow: #ffd43b;
+    --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    --serif: Georgia, 'Times New Roman', serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.65; }
+  .wrap { max-width: 840px; margin: 0 auto; padding: 0 24px 120px; }
+
+  header.hero {
+    padding: 72px 24px 48px; text-align: center; border-bottom: 1px solid var(--border); margin-bottom: 8px;
+    background: radial-gradient(ellipse at top, rgba(255,212,59,0.12), transparent 60%);
+  }
+  .hero-eyebrow { font-family: var(--mono); font-size: 13px; letter-spacing: 3px; color: var(--py-yellow); text-transform: uppercase; }
+  .hero h1 { font-family: var(--serif); font-size: 46px; font-weight: 400; margin: 14px 0 10px; color: #fff; }
+  .hero h1 span { color: var(--accent); font-style: italic; }
+  .hero p { color: var(--text-dim); font-size: 16px; max-width: 500px; margin: 0 auto; }
+
+  .progress-bar { position: sticky; top: 0; z-index: 50; height: 3px; background: var(--border); }
+  .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--py-yellow), var(--pink)); transition: width .15s ease; }
+
+  nav.toc { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; margin: 32px 0; }
+  nav.toc h3 { font-family: var(--mono); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); margin: 0 0 12px; }
+  nav.toc ol { margin: 0; padding-left: 20px; columns: 2; font-size: 13.5px; }
+  nav.toc a { color: var(--text); text-decoration: none; display: inline-block; padding: 3px 0; }
+  nav.toc a:hover { color: var(--accent); }
+
+  .module-divider { margin: 80px 0 40px; text-align: center; }
+  .module-divider .tag {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 3px; color: var(--py-yellow);
+    text-transform: uppercase; background: rgba(255,212,59,0.1); padding: 6px 16px;
+    border-radius: 20px; border: 1px solid rgba(255,212,59,0.3);
+  }
+
+  section.lesson { margin: 56px 0; scroll-margin-top: 20px; }
+  .lesson-num { font-family: var(--mono); color: var(--accent); font-size: 14px; letter-spacing: 2px; }
+  .lesson h2 { font-family: var(--serif); font-size: 28px; font-weight: 400; color: #fff; margin: 6px 0 20px; }
+  .lesson p { font-size: 16px; color: #c6d4e8; }
+  .lesson ul, .lesson ol.explain { font-size: 16px; color: #c6d4e8; padding-left: 22px; }
+  .lesson li { margin-bottom: 6px; }
+
+  .callout { border-left: 3px solid var(--accent2); background: rgba(255,180,84,0.07); padding: 12px 18px; border-radius: 0 8px 8px 0; font-size: 14.5px; color: #f0dfbf; margin: 18px 0; }
+  .callout strong { color: var(--accent2); }
+  .analogy { border-left: 3px solid var(--pink); background: rgba(90,160,214,0.07); padding: 12px 18px; border-radius: 0 8px 8px 0; font-size: 14.5px; color: #d3e5f6; margin: 18px 0; }
+  .analogy strong { color: var(--pink); }
+  .tip { border-left: 3px solid var(--py-yellow); background: rgba(255,212,59,0.08); padding: 12px 18px; border-radius: 0 8px 8px 0; font-size: 14.5px; color: #f6efd0; margin: 18px 0; }
+  .tip strong { color: var(--py-yellow); }
+
+  .playground { background: var(--bg-code); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin: 20px 0; }
+  .playground-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; background: #0b1626; border-bottom: 1px solid var(--border); }
+  .playground-header .dots { display: flex; gap: 6px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.r { background: #ff5f56; } .dot.y { background: #ffbd2e; } .dot.g { background: #27c93f; }
+  .playground-label { font-family: var(--mono); font-size: 12px; color: var(--text-dim); }
+
+  textarea.code-input {
+    width: 100%; background: transparent; color: #e8f0fa;
+    font-family: var(--mono); font-size: 14px; line-height: 1.6;
+    border: none; padding: 16px; resize: vertical; min-height: 90px;
+    outline: none; white-space: pre; tab-size: 2;
+  }
+
+  .playground-actions { display: flex; gap: 10px; padding: 0 16px 14px; flex-wrap: wrap; }
+
+  button.run-btn {
+    background: var(--py-yellow); color: #1a1500; border: none;
+    font-family: var(--mono); font-weight: 700; font-size: 13px;
+    padding: 9px 18px; border-radius: 6px; cursor: pointer;
+    transition: transform .1s ease, background .15s ease;
+  }
+  button.run-btn:hover { background: #ffe27a; transform: translateY(-1px); }
+  button.run-btn:active { transform: translateY(0); }
+
+  button.reset-btn {
+    background: transparent; color: var(--text-dim); border: 1px solid var(--border);
+    font-family: var(--mono); font-size: 13px; padding: 9px 14px; border-radius: 6px; cursor: pointer;
+  }
+  button.reset-btn:hover { color: var(--text); border-color: var(--text-dim); }
+
+  .output {
+    border-top: 1px solid var(--border); background: #060e1a;
+    font-family: var(--mono); font-size: 13.5px; padding: 14px 16px;
+    min-height: 20px; color: var(--ok); white-space: pre-wrap; word-break: break-word;
+  }
+  .output:empty::before { content: '// o resultado aparece aqui'; color: var(--text-dim); }
+  .output .err { color: var(--err); }
+  .output .log-line { display: block; }
+  .output .log-line + .log-line { margin-top: 2px; }
+
+  .inline-demo {
+    background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 22px; margin: 20px 0;
+  }
+  .inline-demo label { font-size: 13.5px; color: var(--text-dim); display: block; margin-bottom: 10px; font-family: var(--mono); }
+  .demo-input {
+    font-family: var(--mono); font-size: 14px; padding: 9px 12px; border-radius: 6px;
+    border: 1px solid var(--border); background: var(--bg-code); color: var(--text);
+    width: 100%; margin-bottom: 10px; outline: none;
+  }
+  .demo-input:focus { border-color: var(--accent); }
+  .demo-output {
+    font-size: 13.5px; color: var(--text); padding: 10px 12px; background: var(--bg-code);
+    border-radius: 6px; border: 1px solid var(--border); min-height: 20px; font-family: var(--mono);
+    white-space: pre-wrap;
+  }
+  input[type=range] { width: 100%; margin-bottom: 10px; accent-color: var(--py-yellow); }
+  input[type=number].demo-input { width: 120px; }
+
+  code.inline { background: rgba(124,184,238,0.14); color: var(--accent); padding: 2px 6px; border-radius: 4px; font-family: var(--mono); font-size: 13.5px; }
+
+  hr.divider { border: none; border-top: 1px solid var(--border); margin: 56px 0 0; }
+  footer { text-align: center; padding: 60px 24px 20px; color: var(--text-dim); font-size: 14px; }
+  footer .accent { color: var(--accent); }
+
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 30px; }
+    nav.toc ol { columns: 1; }
+    .lesson h2 { font-size: 22px; }
+  }
+
+  /* ── Menu lateral retrátil ── */
+  html { scroll-behavior: smooth; }
+  .side-wrap { position: fixed; top: 0; left: 0; z-index: 60; }
+  .side-trigger {
+    position: fixed; top: 18px; left: 18px; z-index: 62;
+    width: 42px; height: 42px; border-radius: 10px;
+    background: var(--bg-panel); border: 1px solid var(--border);
+    color: var(--accent); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 18px rgba(0,0,0,.35);
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .side-trigger svg { width: 18px; height: 18px; }
+  .side-trigger:hover, .side-wrap.open .side-trigger { border-color: var(--accent); }
+  .side-nav {
+    position: fixed; top: 0; left: 0; z-index: 61;
+    width: 280px; max-width: 85vw; height: 100vh;
+    background: var(--bg-panel); border-right: 1px solid var(--border);
+    box-shadow: 8px 0 32px rgba(0,0,0,.45);
+    padding: 76px 0 28px; overflow-y: auto;
+    transform: translateX(-100%); visibility: hidden;
+    transition: transform .25s ease, visibility .25s;
+  }
+  @media (hover: hover) {
+    .side-wrap:hover .side-nav { transform: none; visibility: visible; }
+  }
+  .side-wrap.open .side-nav { transform: none; visibility: visible; }
+  .side-nav-title {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--text-dim); padding: 0 24px 10px;
+  }
+  .side-group {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--pink); padding: 16px 24px 6px;
+  }
+  .side-nav a {
+    display: flex; gap: 12px; align-items: baseline;
+    padding: 7px 24px; font-size: 14px; color: var(--text);
+    text-decoration: none; border-left: 2px solid transparent;
+    transition: color .15s ease, background .15s ease, border-color .15s ease;
+  }
+  .side-nav a .n { font-family: var(--mono); font-size: 12px; color: var(--text-dim); min-width: 18px; }
+  .side-nav a:hover { color: var(--accent); background: rgba(124,184,238,0.07); }
+  .side-nav a.active { color: var(--accent); border-left-color: var(--accent); background: rgba(124,184,238,0.10); }
+  .side-nav a.active .n { color: var(--accent); }
+  @media (max-width: 600px) {
+    .side-trigger { top: auto; bottom: 18px; }
+  }
+
+  /* ── extras do notebook Python ── */
+  .lesson table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 14px; display: block; overflow-x: auto; }
+  .lesson th, .lesson td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; white-space: nowrap; }
+  .lesson th { background: var(--bg-panel); color: var(--accent); font-family: var(--mono); font-size: 12px; letter-spacing: 1px; text-transform: uppercase; }
+  .lesson td { color: #c6d4e8; }
+  .lesson h3 { font-family: var(--serif); font-weight: 400; font-size: 21px; color: #fff; margin: 34px 0 10px; }
+  .lesson a, footer a { color: var(--accent); }
+  textarea.code-input { overflow: auto; }
+  .playground-actions { align-items: center; }
+  .engine { margin-left: auto; font-family: var(--mono); font-size: 11.5px; color: var(--text-dim); }
+  .output .dim { color: var(--text-dim); }
+  .output .stdout { color: var(--ok); }
+  .term-input { background: transparent; border: none; border-bottom: 1px solid var(--py-yellow); color: #fff; font-family: var(--mono); font-size: 13.5px; width: 220px; max-width: 70%; outline: none; padding: 0 2px; }
+  .notice { border: 1px solid var(--border); background: var(--bg-panel); border-radius: 10px; padding: 16px 20px; margin: 32px 0 0; font-size: 14.5px; color: #c6d4e8; }
+  .notice strong { color: var(--py-yellow); }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
+  .row .demo-input { width: 120px; margin-bottom: 0; }
+  .demo-input.wide { width: 100%; }
+  .py-status { position: fixed; top: 22px; right: 18px; z-index: 55; font-family: var(--mono); font-size: 12px; padding: 6px 12px; border-radius: 20px; background: var(--bg-panel); border: 1px solid var(--border); color: var(--text-dim); box-shadow: 0 4px 18px rgba(0,0,0,.35); }
+  .py-status.ready { color: var(--ok); }
+  .py-status.error { color: var(--err); border-color: var(--err); }
+  @media (max-width: 600px) { .py-status { top: 12px; right: 10px; font-size: 11px; } }
+</style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+<div class="py-status" id="pyStatus">🐍 carregando o Python…</div>
+
+<div class="side-wrap" id="sideWrap">
+  <button class="side-trigger" id="sideTrigger" aria-label="Abrir menu de navegação">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+  </button>
+  <nav class="side-nav" aria-label="Navegação">
+    <div class="side-nav-title">Neste notebook</div>
+    <div class="side-group">Módulo 1 · Primeiros passos</div>
+    <a href="#s1" data-target="s1"><span class="n">01</span>print e comentários</a>
+    <a href="#s2" data-target="s2"><span class="n">02</span>Variáveis e tipos</a>
+    <a href="#s3" data-target="s3"><span class="n">03</span>Entrada de dados</a>
+    <div class="side-group">Módulo 2 · Operadores e dados</div>
+    <a href="#s4" data-target="s4"><span class="n">04</span>Operadores</a>
+    <a href="#s5" data-target="s5"><span class="n">05</span>Estruturas de dados</a>
+    <a href="#s6" data-target="s6"><span class="n">06</span>Strings</a>
+    <div class="side-group">Módulo 3 · Controle de fluxo</div>
+    <a href="#s7" data-target="s7"><span class="n">07</span>Condicionais</a>
+    <a href="#s8" data-target="s8"><span class="n">08</span>Laços de repetição</a>
+    <a href="#s9" data-target="s9"><span class="n">09</span>Funções</a>
+    <div class="side-group">Módulo 4 · Bibliotecas</div>
+    <a href="#s10" data-target="s10"><span class="n">10</span>random e math</a>
+    <a href="#sf" data-target="sf"><span class="n">★</span>Você chegou ao fim</a>
+  </nav>
+</div>
+
+<header class="hero">
+  <div class="hero-eyebrow">Notebook Interativo · Python</div>
+  <h1><span>Python</span> do zero à prática</h1>
+  <p>Edite qualquer célula e clique em Executar para ver o resultado. Algumas seções têm demos ao vivo — mexa nelas também.</p>
+</header>
+
+<div class="wrap">
+
+  <div class="notice">
+    <strong>Como as células rodam:</strong> este notebook executa Python de verdade, direto no navegador
+    (usando o Pyodide). Na primeira abertura ele baixa o Python (cerca de 13 MB), então precisa de internet e
+    leva alguns segundos — o indicador no canto da tela avisa quando está pronto. Você pode editar o código à
+    vontade (Shift + Enter executa). Quando o código pedir um <code class="inline">input()</code>, aparece um campo na saída para
+    você digitar.
+  </div>
+
+  <nav class="toc">
+    <h3>Neste notebook</h3>
+    <ol>
+      <li><a href="#s1">print e comentários</a></li>
+      <li><a href="#s2">Variáveis e tipos</a></li>
+      <li><a href="#s3">Entrada de dados</a></li>
+      <li><a href="#s4">Operadores</a></li>
+      <li><a href="#s5">Estruturas de dados</a></li>
+      <li><a href="#s6">Strings</a></li>
+      <li><a href="#s7">Condicionais</a></li>
+      <li><a href="#s8">Laços de repetição</a></li>
+      <li><a href="#s9">Funções</a></li>
+      <li><a href="#s10">random e math</a></li>
+      <li><a href="#sf">Você chegou ao fim</a></li>
+    </ol>
+  </nav>
+
+  <div class="module-divider"><span class="tag">Módulo 1 · Primeiros passos</span></div>
+
+  <!-- SEÇÃO 01 -->
+  <section class="lesson" id="s1">
+    <div class="lesson-num">01</div>
+    <h2><code class="inline">print()</code> e comentários</h2>
+    <p>
+      <code class="inline">print()</code> é o comando mais básico do Python: ele <strong>mostra algo na tela</strong>.
+    </p>
+    <p>
+      Comentários são anotações no código que o Python <em>ignora</em> ao executar. Servem só para humanos lerem.
+      Começam com <code class="inline">#</code> (uma linha) ou ficam entre <code class="inline">"""</code> (várias linhas).
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">comentários e print</span>
+      </div>
+      <textarea class="code-input" data-id="c0" rows="10" spellcheck="false"># Isso é um comentário — o Python não executa esta linha
+print("Olá, mundo!")  # isso aqui também é um comentário, depois do código
+
+"""
+Isso é um comentário
+de várias linhas.
+Útil para explicações maiores.
+"""
+
+print("Aprendendo Python é mais fácil do que parece.")</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c0')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('c0')">↺ Restaurar</button>
+        <span class="engine">Shift + Enter executa</span>
+      </div>
+      <div class="output" id="out-c0"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 02 -->
+  <section class="lesson" id="s2">
+    <div class="lesson-num">02</div>
+    <h2>Variáveis e tipos de dados</h2>
+    <p>
+      Uma <strong>variável</strong> é como uma caixa com etiqueta: você guarda um valor nela e usa o nome para
+      acessá-lo depois. Use <code class="inline">type(variavel)</code> para descobrir o tipo de algo.
+    </p>
+    <table>
+      <tr><th>Tipo</th><th>O que é</th><th>Exemplo</th></tr>
+      <tr><td><code class="inline">str</code></td><td>texto (string)</td><td><code class="inline">"João"</code></td></tr>
+      <tr><td><code class="inline">int</code></td><td>número inteiro</td><td><code class="inline">30</code></td></tr>
+      <tr><td><code class="inline">float</code></td><td>número com casas decimais</td><td><code class="inline">75.5</code></td></tr>
+      <tr><td><code class="inline">bool</code></td><td>verdadeiro ou falso</td><td><code class="inline">True</code> / <code class="inline">False</code></td></tr>
+    </table>
+
+    <div class="inline-demo">
+      <label>Digite qualquer valor Python e veja o tipo (o Python de verdade responde):</label>
+      <input class="demo-input wide" id="type-input" placeholder='ex: 42, 3.14, True, "olá", [1, 2]' oninput="liveRun('type-input','type-output',typeCode)">
+      <div class="demo-output" id="type-output">aguardando...</div>
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">variáveis e type()</span>
+      </div>
+      <textarea class="code-input" data-id="c1" rows="9" spellcheck="false">nome = "João"
+idade = 30
+peso = 75.5
+esta_matriculado = True
+
+print(nome, type(nome))
+print(idade, type(idade))
+print(peso, type(peso))
+print(esta_matriculado, type(esta_matriculado))</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c1')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('c1')">↺ Restaurar</button>
+        <span class="engine">Shift + Enter executa</span>
+      </div>
+      <div class="output" id="out-c1"></div>
+    </div>
+    <div class="tip">
+      <strong>Dica:</strong> em Python você não precisa “avisar” o tipo da variável — ele descobre sozinho.
+      Por convenção, nomes de variáveis usam <code class="inline">snake_case</code> (palavras separadas por <code class="inline">_</code>), tudo minúsculo.
+      Para constantes (valores que nunca mudam), usa-se <code class="inline">MAIUSCULO</code>.
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">constantes</span>
+      </div>
+      <textarea class="code-input" data-id="c2" rows="2" spellcheck="false">VARIAVEL_CONSTANTE = "Isso não deveria mudar durante o programa"
+print(VARIAVEL_CONSTANTE)</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c2')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('c2')">↺ Restaurar</button>
+        <span class="engine">Shift + Enter executa</span>
+      </div>
+      <div class="output" id="out-c2"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 03 -->
+  <section class="lesson" id="s3">
+    <div class="lesson-num">03</div>
+    <h2>Entrada de dados com <code class="inline">input()</code></h2>
+    <p>
+      Até agora usamos valores fixos. Com <code class="inline">input()</code>, o programa <strong>pergunta algo ao usuário</strong> e
+      guarda a resposta digitada — sempre como texto (<code class="inline">str</code>). Se você precisa de um número, converte o
+      resultado com <code class="inline">int(...)</code> ou <code class="inline">float(...)</code>.
+    </p>
+    <div class="tip">
+      <strong>Dica:</strong> quando o código chega num <code class="inline">input()</code>, a saída mostra um campo para você digitar.
+      Aperte Enter para enviar a resposta.
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">input() e f-strings</span>
+      </div>
+      <textarea class="code-input" data-id="c3" rows="6" spellcheck="false">nome = input("Digite seu nome: ")
+print(f"Olá, {nome}! Seja bem-vindo(a).")
+
+idade_texto = input("Digite sua idade: ")
+idade = int(idade_texto)  # convertendo texto para número inteiro
+print(f"Daqui a 10 anos você terá {idade + 10} anos.")</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c3')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('c3')">↺ Restaurar</button>
+        <span class="engine">Shift + Enter executa</span>
+      </div>
+      <div class="output" id="out-c3"></div>
+    </div>
+    <div class="tip">
+      <strong>Repare no <code class="inline">f"..."</code>:</strong> é uma <strong>f-string</strong>, a forma mais moderna de montar
+      textos com variáveis dentro. Tudo que estiver entre <code class="inline">{}</code> é calculado e inserido no texto.
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">conversão Celsius → Fahrenheit</span>
+      </div>
+      <textarea class="code-input" data-id="c4" rows="3" spellcheck="false">celsius = float(input("Digite a temperatura em Celsius: "))
+fahrenheit = celsius * 9/5 + 32
+print(f"{celsius}°C equivalem a {fahrenheit}°F")</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c4')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('c4')">↺ Restaurar</button>
+        <span class="engine">Shift + Enter executa</span>
+      </div>
+      <div class="output" id="out-c4"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <div class="module-divider"><span class="tag">Módulo 2 · Operadores e dados</span></div>
+
+  <!-- SEÇÃO 04 -->
+  <section class="lesson" id="s4">
+    <div class="lesson-num">04</div>
+    <h2>Operadores</h2>
+    <p><strong>Aritméticos</strong> — para fazer contas:</p>
+    <table>
+      <tr><th>Operador</th><th>Significado</th><th>Exemplo</th></tr>
+      <tr><td><code class="inline">+</code></td><td>soma</td><td><code class="inline">10 + 5</code> → <code class="inline">15</code></td></tr>
+      <tr><td><code class="inline">-</code></td><td>subtração</td><td><code class="inline">10 - 5</code> → <code class="inline">5</code></td></tr>
+      <tr><td><code class="inline">*</code></td><td>multiplicação</td><td><code class="inline">10 * 5</code> → <code class="inline">50</code></td></tr>
+      <tr><td><code class="inline">/</code></td><td>divisão</td><td><code class="inline">10 / 5</code> → <code class="inline">2.0</code></td></tr>
+      <tr><td><code class="inline">//</code></td><td>divisão inteira</td><td><code class="inline">10 // 3</code> → <code class="inline">3</code></td></tr>
+      <tr><td><code class="inline">%</code></td><td>resto da divisão</td><td><code class="inline">10 % 3</code> → <code class="inline">1</code></td></tr>
+      <tr><td><code class="inline">**</code></td><td>potência</td><td><code class="inline">10 ** 2</code> → <code class="inline">100</code></td></tr>
+    </table>
+
+    <div class="inline-demo">
+      <label>Calculadora ao vivo — digite uma expressão Python:</label>
+      <input class="demo-input wide" id="calc-input" placeholder='ex: 10 // 3 + 2 ** 8 ou "oi" * 3' oninput="liveRun('calc-input','calc-output',calcCode)">
+      <div class="demo-output" id="calc-output">aguardando...</div>
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">operadores aritméticos</span>
+      </div>
+      <textarea class="code-input" data-id="c5" rows="10" spellcheck="false">a = 10
+b = 3
+
+print("Soma:", a + b)
+print("Subtração:", a - b)
+print("Multiplicação:", a * b)
+print("Divisão:", a / b)
+print("Divisão inteira:", a // b)
+print("Resto (módulo):", a % b)
+print("Potência:", a ** b)</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c5')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('c5')">↺ Restaurar</button>
+        <span class="engine">Shift + Enter executa</span>
+      </div>
+      <div class="output" id="out-c5"></div>
+    </div>
+    <p>
+      <strong>Relacionais</strong> — comparam valores e sempre resultam em <code class="inline">True</code> ou <code class="inline">False</code>:
+      <code class="inline">></code>, <code class="inline"><</code>, <code class="inline">>=</code>, <code class="inline"><=</code>, <code class="inline">==</code> (igual), <code class="inline">!=</code> (diferente).
+    </p>
+    <p>
+      <strong>Lógicos</strong> — combinam condições: <code class="inline">and</code> (e), <code class="inline">or</code> (ou), <code class="inline">not</code> (nega).
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">relacionais e lógicos</span>
+      </div>
+      <textarea class="code-input" data-id="c6" rows="7" spellcheck="false">idade = 20
+tem_carteira = True
+
+print(idade &gt;= 18)                     # relacional
+print(idade &gt;= 18 and tem_carteira)    # lógico: as duas precisam ser True
+print(idade &lt; 18 or tem_carteira)      # lógico: basta uma ser True
+print(not tem_carteira)                # lógico: inverte o valor</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c6')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('c6')">↺ Restaurar</button>
+        <span class="engine">Shift + Enter executa</span>
+      </div>
+      <div class="output" id="out-c6"></div>
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">par ou ímpar?</span>
+      </div>
+      <textarea class="code-input" data-id="c7" rows="2" spellcheck="false">numero = 17
+print(numero % 2 == 0)  # True se for par, False se for ímpar</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c7')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('c7')">↺ Restaurar</button>
+        <span class="engine">Shift + Enter executa</span>
+      </div>
+      <div class="output" id="out-c7"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 05 -->
+  <section class="lesson" id="s5">
+    <div class="lesson-num">05</div>
+    <h2>Estruturas de dados</h2>
+    <ul>
+      <li><strong>Lista</strong> <code class="inline">[]</code> — coleção ordenada e <strong>mutável</strong> (pode mudar).</li>
+      <li><strong>Tupla</strong> <code class="inline">()</code> — coleção ordenada e <strong>imutável</strong> (não pode mudar).</li>
+      <li><strong>Dicionário</strong> <code class="inline">{chave: valor}</code> — guarda pares de chave e valor, como uma ficha de cadastro.</li>
+      <li><strong>Set (conjunto)</strong> <code class="inline">{}</code> — coleção sem ordem e <strong>sem itens repetidos</strong>.</li>
+    </ul>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">listas</span>
+      </div>
+      <textarea class="code-input" data-id="c8" rows="5" spellcheck="false">compras = ['maçã', 'banana', 'pão', 'leite']  # lista
+print(compras)
+compras.append('café')   # dá pra adicionar itens
+print(compras)
+print("Primeiro item:", compras[0])   # acessando por posição (começa em 0)</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c8')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('c8')">↺ Restaurar</button>
+        <span class="engine">Shift + Enter executa</span>
+      </div>
+      <div class="output" id="out-c8"></div>
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">dicionários</span>
+      </div>
+      <textarea class="code-input" data-id="c9" rows="9" spellcheck="false">endereco = {
+    "rua": "Rua das Flores",
+    "numero": 123,
+    "cidade": "São Paulo",
+}
+
+print(endereco["cidade"])   # acessando valor pela chave
+endereco["numero"] = 456    # alterando um valor
+print(endereco)</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c9')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('c9')">↺ Restaurar</button>
+        <span class="engine">Shift + Enter executa</span>
+      </div>
+      <div class="output" id="out-c9"></div>
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">sets (conjuntos)</span>
+      </div>
+      <textarea class="code-input" data-id="c10" rows="5" spellcheck="false">conjunto_a = {1, 2, 3, 4, 5}
+conjunto_b = {3, 4, 5, 6, 7}
+
+print(conjunto_a &amp; conjunto_b)  # interseção: o que está nos dois
+print(conjunto_a | conjunto_b)  # união: todos os elementos, sem repetir</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c10')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('c10')">↺ Restaurar</button>
+        <span class="engine">Shift + Enter executa</span>
+      </div>
+      <div class="output" id="out-c10"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 06 -->
+  <section class="lesson" id="s6">
+    <div class="lesson-num">06</div>
+    <h2>Strings e seus métodos</h2>
+    <p>
+      Texto (<code class="inline">str</code>) tem vários métodos prontos para manipulação. Alguns dos mais usados:
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">métodos de string</span>
+      </div>
+      <textarea class="code-input" data-id="c11" rows="8" spellcheck="false">texto = "  Aprendo muito com o Python!  "
+
+print(texto.strip())          # remove espaços das pontas
+print(texto.upper())          # tudo maiúsculo
+print(texto.lower())          # tudo minúsculo
+print(texto.strip().replace("Python", "Django"))  # troca uma parte
+print(texto.strip().split(" "))  # separa em uma lista de palavras
+print(len(texto))             # tamanho do texto (incluindo espaços)</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c11')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('c11')">↺ Restaurar</button>
+        <span class="engine">Shift + Enter executa</span>
+      </div>
+      <div class="output" id="out-c11"></div>
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">find, fatiamento, startswith</span>
+      </div>
+      <textarea class="code-input" data-id="c12" rows="5" spellcheck="false">frase = "não gosto de café"
+print(frase.find("café"))          # posição onde "café" começa
+print(frase[10:12])                # fatiamento: caracteres da posição 10 a 11
+print(frase.startswith("não"))     # verifica início
+print(frase.endswith("café"))      # verifica fim</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c12')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('c12')">↺ Restaurar</button>
+        <span class="engine">Shift + Enter executa</span>
+      </div>
+      <div class="output" id="out-c12"></div>
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">palíndromo</span>
+      </div>
+      <textarea class="code-input" data-id="c13" rows="2" spellcheck="false">palavra = "arara"
+print(palavra == palavra[::-1])  # [::-1] inverte o texto; compara com o original -&gt; palíndromo?</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c13')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('c13')">↺ Restaurar</button>
+        <span class="engine">Shift + Enter executa</span>
+      </div>
+      <div class="output" id="out-c13"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <div class="module-divider"><span class="tag">Módulo 3 · Controle de fluxo</span></div>
+
+  <!-- SEÇÃO 07 -->
+  <section class="lesson" id="s7">
+    <div class="lesson-num">07</div>
+    <h2>Condicionais: <code class="inline">if</code>, <code class="inline">elif</code>, <code class="inline">else</code></h2>
+    <p>
+      Servem para o programa <strong>tomar decisões</strong>: “se isso for verdade, faça aquilo; senão, faça
+      outra coisa”.
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">if / elif / else</span>
+      </div>
+      <textarea class="code-input" data-id="c14" rows="8" spellcheck="false">idade = 15
+
+if idade &gt;= 18:
+    print("Maior de idade")
+elif idade &gt;= 12:
+    print("Adolescente")
+else:
+    print("Criança")</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c14')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('c14')">↺ Restaurar</button>
+        <span class="engine">Shift + Enter executa</span>
+      </div>
+      <div class="output" id="out-c14"></div>
+    </div>
+    <div class="callout">
+      <strong>Atenção à indentação</strong> (espaços no início da linha): em Python, ela não é só estética — é o
+      que define o que está “dentro” do <code class="inline">if</code>. Sempre use 4 espaços (ou um Tab) para indentar.
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">ano bissexto</span>
+      </div>
+      <textarea class="code-input" data-id="c15" rows="6" spellcheck="false">ano = 2024
+
+if (ano % 4 == 0 and ano % 100 != 0) or (ano % 400 == 0):
+    print(f"{ano} é bissexto")
+else:
+    print(f"{ano} não é bissexto")</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c15')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('c15')">↺ Restaurar</button>
+        <span class="engine">Shift + Enter executa</span>
+      </div>
+      <div class="output" id="out-c15"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 08 -->
+  <section class="lesson" id="s8">
+    <div class="lesson-num">08</div>
+    <h2>Laços de repetição: <code class="inline">for</code> e <code class="inline">while</code></h2>
+    <ul>
+      <li><code class="inline">for</code> repete um bloco de código <strong>para cada item</strong> de uma sequência (lista, texto, intervalo de números...).</li>
+      <li><code class="inline">while</code> repete um bloco de código <strong>enquanto uma condição for verdadeira</strong>.</li>
+    </ul>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">for — percorrendo itens</span>
+      </div>
+      <textarea class="code-input" data-id="c16" rows="9" spellcheck="false">compras = ['maçã', 'banana', 'pão']
+
+for item in compras:
+    print("Item:", item)
+
+print("---")
+
+for numero in range(1, 6):   # de 1 até 5
+    print("Número:", numero)</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c16')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('c16')">↺ Restaurar</button>
+        <span class="engine">Shift + Enter executa</span>
+      </div>
+      <div class="output" id="out-c16"></div>
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">while</span>
+      </div>
+      <textarea class="code-input" data-id="c17" rows="7" spellcheck="false">contador = 0
+
+while contador &lt; 5:
+    print("Contador vale:", contador)
+    contador += 1   # o mesmo que: contador = contador + 1
+
+print("Acabou o while!")</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c17')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('c17')">↺ Restaurar</button>
+        <span class="engine">Shift + Enter executa</span>
+      </div>
+      <div class="output" id="out-c17"></div>
+    </div>
+    <div class="callout">
+      <strong>Cuidado com loops infinitos:</strong> se a condição do <code class="inline">while</code> nunca virar <code class="inline">False</code>, o código
+      roda para sempre. Sempre garanta que algo dentro do loop muda a condição. (Aqui, um programa que passa de
+      10 segundos é interrompido automaticamente.)
+    </div>
+
+    <div class="inline-demo">
+      <label>Tabuada interativa (um <code class="inline">for</code> de verdade rodando em Python):</label>
+      <input type="number" class="demo-input" id="tab-input" min="1" max="20" value="7" style="width:120px" oninput="liveRun('tab-input','tab-output',tabCode)">
+      <div class="demo-output" id="tab-output" style="white-space:pre; max-height:180px; overflow-y:auto; font-size:13px;"></div>
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">tabuada do 7</span>
+      </div>
+      <textarea class="code-input" data-id="c18" rows="3" spellcheck="false">numero = 7
+for i in range(1, 11):
+    print(f"{numero} x {i} = {numero * i}")</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c18')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('c18')">↺ Restaurar</button>
+        <span class="engine">Shift + Enter executa</span>
+      </div>
+      <div class="output" id="out-c18"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 09 -->
+  <section class="lesson" id="s9">
+    <div class="lesson-num">09</div>
+    <h2>Funções</h2>
+    <p>
+      Uma função é um <strong>bloco de código reutilizável</strong>, que pode receber entradas (parâmetros) e
+      devolver um resultado (<code class="inline">return</code>). Serve para não repetir o mesmo código várias vezes.
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">funções com return</span>
+      </div>
+      <textarea class="code-input" data-id="c19" rows="13" spellcheck="false">def saudacao():
+    print("Olá, mundo!")
+
+def soma(a, b):
+    return a + b
+
+def eh_par(numero):
+    return numero % 2 == 0
+
+saudacao()
+resultado = soma(10, 5)
+print("Soma:", resultado)
+print("7 é par?", eh_par(7))</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c19')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('c19')">↺ Restaurar</button>
+        <span class="engine">Shift + Enter executa</span>
+      </div>
+      <div class="output" id="out-c19"></div>
+    </div>
+    <div class="tip">
+      <strong>Dica:</strong> parâmetros podem ter um <strong>valor padrão</strong>, usado quando você não informa nada:
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">parâmetro padrão</span>
+      </div>
+      <textarea class="code-input" data-id="c20" rows="5" spellcheck="false">def saudacao_personalizada(nome="visitante"):
+    print(f"Olá, {nome}!")
+
+saudacao_personalizada()          # usa o padrão "visitante"
+saudacao_personalizada("Maria")   # usa "Maria"</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c20')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('c20')">↺ Restaurar</button>
+        <span class="engine">Shift + Enter executa</span>
+      </div>
+      <div class="output" id="out-c20"></div>
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">média de notas</span>
+      </div>
+      <textarea class="code-input" data-id="c21" rows="4" spellcheck="false">def media(nota1, nota2, nota3):
+    return (nota1 + nota2 + nota3) / 3
+
+print(media(7, 8, 9))</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c21')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('c21')">↺ Restaurar</button>
+        <span class="engine">Shift + Enter executa</span>
+      </div>
+      <div class="output" id="out-c21"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <div class="module-divider"><span class="tag">Módulo 4 · Bibliotecas</span></div>
+
+  <!-- SEÇÃO 10 -->
+  <section class="lesson" id="s10">
+    <div class="lesson-num">10</div>
+    <h2>Bibliotecas prontas: <code class="inline">random</code> e <code class="inline">math</code></h2>
+    <p>
+      Python já vem com várias bibliotecas prontas para usar — basta importar com <code class="inline">import</code>. Duas muito úteis
+      para começar:
+    </p>
+    <ul>
+      <li><code class="inline">random</code> — gera números aleatórios, sorteios, embaralhamentos.</li>
+      <li><code class="inline">math</code> — funções e constantes matemáticas (raiz quadrada, potência, arredondamento, <code class="inline">pi</code>, fatorial...).</li>
+    </ul>
+
+    <h3>random</h3>
+    <table>
+      <tr><th>Função</th><th>O que faz</th></tr>
+      <tr><td><code class="inline">random.randint(a, b)</code></td><td>sorteia um inteiro entre <code class="inline">a</code> e <code class="inline">b</code> (incluindo os dois)</td></tr>
+      <tr><td><code class="inline">random.choice(lista)</code></td><td>escolhe um item aleatório da lista</td></tr>
+      <tr><td><code class="inline">random.shuffle(lista)</code></td><td>embaralha a lista (altera ela mesma)</td></tr>
+      <tr><td><code class="inline">random.random()</code></td><td>sorteia um número decimal entre 0 e 1</td></tr>
+    </table>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">random — sorteios</span>
+      </div>
+      <textarea class="code-input" data-id="c22" rows="15" spellcheck="false">import random
+
+# Sorteando um número inteiro entre 1 e 10
+numero_sorteado = random.randint(1, 10)
+print("Número sorteado:", numero_sorteado)
+
+# Escolhendo um item aleatório de uma lista
+frutas = ['maçã', 'banana', 'uva', 'pêra', 'manga']
+fruta_sorteada = random.choice(frutas)
+print("Fruta sorteada:", fruta_sorteada)
+
+# Embaralhando uma lista
+baralho = ['A', 'K', 'Q', 'J', '10']
+random.shuffle(baralho)
+print("Baralho embaralhado:", baralho)</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c22')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('c22')">↺ Restaurar</button>
+        <span class="engine">Shift + Enter executa</span>
+      </div>
+      <div class="output" id="out-c22"></div>
+    </div>
+    <p><strong>Exemplo prático:</strong> um jogo de adivinhação, onde o computador sorteia um número e o jogador tenta acertar.</p>
+    <div class="tip">
+      <strong>Dica:</strong> o número secreto fica o mesmo durante a partida (até você apertar Executar de novo).
+      Tente adivinhar usando só as pistas “maior” e “menor”.
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">jogo de adivinhação</span>
+      </div>
+      <textarea class="code-input" data-id="c23" rows="18" spellcheck="false">import random
+
+numero_secreto = random.randint(1, 100)
+tentativas = 0
+acertou = False
+
+print("Tente adivinhar o número entre 1 e 100!")
+
+while not acertou:
+    palpite = int(input("Seu palpite: "))
+    tentativas += 1
+    if palpite &lt; numero_secreto:
+        print("O número é maior!")
+    elif palpite &gt; numero_secreto:
+        print("O número é menor!")
+    else:
+        acertou = True
+        print(f"Parabéns! Você acertou em {tentativas} tentativas.")</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c23')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('c23')">↺ Restaurar</button>
+        <span class="engine">Shift + Enter executa</span>
+      </div>
+      <div class="output" id="out-c23"></div>
+    </div>
+
+    <h3>math</h3>
+    <table>
+      <tr><th>Função / constante</th><th>O que faz</th></tr>
+      <tr><td><code class="inline">math.sqrt(x)</code></td><td>raiz quadrada de <code class="inline">x</code></td></tr>
+      <tr><td><code class="inline">math.pow(x, y)</code></td><td><code class="inline">x</code> elevado a <code class="inline">y</code></td></tr>
+      <tr><td><code class="inline">math.factorial(x)</code></td><td>fatorial de <code class="inline">x</code></td></tr>
+      <tr><td><code class="inline">math.pi</code></td><td>valor da constante π (3.14159...)</td></tr>
+      <tr><td><code class="inline">math.ceil(x)</code> / <code class="inline">math.floor(x)</code></td><td>arredonda para cima / para baixo</td></tr>
+    </table>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">math — funções e constantes</span>
+      </div>
+      <textarea class="code-input" data-id="c24" rows="8" spellcheck="false">import math
+
+print("Raiz quadrada de 81:", math.sqrt(81))
+print("2 elevado a 10:", math.pow(2, 10))
+print("Fatorial de 5:", math.factorial(5))
+print("Valor de pi:", math.pi)
+print("Arredondando 4.3 para cima:", math.ceil(4.3))
+print("Arredondando 4.7 para baixo:", math.floor(4.7))</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c24')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('c24')">↺ Restaurar</button>
+        <span class="engine">Shift + Enter executa</span>
+      </div>
+      <div class="output" id="out-c24"></div>
+    </div>
+    <p><strong>Exemplo prático:</strong> calculando a área de um círculo, usando <code class="inline">math.pi</code>.</p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">área do círculo</span>
+      </div>
+      <textarea class="code-input" data-id="c25" rows="5" spellcheck="false">import math
+
+raio = float(input("Digite o raio do círculo: "))
+area = math.pi * (raio ** 2)
+print(f"A área do círculo é: {area:.2f}")</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c25')">▶ Executar</button>
+        <button class="reset-btn" onclick="resetCode('c25')">↺ Restaurar</button>
+        <span class="engine">Shift + Enter executa</span>
+      </div>
+      <div class="output" id="out-c25"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO Fim -->
+  <section class="lesson" id="sf">
+    <div class="lesson-num">Fim</div>
+    <h2>Você chegou ao fim!</h2>
+    <p>Recapitulando o que você aprendeu:</p>
+    <ul>
+      <li><code class="inline">print()</code>, comentários e variáveis</li>
+      <li>Tipos de dados: <code class="inline">str</code>, <code class="inline">int</code>, <code class="inline">float</code>, <code class="inline">bool</code></li>
+      <li>Entrada de dados com <code class="inline">input()</code></li>
+      <li>Operadores aritméticos, relacionais e lógicos</li>
+      <li>Listas, tuplas, dicionários e sets</li>
+      <li>Manipulação de strings</li>
+      <li>Condicionais (<code class="inline">if</code>/<code class="inline">elif</code>/<code class="inline">else</code>)</li>
+      <li>Laços (<code class="inline">for</code>/<code class="inline">while</code>)</li>
+      <li>Funções</li>
+      <li>As bibliotecas <code class="inline">random</code> e <code class="inline">math</code></li>
+      <li>Um projeto prático juntando tudo</li>
+    </ul>
+  </section>
+
+  <hr class="divider">
+
+  <footer>
+    Bons estudos! <span class="accent">Continue praticando</span> — altere os exemplos, quebre o código de propósito
+    e veja o que o Python responde. É assim que se aprende.
+  </footer>
+
+</div>
+
+<script>
+
+  /* ═════════ Python de verdade (Pyodide) rodando num Web Worker ═════════ */
+  const PY_BASE = 'https://cdn.jsdelivr.net/npm/pyodide@0.29.5/';
+  const TIMEOUT_MS = 10000;
+
+  function workerMain() {
+    let py = null;
+    const dec = new TextDecoder(), enc = new TextEncoder();
+    self.onmessage = async (ev) => {
+      const m = ev.data;
+      if (m.type === 'init') {
+        try {
+          importScripts(m.base + 'pyodide.js');
+          py = await loadPyodide({ indexURL: m.base });
+          self.postMessage({ type: 'ready' });
+        } catch (e) { self.postMessage({ type: 'initerror', message: String((e && e.message) || e) }); }
+        return;
+      }
+      if (m.type === 'run') {
+        const bytes = [], q = m.inputs.slice();
+        let need = false, err = null;
+        py.setStdout({ raw: b => bytes.push(b & 255) });
+        py.setStderr({ raw: b => bytes.push(b & 255) });
+        py.setStdin({ stdin: () => {
+          if (q.length) { const l = q.shift(); for (const b of enc.encode(l + '\n')) bytes.push(b); return l; }
+          need = true; return null;
+        } });
+        try {
+          py.runPython('import random as _r\n_r.seed(' + (m.seed | 0) + ')');
+          const g = py.globals.get('dict')();
+          try { await py.runPythonAsync(m.code, { globals: g }); } finally { g.destroy(); }
+        } catch (e) { err = String((e && e.message) || e); }
+        self.postMessage({ type: 'result', out: dec.decode(new Uint8Array(bytes)), err, need });
+      }
+    };
+  }
+
+  let worker = null, readyP = null, readyRes, readyRej, pending = null, chain = Promise.resolve(), isReady = false;
+  const statusEl = document.getElementById('pyStatus');
+  function setStatus(kind, msg) {
+    statusEl.className = 'py-status' + (kind === 'ready' ? ' ready' : kind === 'error' ? ' error' : '');
+    statusEl.textContent = kind === 'ready' ? '🐍 Python pronto'
+      : kind === 'error' ? '⚠ Python não carregou'
+      : kind === 'restart' ? '🐍 reiniciando o Python…' : '🐍 carregando o Python…';
+    if (msg) statusEl.title = msg;
+  }
+  function startWorker() {
+    isReady = false;
+    setStatus('loading');
+    readyP = new Promise((res, rej) => { readyRes = res; readyRej = rej; });
+    readyP.catch(() => {});
+    try {
+      const url = URL.createObjectURL(new Blob(['(' + workerMain.toString() + ')()'], { type: 'text/javascript' }));
+      worker = new Worker(url);
+    } catch (e) { setStatus('error', String(e)); readyRej(e); return; }
+    worker.onmessage = ev => {
+      const m = ev.data;
+      if (m.type === 'ready') { isReady = true; setStatus('ready'); readyRes(); }
+      else if (m.type === 'initerror') { setStatus('error', m.message); readyRej(new Error(m.message)); }
+      else if (m.type === 'result' && pending) pending(m);
+    };
+    worker.onerror = ev => { if (!isReady) { setStatus('error', ev.message); readyRej(new Error(ev.message || 'worker')); } };
+    worker.postMessage({ type: 'init', base: PY_BASE });
+  }
+
+  function runPy(code, inputs, seed, timeout) {
+    const job = chain.then(async () => {
+      await readyP;
+      return new Promise(resolve => {
+        const t = setTimeout(() => {
+          worker.terminate(); pending = null; setStatus('restart'); startWorker(); resolve({ timeout: true });
+        }, timeout || TIMEOUT_MS);
+        pending = m => { clearTimeout(t); pending = null; resolve(m); };
+        worker.postMessage({ type: 'run', code, inputs, seed });
+      });
+    });
+    chain = job.catch(() => {});
+    return job;
+  }
+
+  const escapeHtml = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  function cleanErr(e) {
+    const lines = e.split('\n');
+    const i = lines.findIndex(l => l.includes('File "<exec>"'));
+    if (i < 0) return e.trim();
+    return ['Traceback (most recent call last):', ...lines.slice(i)].join('\n').replace(/File "<exec>"/g, 'File "<célula>"').trim();
+  }
+
+  /* ── células ── */
+  const originals = {}, sessions = {};
+  document.querySelectorAll('.code-input').forEach(ta => {
+    originals[ta.dataset.id] = ta.value;
+    const fit = () => { ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight + 4, 560) + 'px'; };
+    fit(); ta.addEventListener('input', fit);
+    ta.addEventListener('keydown', e => {
+      const id = ta.dataset.id;
+      if (e.key === 'Enter' && (e.shiftKey || e.ctrlKey || e.metaKey)) { e.preventDefault(); runCode(id); return; }
+      if (e.key === 'Tab' && !e.shiftKey) {
+        e.preventDefault();
+        const s = ta.selectionStart, t = ta.selectionEnd;
+        ta.value = ta.value.slice(0, s) + '    ' + ta.value.slice(t);
+        ta.selectionStart = ta.selectionEnd = s + 4; fit();
+      }
+    });
+  });
+
+  function resetCode(id) {
+    const ta = document.querySelector(`.code-input[data-id="${id}"]`);
+    ta.value = originals[id]; ta.dispatchEvent(new Event('input'));
+    document.getElementById('out-' + id).innerHTML = '';
+    delete sessions[id];
+  }
+
+  async function runCode(id, fresh = true) {
+    if (fresh) sessions[id] = { inputs: [], seed: Math.floor(Math.random() * 2147483647) };
+    const s = sessions[id];
+    const ta = document.querySelector(`.code-input[data-id="${id}"]`);
+    const outEl = document.getElementById('out-' + id);
+    if (!isReady) outEl.innerHTML = '<span class="dim">⏳ carregando o Python (só na primeira vez)…</span>';
+    let r;
+    try { r = await runPy(ta.value, s.inputs, s.seed); }
+    catch (e) {
+      outEl.innerHTML = '<span class="log-line err">⚠ Não foi possível carregar o Python. Verifique sua conexão com a internet e recarregue a página.</span>';
+      return;
+    }
+    if (r.timeout) {
+      outEl.innerHTML = `<span class="log-line err">⏱ O programa passou de ${TIMEOUT_MS / 1000} segundos e foi interrompido (laço infinito?).</span>`;
+      return;
+    }
+    let h = r.out ? `<span class="stdout">${escapeHtml(r.out)}</span>` : '';
+    if (r.need) {
+      outEl.innerHTML = h + '<input class="term-input" spellcheck="false" autocomplete="off" aria-label="Digite a entrada e aperte Enter">';
+      const inp = outEl.querySelector('input');
+      inp.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); s.inputs.push(inp.value); runCode(id, false); }
+      });
+      inp.focus({ preventScroll: true });
+      return;
+    }
+    if (r.err) h += `<span class="log-line err">${escapeHtml(cleanErr(r.err))}</span>`;
+    else if (!r.out) h = '<span class="log-line dim">// executado sem saída (use print)</span>';
+    outEl.innerHTML = h;
+  }
+
+  /* ── demos ao vivo (usam o mesmo Python) ── */
+  const typeCode = v => `_v = eval(${JSON.stringify(v)})\nprint('tipo:', type(_v).__name__, '  valor:', repr(_v))`;
+  const calcCode = v => `_v = eval(${JSON.stringify(v)})\nprint('→', repr(_v), ' (tipo:', type(_v).__name__ + ')')`;
+  const tabCode = v => {
+    const n = parseInt(v, 10);
+    return `n = ${isNaN(n) ? 0 : n}\nfor i in range(1, 11):\n    print(f"{n} x {i} = {n * i}")`;
+  };
+  const liveTimers = {}, liveSeq = {};
+  function liveRun(inId, outId, makeCode) {
+    const val = document.getElementById(inId).value, out = document.getElementById(outId);
+    clearTimeout(liveTimers[outId]);
+    if (!String(val).trim()) { out.textContent = 'aguardando...'; return; }
+    const mine = liveSeq[outId] = (liveSeq[outId] || 0) + 1;
+    liveTimers[outId] = setTimeout(async () => {
+      if (!isReady) out.textContent = 'carregando o Python…';
+      let r;
+      try { r = await runPy(makeCode(val), [], 1, 4000); } catch (e) { if (mine === liveSeq[outId]) out.textContent = 'Python indisponível (sem internet?)'; return; }
+      if (mine !== liveSeq[outId]) return;
+      out.textContent = r.timeout ? 'demorou demais...' : r.err ? 'expressão incompleta ou inválida...' : r.out.trim();
+    }, 300);
+  }
+
+  startWorker();
+  liveRun('tab-input', 'tab-output', tabCode);
+
+
+  window.addEventListener('scroll', () => {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    document.getElementById('progressFill').style.width = pct + '%';
+  });
+
+  // ── Menu lateral retrátil ──
+  (function () {
+    const wrap = document.getElementById('sideWrap');
+    const trigger = document.getElementById('sideTrigger');
+    const links = [...wrap.querySelectorAll('.side-nav a')];
+    const sections = links.map(a => document.getElementById(a.dataset.target));
+
+    // clique/toque no ícone abre e fecha (útil no celular, onde não existe "passar o mouse")
+    trigger.addEventListener('click', e => { e.stopPropagation(); wrap.classList.toggle('open'); });
+    links.forEach(a => a.addEventListener('click', () => wrap.classList.remove('open')));
+    document.addEventListener('click', e => { if (!wrap.contains(e.target)) wrap.classList.remove('open'); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') wrap.classList.remove('open'); });
+
+    // destaca no menu a seção que está na tela
+    function markActive() {
+      let current = 0;
+      sections.forEach((s, i) => { if (s && s.getBoundingClientRect().top <= 140) current = i; });
+      links.forEach((a, i) => a.classList.toggle('active', i === current));
+    }
+    window.addEventListener('scroll', markActive, { passive: true });
+    markActive();
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,3750 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C# — Guia Completo .NET · Notebook Interativo</title>
+<style>
+  :root {
+    --bg: #0e0a1d;
+    --bg-panel: #151030;
+    --bg-code: #0a0716;
+    --border: #2b2257;
+    --text: #e9e4fb;
+    --text-dim: #8c82b8;
+    --accent: #b79cff;
+    --accent2: #f2c574;
+    --pink: #8f6bff;
+    --err: #f47174;
+    --ok: #82e08c;
+    --cs-purple: #9b6dff;
+    --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    --serif: Georgia, 'Times New Roman', serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.65; }
+  .wrap { max-width: 840px; margin: 0 auto; padding: 0 24px 120px; }
+
+  header.hero {
+    padding: 72px 24px 48px; text-align: center; border-bottom: 1px solid var(--border); margin-bottom: 8px;
+    background: radial-gradient(ellipse at top, rgba(155,109,255,0.12), transparent 60%);
+  }
+  .hero-eyebrow { font-family: var(--mono); font-size: 13px; letter-spacing: 3px; color: var(--cs-purple); text-transform: uppercase; }
+  .hero h1 { font-family: var(--serif); font-size: 46px; font-weight: 400; margin: 14px 0 10px; color: #fff; }
+  .hero h1 span { color: var(--accent); font-style: italic; }
+  .hero p { color: var(--text-dim); font-size: 16px; max-width: 500px; margin: 0 auto; }
+
+  .progress-bar { position: sticky; top: 0; z-index: 50; height: 3px; background: var(--border); }
+  .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--cs-purple), var(--pink)); transition: width .15s ease; }
+
+  nav.toc { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; margin: 32px 0; }
+  nav.toc h3 { font-family: var(--mono); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); margin: 0 0 12px; }
+  nav.toc ol { margin: 0; padding-left: 20px; columns: 2; font-size: 13.5px; }
+  nav.toc a { color: var(--text); text-decoration: none; display: inline-block; padding: 3px 0; }
+  nav.toc a:hover { color: var(--accent); }
+
+  .module-divider { margin: 80px 0 40px; text-align: center; }
+  .module-divider .tag {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 3px; color: var(--cs-purple);
+    text-transform: uppercase; background: rgba(155,109,255,0.1); padding: 6px 16px;
+    border-radius: 20px; border: 1px solid rgba(155,109,255,0.3);
+  }
+
+  section.lesson { margin: 56px 0; scroll-margin-top: 20px; }
+  .lesson-num { font-family: var(--mono); color: var(--accent); font-size: 14px; letter-spacing: 2px; }
+  .lesson h2 { font-family: var(--serif); font-size: 28px; font-weight: 400; color: #fff; margin: 6px 0 20px; }
+  .lesson p { font-size: 16px; color: #cfc8ea; }
+  .lesson ul, .lesson ol.explain { font-size: 16px; color: #cfc8ea; padding-left: 22px; }
+  .lesson li { margin-bottom: 6px; }
+
+  .callout { border-left: 3px solid var(--accent2); background: rgba(242,197,116,0.07); padding: 12px 18px; border-radius: 0 8px 8px 0; font-size: 14.5px; color: #e8dcc0; margin: 18px 0; }
+  .callout strong { color: var(--accent2); }
+  .analogy { border-left: 3px solid var(--pink); background: rgba(143,107,255,0.07); padding: 12px 18px; border-radius: 0 8px 8px 0; font-size: 14.5px; color: #e2dcf8; margin: 18px 0; }
+  .analogy strong { color: var(--pink); }
+  .tip { border-left: 3px solid var(--cs-purple); background: rgba(155,109,255,0.08); padding: 12px 18px; border-radius: 0 8px 8px 0; font-size: 14.5px; color: #e9e0ff; margin: 18px 0; }
+  .tip strong { color: var(--cs-purple); }
+
+  .playground { background: var(--bg-code); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin: 20px 0; }
+  .playground-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; background: #0d0a22; border-bottom: 1px solid var(--border); }
+  .playground-header .dots { display: flex; gap: 6px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.r { background: #ff5f56; } .dot.y { background: #ffbd2e; } .dot.g { background: #27c93f; }
+  .playground-label { font-family: var(--mono); font-size: 12px; color: var(--text-dim); }
+
+  textarea.code-input {
+    width: 100%; background: transparent; color: #efeaff;
+    font-family: var(--mono); font-size: 14px; line-height: 1.6;
+    border: none; padding: 16px; resize: vertical; min-height: 90px;
+    outline: none; white-space: pre; tab-size: 2;
+  }
+
+  .playground-actions { display: flex; gap: 10px; padding: 0 16px 14px; flex-wrap: wrap; }
+
+  button.run-btn {
+    background: var(--cs-purple); color: #120826; border: none;
+    font-family: var(--mono); font-weight: 700; font-size: 13px;
+    padding: 9px 18px; border-radius: 6px; cursor: pointer;
+    transition: transform .1s ease, background .15s ease;
+  }
+  button.run-btn:hover { background: #b794ff; transform: translateY(-1px); }
+  button.run-btn:active { transform: translateY(0); }
+
+  button.reset-btn {
+    background: transparent; color: var(--text-dim); border: 1px solid var(--border);
+    font-family: var(--mono); font-size: 13px; padding: 9px 14px; border-radius: 6px; cursor: pointer;
+  }
+  button.reset-btn:hover { color: var(--text); border-color: var(--text-dim); }
+
+  .output {
+    border-top: 1px solid var(--border); background: #070514;
+    font-family: var(--mono); font-size: 13.5px; padding: 14px 16px;
+    min-height: 20px; color: var(--ok); white-space: pre-wrap; word-break: break-word;
+  }
+  .output:empty::before { content: '// o resultado aparece aqui'; color: var(--text-dim); }
+  .output .err { color: var(--err); }
+  .output .log-line { display: block; }
+  .output .log-line + .log-line { margin-top: 2px; }
+
+  .inline-demo {
+    background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 22px; margin: 20px 0;
+  }
+  .inline-demo label { font-size: 13.5px; color: var(--text-dim); display: block; margin-bottom: 10px; font-family: var(--mono); }
+  .demo-input {
+    font-family: var(--mono); font-size: 14px; padding: 9px 12px; border-radius: 6px;
+    border: 1px solid var(--border); background: var(--bg-code); color: var(--text);
+    width: 100%; margin-bottom: 10px; outline: none;
+  }
+  .demo-input:focus { border-color: var(--accent); }
+  .demo-output {
+    font-size: 13.5px; color: var(--text); padding: 10px 12px; background: var(--bg-code);
+    border-radius: 6px; border: 1px solid var(--border); min-height: 20px; font-family: var(--mono);
+    white-space: pre-wrap;
+  }
+  input[type=range] { width: 100%; margin-bottom: 10px; accent-color: var(--cs-purple); }
+  input[type=number].demo-input { width: 120px; }
+
+  code.inline { background: rgba(183,156,255,0.14); color: var(--accent); padding: 2px 6px; border-radius: 4px; font-family: var(--mono); font-size: 13.5px; }
+
+  hr.divider { border: none; border-top: 1px solid var(--border); margin: 56px 0 0; }
+  footer { text-align: center; padding: 60px 24px 20px; color: var(--text-dim); font-size: 14px; }
+  footer .accent { color: var(--accent); }
+
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 30px; }
+    nav.toc ol { columns: 1; }
+    .lesson h2 { font-size: 22px; }
+  }
+
+  /* ── Menu lateral retrátil ── */
+  html { scroll-behavior: smooth; }
+  .side-wrap { position: fixed; top: 0; left: 0; z-index: 60; }
+  .side-trigger {
+    position: fixed; top: 18px; left: 18px; z-index: 62;
+    width: 42px; height: 42px; border-radius: 10px;
+    background: var(--bg-panel); border: 1px solid var(--border);
+    color: var(--accent); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 18px rgba(0,0,0,.35);
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .side-trigger svg { width: 18px; height: 18px; }
+  .side-trigger:hover, .side-wrap.open .side-trigger { border-color: var(--accent); }
+  .side-nav {
+    position: fixed; top: 0; left: 0; z-index: 61;
+    width: 280px; max-width: 85vw; height: 100vh;
+    background: var(--bg-panel); border-right: 1px solid var(--border);
+    box-shadow: 8px 0 32px rgba(0,0,0,.45);
+    padding: 76px 0 28px; overflow-y: auto;
+    transform: translateX(-100%); visibility: hidden;
+    transition: transform .25s ease, visibility .25s;
+  }
+  @media (hover: hover) {
+    .side-wrap:hover .side-nav { transform: none; visibility: visible; }
+  }
+  .side-wrap.open .side-nav { transform: none; visibility: visible; }
+  .side-nav-title {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--text-dim); padding: 0 24px 10px;
+  }
+  .side-group {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--pink); padding: 16px 24px 6px;
+  }
+  .side-nav a {
+    display: flex; gap: 12px; align-items: baseline;
+    padding: 7px 24px; font-size: 14px; color: var(--text);
+    text-decoration: none; border-left: 2px solid transparent;
+    transition: color .15s ease, background .15s ease, border-color .15s ease;
+  }
+  .side-nav a .n { font-family: var(--mono); font-size: 12px; color: var(--text-dim); min-width: 18px; }
+  .side-nav a:hover { color: var(--accent); background: rgba(183,156,255,0.07); }
+  .side-nav a.active { color: var(--accent); border-left-color: var(--accent); background: rgba(183,156,255,0.10); }
+  .side-nav a.active .n { color: var(--accent); }
+  @media (max-width: 600px) {
+    .side-trigger { top: auto; bottom: 18px; }
+  }
+
+  /* ── extras do notebook C# ── */
+  .lesson h3 { font-family: var(--serif); font-weight: 400; font-size: 21px; color: #fff; margin: 34px 0 10px; }
+  .lesson .desc { font-size: 17px; color: #d6cff0; }
+  .lesson a, footer a { color: var(--accent); }
+  .callout.danger-x { border-left-color: var(--err); }
+  textarea.code-input[readonly] { cursor: text; }
+  .output .cmd { color: var(--text-dim); display: block; margin-bottom: 6px; }
+  .output .stdout { color: var(--ok); }
+  .notice { border: 1px solid var(--border); background: var(--bg-panel); border-radius: 10px; padding: 14px 20px; margin: 32px 0 0; font-size: 14.5px; color: #cfc8ea; }
+  .notice strong { color: var(--cs-purple); }
+</style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<div class="side-wrap" id="sideWrap">
+  <button class="side-trigger" id="sideTrigger" aria-label="Abrir menu de navegação">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+  </button>
+  <nav class="side-nav" aria-label="Navegação">
+    <div class="side-nav-title">Neste notebook</div>
+    <div class="side-group">Módulo 1 · Fundamentos</div>
+    <a href="#s1" data-target="s1"><span class="n">01</span>Tipos de Dados e Variáveis</a>
+    <a href="#s2" data-target="s2"><span class="n">02</span>Operadores</a>
+    <a href="#s3" data-target="s3"><span class="n">03</span>Controle de Fluxo e Switch</a>
+    <a href="#s4" data-target="s4"><span class="n">04</span>Métodos e Funções</a>
+    <a href="#s5" data-target="s5"><span class="n">05</span>Arrays e Manipulação de Dados</a>
+    <a href="#s6" data-target="s6"><span class="n">06</span>Enums, Structs e Tuplas</a>
+    <div class="side-group">Módulo 2 · Orientação a Objetos</div>
+    <a href="#s7" data-target="s7"><span class="n">07</span>Classes, Objetos e Encapsulamento</a>
+    <a href="#s8" data-target="s8"><span class="n">08</span>Herança e Polimorfismo</a>
+    <a href="#s9" data-target="s9"><span class="n">09</span>Interfaces e Classes Abstratas</a>
+    <a href="#s10" data-target="s10"><span class="n">10</span>Records e Tipos Modernos</a>
+    <a href="#s11" data-target="s11"><span class="n">11</span>Pattern Matching Avançado</a>
+    <div class="side-group">Módulo 3 · Dados e Coleções</div>
+    <a href="#s12" data-target="s12"><span class="n">12</span>Coleções Genéricas</a>
+    <a href="#s13" data-target="s13"><span class="n">13</span>LINQ — Language Integrated Query</a>
+    <a href="#s14" data-target="s14"><span class="n">14</span>Arquivos, JSON e Serialização</a>
+    <a href="#s15" data-target="s15"><span class="n">15</span>Exceções e Tratamento de Erros</a>
+    <div class="side-group">Módulo 4 · Programação Funcional</div>
+    <a href="#s16" data-target="s16"><span class="n">16</span>Delegates, Func, Action e Expressões Lambda</a>
+    <a href="#s17" data-target="s17"><span class="n">17</span>Generics Avançados</a>
+    <a href="#s18" data-target="s18"><span class="n">18</span>Métodos de Extensão</a>
+    <div class="side-group">Módulo 5 · Concorrência</div>
+    <a href="#s19" data-target="s19"><span class="n">19</span>Programação Assíncrona — async / await</a>
+    <a href="#s20" data-target="s20"><span class="n">20</span>Paralelismo e Thread-Safety</a>
+    <div class="side-group">Módulo 6 · Banco de Dados</div>
+    <a href="#s21" data-target="s21"><span class="n">21</span>ADO.NET — Acesso de Baixo Nível</a>
+    <a href="#s22" data-target="s22"><span class="n">22</span>Entity Framework Core</a>
+    <div class="side-group">Módulo 7 · Web e Arquitetura</div>
+    <a href="#s23" data-target="s23"><span class="n">23</span>API REST com ASP.NET Core</a>
+    <a href="#s24" data-target="s24"><span class="n">24</span>SOLID e Design Patterns</a>
+    <a href="#s25" data-target="s25"><span class="n">25</span>Testes Automatizados com xUnit</a>
+    <div class="side-group">Módulo 8 · Avançado</div>
+    <a href="#s26" data-target="s26"><span class="n">26</span>Gerenciamento de Memória e Performance</a>
+    <a href="#s27" data-target="s27"><span class="n">27</span>Recursos Modernos — C# 10 ao 13</a>
+  </nav>
+</div>
+
+<header class="hero">
+  <div class="hero-eyebrow">Notebook Interativo · .NET</div>
+  <h1><span>C#</span> do básico ao avançado</h1>
+  <p>Tipos, orientação a objetos, LINQ, async, banco de dados, ASP.NET e mais. Clique em Executar em qualquer célula para ver a saída.</p>
+</header>
+
+<div class="wrap">
+
+  <div class="notice">
+    <strong>Como as células rodam:</strong> o código C# aparece em cada célula e, por trás, o JavaScript gera a saída.
+  </div>
+
+  <nav class="toc">
+    <h3>Neste notebook</h3>
+    <ol>
+      <li><a href="#s1">Tipos de Dados e Variáveis</a></li>
+      <li><a href="#s2">Operadores</a></li>
+      <li><a href="#s3">Controle de Fluxo e Switch</a></li>
+      <li><a href="#s4">Métodos e Funções</a></li>
+      <li><a href="#s5">Arrays e Manipulação de Dados</a></li>
+      <li><a href="#s6">Enums, Structs e Tuplas</a></li>
+      <li><a href="#s7">Classes, Objetos e Encapsulamento</a></li>
+      <li><a href="#s8">Herança e Polimorfismo</a></li>
+      <li><a href="#s9">Interfaces e Classes Abstratas</a></li>
+      <li><a href="#s10">Records e Tipos Modernos</a></li>
+      <li><a href="#s11">Pattern Matching Avançado</a></li>
+      <li><a href="#s12">Coleções Genéricas</a></li>
+      <li><a href="#s13">LINQ — Language Integrated Query</a></li>
+      <li><a href="#s14">Arquivos, JSON e Serialização</a></li>
+      <li><a href="#s15">Exceções e Tratamento de Erros</a></li>
+      <li><a href="#s16">Delegates, Func, Action e Expressões Lambda</a></li>
+      <li><a href="#s17">Generics Avançados</a></li>
+      <li><a href="#s18">Métodos de Extensão</a></li>
+      <li><a href="#s19">Programação Assíncrona — async / await</a></li>
+      <li><a href="#s20">Paralelismo e Thread-Safety</a></li>
+      <li><a href="#s21">ADO.NET — Acesso de Baixo Nível</a></li>
+      <li><a href="#s22">Entity Framework Core</a></li>
+      <li><a href="#s23">API REST com ASP.NET Core</a></li>
+      <li><a href="#s24">SOLID e Design Patterns</a></li>
+      <li><a href="#s25">Testes Automatizados com xUnit</a></li>
+      <li><a href="#s26">Gerenciamento de Memória e Performance</a></li>
+      <li><a href="#s27">Recursos Modernos — C# 10 ao 13</a></li>
+    </ol>
+  </nav>
+
+  <div class="module-divider"><span class="tag">Módulo 1 · Fundamentos</span></div>
+
+  <!-- SEÇÃO 01 -->
+  <section class="lesson" id="s1">
+    <div class="lesson-num">01</div>
+    <h2>Tipos de Dados e Variáveis</h2>
+    <p class="desc">O sistema de tipos do C# é estático e fortemente tipado. Cada variável tem tipo definido em compile-time, garantindo segurança e desempenho.</p>
+    <h3>Tipos por Valor vs por Referência</h3>
+    <p><strong>Tipos por valor</strong> (<code class="inline">int</code>, <code class="inline">double</code>, <code class="inline">bool</code>, <code class="inline">char</code>, <code class="inline">decimal</code>, <code class="inline">struct</code>): vivem na <em>stack</em>. Cópia cria valor independente.</p>
+    <p><strong>Tipos por referência</strong> (<code class="inline">string</code>, <code class="inline">class</code>, arrays): vivem no <em>heap</em>; variável guarda ponteiro. Cópia copia o ponteiro.</p>
+    <p><code class="inline">var</code> é inferência de tipo em compile-time — o tipo é fixo, não é dinâmico. <strong>Nullable types</strong> (<code class="inline">int?</code>) permitem que tipos por valor aceitem <code class="inline">null</code>.</p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">tipos, var, nullable e conversões</span>
+      </div>
+      <textarea class="code-input" data-id="c-s1-1" rows="30" spellcheck="false" readonly>// Tipos primitivos
+int    idade   = 30;
+long   pop     = 8_000_000_000L;   // separador visual
+double preco   = 19.99;
+decimal valor  = 1_234.56m;        // decimal: financeiro (sem erro de ponto flutuante)
+float  temp    = 36.6f;
+bool   ativo   = true;
+char   inicial = 'C';
+byte   nivel   = 255;
+
+// Inferência com var
+var nome     = "Arthur";   // string
+var pi       = 3.14159;    // double
+var lista    = new List&lt;int&gt;();  // List&lt;int&gt;
+
+// Nullable
+int? notaOpcional = null;
+notaOpcional = 10;
+
+// Constante e readonly
+const double TAXA_JUROS = 0.085;
+
+// Conversões
+string txt = "42";
+int convertido   = int.Parse(txt);
+bool okInt       = int.TryParse("abc", out int r1);
+double d         = Convert.ToDouble("3.14");
+int truncado     = (int)3.99;      // cast explícito (perde decimais)
+
+Console.WriteLine($"idade={idade}, pop={pop:N0}, preco={preco:C2}");
+Console.WriteLine($"decimal={valor:N2}, float={temp:F1}");
+Console.WriteLine($"nome={nome} ({nome.GetType().Name})");
+Console.WriteLine($"nullable={notaOpcional ?? 0}");
+Console.WriteLine($"Parse={convertido}, TryParse ok={okInt}, Cast={truncado}");
+Console.WriteLine($"sizeof int={sizeof(int)}, sizeof double={sizeof(double)}");</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c-s1-1')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('c-s1-1', this)">⧉ Copiar código</button>
+      </div>
+      <div class="output" id="out-c-s1-1"></div>
+    </div>
+    <h3>Strings em Profundidade</h3>
+    <h3>String, StringBuilder e Interpolação</h3>
+    <p><strong>String</strong> é imutável: cada concatenação cria novo objeto. Para loops, use <code class="inline">StringBuilder</code>. <strong>Interpolação</strong> (<code class="inline">$"..."</code>) é compilada para <code class="inline">string.Format</code>. <strong>Verbatim</strong> (<code class="inline">@"..."</code>) ignora escapes — ideal para paths. <strong>Raw string literals</strong> (<code class="inline">"""..."""</code>) (C# 11) permitem qualquer caractere sem escape.</p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">strings, StringBuilder e formatação</span>
+      </div>
+      <textarea class="code-input" data-id="c-s1-2" rows="30" spellcheck="false" readonly>using System.Text;
+
+string s = "  Olá, Mundo C#!  ";
+Console.WriteLine(s.Trim());
+Console.WriteLine(s.ToUpper());
+Console.WriteLine(s.Replace("Mundo", "Dev"));
+Console.WriteLine(s.Contains("C#"));
+Console.WriteLine(s.TrimStart().Substring(0, 4));   // "Olá,"
+
+// Split / Join
+string csv = "Ana,Bob,Carlos,Diana";
+string[] nomes = csv.Split(',');
+Console.WriteLine(string.Join(" | ", nomes));
+
+// Formatação
+double valor = 1234567.89;
+Console.WriteLine($"Moeda:    {valor:C2}");
+Console.WriteLine($"Número:   {valor:N0}");
+Console.WriteLine($"Percent:  {0.856:P1}");
+Console.WriteLine($"Hex:      {255:X}");
+Console.WriteLine($"Data:     {DateTime.Now:dd/MM/yyyy HH:mm}");
+
+// StringBuilder — eficiente para muitas concatenações
+var sb = new StringBuilder();
+for (int i = 1; i &lt;= 5; i++)
+    sb.AppendLine($"  Linha {i}: {'*', -10} {i * i,5}");
+Console.Write(sb);
+
+// Verbatim e raw string (C# 11)
+string path = @"C:\Users\Dev\projetos\app";
+string raw  = """{"nome": "Ana", "idade": 30}""";
+Console.WriteLine(path);
+Console.WriteLine(raw);
+
+// Span&lt;char&gt; — acesso sem alocação (high perf)
+ReadOnlySpan&lt;char&gt; span = "Hello, World".AsSpan(7, 5);
+Console.WriteLine(span.ToString());</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c-s1-2')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('c-s1-2', this)">⧉ Copiar código</button>
+      </div>
+      <div class="output" id="out-c-s1-2"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 02 -->
+  <section class="lesson" id="s2">
+    <div class="lesson-num">02</div>
+    <h2>Operadores</h2>
+    <p class="desc">Aritméticos, relacionais, lógicos, bit a bit, de atribuição e os operadores especiais de C# para null e coalescência.</p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">aritméticos, lógicos, bit a bit e null</span>
+      </div>
+      <textarea class="code-input" data-id="c-s2-1" rows="30" spellcheck="false" readonly>// Aritméticos
+Console.WriteLine($"7 + 3 = {7 + 3}");
+Console.WriteLine($"7 - 3 = {7 - 3}");
+Console.WriteLine($"7 * 3 = {7 * 3}");
+Console.WriteLine($"7 / 3 = {7 / 3}   (inteiro!)");
+Console.WriteLine($"7.0/3 = {7.0 / 3:F4}");
+Console.WriteLine($"7 % 3 = {7 % 3}   (resto)");
+Console.WriteLine($"2^10  = {Math.Pow(2, 10)}");
+
+// Incremento / decremento
+int a = 5;
+Console.WriteLine($"a++={a++}, a={a}");  // pós: retorna antes
+Console.WriteLine($"++a={++a}, a={a}");  // pré: incrementa antes
+
+// Lógicos
+bool x = true, y = false;
+Console.WriteLine($"x &amp;&amp; y = {x &amp;&amp; y}");
+Console.WriteLine($"x || y = {x || y}");
+Console.WriteLine($"!x     = {!x}");
+Console.WriteLine($"x ^ y  = {x ^ y}");   // XOR
+
+// Bit a bit
+int b = 0b_1010_1100;   // 172
+int c = 0b_0011_1100;   // 60
+Console.WriteLine($"AND:  {b &amp; c:B8}  = {b &amp; c}");
+Console.WriteLine($"OR:   {b | c:B8}  = {b | c}");
+Console.WriteLine($"XOR:  {b ^ c:B8}  = {b ^ c}");
+Console.WriteLine($"SHL:  {60 &lt;&lt; 2}  (60 * 4)");
+Console.WriteLine($"SHR:  {60 &gt;&gt; 1}  (60 / 2)");
+
+// Null
+string? s = null;
+string resultado  = s ?? "padrão";           // coalescência nula
+string? resultado2 = s?.ToUpper();           // acesso condicional
+s ??= "atribuído";                           // atribuição nula
+Console.WriteLine($"?? = {resultado}");
+Console.WriteLine($"?. = {resultado2 ?? "null"}");
+Console.WriteLine($"??= s agora é: {s}");
+
+// Ternário e range
+int nota = 75;
+string conceito = nota &gt;= 60 ? "Aprovado" : "Reprovado";
+Console.WriteLine(conceito);
+
+int[] arr = {10,20,30,40,50};
+Console.WriteLine($"Último: {arr[^1]}, Penúltimo: {arr[^2]}");
+Console.WriteLine($"[1..3]: {string.Join(",", arr[1..3])}");</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c-s2-1')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('c-s2-1', this)">⧉ Copiar código</button>
+      </div>
+      <div class="output" id="out-c-s2-1"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 03 -->
+  <section class="lesson" id="s3">
+    <div class="lesson-num">03</div>
+    <h2>Controle de Fluxo e Switch</h2>
+    <p class="desc">if/else, loops e o poderoso switch do C# — do clássico ao switch expression com pattern matching.</p>
+    <h3>Switch em todas as formas</h3>
+    <p><strong>switch statement</strong> clássico: com <code class="inline">case</code> e <code class="inline">break</code>. <strong>Switch expression</strong> (C# 8+): retorna valor, sintaxe funcional, mais concisa. <strong>Pattern matching</strong> (C# 9+): testa tipo, propriedade, valor relacional e combinações lógicas (<code class="inline">and</code>, <code class="inline">or</code>, <code class="inline">not</code>) dentro do switch.</p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">switch, pattern matching e laços</span>
+      </div>
+      <textarea class="code-input" data-id="c-s3-1" rows="30" spellcheck="false" readonly>// ── 1. Switch Statement clássico ──
+string diaSemana = DateTime.Now.DayOfWeek.ToString();
+switch (diaSemana)
+{
+    case "Saturday":
+    case "Sunday":
+        Console.WriteLine("Fim de semana!"); break;
+    case "Monday":
+        Console.WriteLine("Segunda, começo da semana."); break;
+    default:
+        Console.WriteLine($"Dia útil: {diaSemana}"); break;
+}
+
+// ── 2. Switch Expression (C# 8+) ──
+int nota = 83;
+string conceito = nota switch
+{
+    &gt;= 90          =&gt; "A — Excelente",
+    &gt;= 80          =&gt; "B — Bom",
+    &gt;= 70          =&gt; "C — Regular",
+    &gt;= 60          =&gt; "D — Suficiente",
+    _              =&gt; "F — Reprovado"
+};
+Console.WriteLine($"Nota {nota} → {conceito}");
+
+// ── 3. Pattern matching com tipo ──
+object[] objetos = { 42, "olá", 3.14, true, null!, new int[]{1,2,3} };
+foreach (var o in objetos)
+{
+    string desc = o switch
+    {
+        int n when n &gt; 0    =&gt; $"Inteiro positivo: {n}",
+        int n               =&gt; $"Inteiro não-positivo: {n}",
+        string s            =&gt; $"String de {s.Length} chars: '{s}'",
+        double d            =&gt; $"Double: {d:F2}",
+        bool b              =&gt; $"Bool: {b}",
+        int[] arr           =&gt; $"Array int[{arr.Length}]",
+        null                =&gt; "null!",
+        _                   =&gt; $"Outro: {o.GetType().Name}"
+    };
+    Console.WriteLine($"  {desc}");
+}
+
+// ── 4. Property pattern ──
+record Ponto(int X, int Y);
+var pontos = new[] { new Ponto(0,0), new Ponto(5,0), new Ponto(0,3), new Ponto(4,4) };
+foreach (var p in pontos)
+{
+    string quadrante = p switch
+    {
+        { X: 0, Y: 0 }         =&gt; "Origem",
+        { X: &gt; 0, Y: 0 }       =&gt; "Eixo X+",
+        { X: 0, Y: &gt; 0 }       =&gt; "Eixo Y+",
+        { X: &gt; 0, Y: &gt; 0 }     =&gt; "1° quadrante",
+        _                       =&gt; "Outro"
+    };
+    Console.WriteLine($"  ({p.X},{p.Y}) → {quadrante}");
+}
+
+// ── 5. Loops ──
+Console.WriteLine("\nFor clássico:");
+for (int i = 0; i &lt; 5; i++) Console.Write($"{i} ");
+Console.WriteLine();
+
+Console.WriteLine("Foreach com index (C# — LINQ):");
+string[] frutas = {"Maçã","Banana","Laranja"};
+foreach (var (fruta, idx) in frutas.Select((f,i)=&gt;(f,i)))
+    Console.Write($"[{idx}]{fruta} ");
+Console.WriteLine();
+
+Console.WriteLine("While com break/continue:");
+int n = 0;
+while (true)
+{
+    n++;
+    if (n % 2 == 0) continue;
+    if (n &gt; 9) break;
+    Console.Write($"{n} ");
+}
+Console.WriteLine();</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c-s3-1')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('c-s3-1', this)">⧉ Copiar código</button>
+      </div>
+      <div class="output" id="out-c-s3-1"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 04 -->
+  <section class="lesson" id="s4">
+    <div class="lesson-num">04</div>
+    <h2>Métodos e Funções</h2>
+    <p class="desc">Sobrecarga, parâmetros opcionais, passagem por referência, métodos locais e expressões de corpo de método.</p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">sobrecarga, ref/out, opcionais e tuplas</span>
+      </div>
+      <textarea class="code-input" data-id="c-s4-1" rows="30" spellcheck="false" readonly>// Sobrecarga
+static int Somar(int a, int b) =&gt; a + b;
+static double Somar(double a, double b) =&gt; a + b;
+static int Somar(params int[] nums) =&gt; nums.Sum();
+
+Console.WriteLine(Somar(3, 4));
+Console.WriteLine(Somar(1.5, 2.3));
+Console.WriteLine(Somar(1, 2, 3, 4, 5));
+
+// ref e out
+static void Trocar(ref int a, ref int b) { (a, b) = (b, a); }
+static bool Dividir(int a, int b, out double resultado)
+{
+    if (b == 0) { resultado = 0; return false; }
+    resultado = (double)a / b;
+    return true;
+}
+
+int x = 10, y = 20;
+Trocar(ref x, ref y);
+Console.WriteLine($"Após troca: x={x}, y={y}");
+
+if (Dividir(10, 3, out double div))
+    Console.WriteLine($"10/3 = {div:F4}");
+
+// Parâmetros opcionais e nomeados
+static string Saudar(string nome, string prefixo = "Olá", bool formal = false)
+    =&gt; formal ? $"Prezado(a) {prefixo} {nome}" : $"{prefixo}, {nome}!";
+
+Console.WriteLine(Saudar("Ana"));
+Console.WriteLine(Saudar("Dr. Costa", formal: true, prefixo: "Bem-vindo"));
+
+// Método local
+static double CalcularIMC(double peso, double altura)
+{
+    ValidarPositivo(peso,  "peso");
+    ValidarPositivo(altura,"altura");
+    double imc = peso / (altura * altura);
+    return Math.Round(imc, 2);
+
+    static void ValidarPositivo(double v, string nome)
+    {
+        if (v &lt;= 0) throw new ArgumentException($"{nome} deve ser positivo");
+    }
+}
+Console.WriteLine($"IMC: {CalcularIMC(70, 1.75)}");
+
+// Tuplas retornadas
+static (double Min, double Max, double Media) Estatisticas(IEnumerable&lt;double&gt; nums)
+{
+    var list = nums.ToList();
+    return (list.Min(), list.Max(), list.Average());
+}
+
+var (min, max, media) = Estatisticas(new[] { 3.0, 1.5, 7.0, 2.5, 5.0 });
+Console.WriteLine($"Min={min}, Max={max}, Média={media:F2}");</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c-s4-1')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('c-s4-1', this)">⧉ Copiar código</button>
+      </div>
+      <div class="output" id="out-c-s4-1"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 05 -->
+  <section class="lesson" id="s5">
+    <div class="lesson-num">05</div>
+    <h2>Arrays e Manipulação de Dados</h2>
+    <p class="desc">Arrays unidimensionais, matrizes, jagged arrays e os índices/ranges do C# 8+.</p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">arrays, ranges, matrizes e Span</span>
+      </div>
+      <textarea class="code-input" data-id="c-s5-1" rows="30" spellcheck="false" readonly>// Array básico
+int[] nums = { 5, 3, 8, 1, 9, 2, 7, 4, 6 };
+Console.WriteLine($"Original: [{string.Join(", ", nums)}]");
+
+Array.Sort(nums);
+Console.WriteLine($"Ordenado: [{string.Join(", ", nums)}]");
+Array.Reverse(nums);
+Console.WriteLine($"Invertido: [{string.Join(", ", nums)}]");
+
+int idx = Array.BinarySearch(nums, 7);
+Console.WriteLine($"7 está no índice: {Array.IndexOf(nums, 7)}");
+
+// Índices e ranges (C# 8+)
+Console.WriteLine($"Último:      {nums[^1]}");
+Console.WriteLine($"Penúltimo:   {nums[^2]}");
+Console.WriteLine($"Fatia [2..5]: [{string.Join(",", nums[2..5])}]");
+Console.WriteLine($"Últimos 3:   [{string.Join(",", nums[^3..])}]");
+Console.WriteLine($"Primeiros 3: [{string.Join(",", nums[..3])}]");
+
+// Matriz 2D
+int[,] mat = { {1,2,3}, {4,5,6}, {7,8,9} };
+Console.WriteLine("\nMatriz 3×3:");
+for (int r = 0; r &lt; 3; r++)
+{
+    for (int c = 0; c &lt; 3; c++) Console.Write($"{mat[r,c],4}");
+    Console.WriteLine();
+}
+Console.WriteLine($"Diagonal principal: {mat[0,0]}, {mat[1,1]}, {mat[2,2]}");
+
+// Jagged array (array de arrays com tamanhos diferentes)
+int[][] jagged = new int[3][];
+jagged[0] = new[] { 1, 2 };
+jagged[1] = new[] { 3, 4, 5 };
+jagged[2] = new[] { 6 };
+
+Console.WriteLine("\nJagged array:");
+foreach (var row in jagged)
+    Console.WriteLine($"  [{string.Join(", ", row)}]");
+
+// Span&lt;T&gt; — janela zero-cópia sobre array
+int[] dados = Enumerable.Range(0, 10).ToArray();
+Span&lt;int&gt; meio = dados.AsSpan(3, 4);   // [3,4,5,6]
+Console.WriteLine($"\nSpan[3..6]: [{string.Join(",", meio.ToArray())}]");
+meio[0] = 99;   // modifica o array original!
+Console.WriteLine($"dados[3] após Span write: {dados[3]}");</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c-s5-1')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('c-s5-1', this)">⧉ Copiar código</button>
+      </div>
+      <div class="output" id="out-c-s5-1"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 06 -->
+  <section class="lesson" id="s6">
+    <div class="lesson-num">06</div>
+    <h2>Enums, Structs e Tuplas</h2>
+    <p class="desc">Tipos de valor além dos primitivos: enumerações com flags, structs performáticas e tuplas para retornos múltiplos.</p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">enum, struct e tuplas</span>
+      </div>
+      <textarea class="code-input" data-id="c-s6-1" rows="30" spellcheck="false" readonly>// ── Enum básico ──
+enum DiaSemana { Domingo, Segunda, Terca, Quarta, Quinta, Sexta, Sabado }
+
+DiaSemana hoje = DiaSemana.Quarta;
+Console.WriteLine($"Hoje: {hoje} (valor={( int)hoje})");
+Console.WriteLine($"É útil: {hoje is not DiaSemana.Sabado and not DiaSemana.Domingo}");
+
+// Enum com valor explícito
+enum HttpStatus { OK = 200, Created = 201, BadRequest = 400, NotFound = 404, ServerError = 500 }
+HttpStatus status = HttpStatus.NotFound;
+Console.WriteLine($"HTTP {(int)status}: {status}");
+
+// Enum com [Flags] — combinação bit a bit
+[Flags]
+enum Permissoes { Nenhuma = 0, Ler = 1, Escrever = 2, Executar = 4, Admin = 7 }
+
+var perm = Permissoes.Ler | Permissoes.Escrever;
+Console.WriteLine($"Permissões: {perm}");
+Console.WriteLine($"Pode ler:     {perm.HasFlag(Permissoes.Ler)}");
+Console.WriteLine($"Pode executar:{perm.HasFlag(Permissoes.Executar)}");
+
+// ── Struct ──
+struct Ponto2D
+{
+    public double X { get; init; }
+    public double Y { get; init; }
+    public double DistanciaOrigem =&gt; Math.Sqrt(X * X + Y * Y);
+    public Ponto2D Deslocar(double dx, double dy) =&gt; new() { X = X + dx, Y = Y + dy };
+    public override string ToString() =&gt; $"({X:F1}, {Y:F1})";
+}
+
+var p1 = new Ponto2D { X = 3, Y = 4 };
+var p2 = p1.Deslocar(1, -2);
+Console.WriteLine($"\np1={p1}, distância={p1.DistanciaOrigem:F2}");
+Console.WriteLine($"p2={p2}");
+// Structs são copiadas por valor
+var p3 = p1;
+Console.WriteLine($"p3==p1 em memória: {object.ReferenceEquals(p1, p1)} (são structs, sem referência)");
+
+// ── Tuplas ──
+(string Nome, int Idade, double Nota) aluno = ("Ana", 20, 9.5);
+Console.WriteLine($"\nAluno: {aluno.Nome}, {aluno.Idade} anos, nota {aluno.Nota}");
+
+// Desconstrução
+var (nome, idade, nota) = aluno;
+Console.WriteLine($"Desconstruído: {nome} tem {idade} anos");
+
+// Tupla anônima
+var par = (Chave: "token", Valor: Guid.NewGuid().ToString()[..8]);
+Console.WriteLine($"Par: {par.Chave}={par.Valor}");</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c-s6-1')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('c-s6-1', this)">⧉ Copiar código</button>
+      </div>
+      <div class="output" id="out-c-s6-1"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <div class="module-divider"><span class="tag">Módulo 2 · Orientação a Objetos</span></div>
+
+  <!-- SEÇÃO 07 -->
+  <section class="lesson" id="s7">
+    <div class="lesson-num">07</div>
+    <h2>Classes, Objetos e Encapsulamento</h2>
+    <p class="desc">Classes são moldes. Encapsulamento protege o estado interno expondo só o necessário via propriedades e métodos.</p>
+    <h3>Propriedades, init e required</h3>
+    <p><code class="inline">{ get; set; }</code> gera campo privado automaticamente. <code class="inline">init</code> permite definir só na construção (imutável depois). <code class="inline">required</code> (C# 11) obriga o caller a inicializar. Construtores primários (C# 12) declaram parâmetros diretamente na assinatura da classe.</p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">classe com encapsulamento</span>
+      </div>
+      <textarea class="code-input" data-id="c-s7-1" rows="30" spellcheck="false" readonly>class ContaBancaria
+{
+    // Propriedade somente leitura pública
+    public string Titular { get; }
+    public string Numero  { get; } = Guid.NewGuid().ToString()[..8].ToUpper();
+    private decimal _saldo;
+    private readonly List&lt;string&gt; _historico = new();
+
+    public decimal Saldo =&gt; _saldo;
+    public IReadOnlyList&lt;string&gt; Historico =&gt; _historico.AsReadOnly();
+
+    public ContaBancaria(string titular, decimal saldoInicial = 0)
+    {
+        if (string.IsNullOrWhiteSpace(titular))
+            throw new ArgumentException("Titular obrigatório");
+        Titular = titular;
+        _saldo  = saldoInicial;
+        Registrar($"Conta criada. Saldo inicial: {saldoInicial:C2}");
+    }
+
+    public void Depositar(decimal valor)
+    {
+        if (valor &lt;= 0) throw new ArgumentOutOfRangeException(nameof(valor));
+        _saldo += valor;
+        Registrar($"Depósito +{valor:C2} → saldo {_saldo:C2}");
+    }
+
+    public bool Sacar(decimal valor)
+    {
+        if (valor &gt; _saldo) { Registrar($"Saque recusado: {valor:C2}"); return false; }
+        _saldo -= valor;
+        Registrar($"Saque -{valor:C2} → saldo {_saldo:C2}");
+        return true;
+    }
+
+    public void Transferir(ContaBancaria destino, decimal valor)
+    {
+        if (Sacar(valor)) destino.Depositar(valor);
+    }
+
+    private void Registrar(string msg)
+        =&gt; _historico.Add($"[{DateTime.Now:HH:mm:ss}] {msg}");
+
+    public override string ToString()
+        =&gt; $"Conta {Numero} ({Titular}) | Saldo: {_saldo:C2}";
+}
+
+// ── Uso ──
+var c1 = new ContaBancaria("Ana Silva", 1000m);
+var c2 = new ContaBancaria("Bruno Santos");
+
+c1.Depositar(500m);
+c1.Sacar(200m);
+c1.Sacar(2000m);       // recusado
+c1.Transferir(c2, 300m);
+
+Console.WriteLine(c1);
+Console.WriteLine(c2);
+Console.WriteLine("\nHistórico c1:");
+foreach (var h in c1.Historico) Console.WriteLine($"  {h}");
+Console.WriteLine("\nHistórico c2:");
+foreach (var h in c2.Historico) Console.WriteLine($"  {h}");</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c-s7-1')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('c-s7-1', this)">⧉ Copiar código</button>
+      </div>
+      <div class="output" id="out-c-s7-1"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 08 -->
+  <section class="lesson" id="s8">
+    <div class="lesson-num">08</div>
+    <h2>Herança e Polimorfismo</h2>
+    <p class="desc">Herança especializa comportamento; polimorfismo permite tratar subtipos por uma interface comum via despacho dinâmico.</p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">herança e polimorfismo</span>
+      </div>
+      <textarea class="code-input" data-id="c-s8-1" rows="30" spellcheck="false" readonly>// Classe base abstrata
+abstract class Animal
+{
+    public string Nome { get; init; } = "";
+    public int    Idade { get; init; }
+
+    public abstract string Falar();
+    public virtual string Descrever()
+        =&gt; $"{GetType().Name} '{Nome}' ({Idade} anos) diz: {Falar()}";
+}
+
+class Cachorro : Animal
+{
+    public string Raca { get; init; } = "";
+    public override string Falar() =&gt; "Au au!";
+    public override string Descrever()
+        =&gt; base.Descrever() + $" [Raça: {Raca}]";
+}
+
+class Gato : Animal
+{
+    public bool EhDomestico { get; init; } = true;
+    public override string Falar() =&gt; "Miau!";
+}
+
+sealed class Papagaio : Animal   // sealed: não pode ser herdada
+{
+    public string FraseFavorita { get; init; } = "";
+    public override string Falar() =&gt; $"'{FraseFavorita}'";
+}
+
+// Polimorfismo
+List&lt;Animal&gt; animais = new()
+{
+    new Cachorro { Nome = "Rex",    Idade = 5, Raca = "Labrador" },
+    new Gato     { Nome = "Mimi",   Idade = 3 },
+    new Papagaio { Nome = "Louro",  Idade = 10, FraseFavorita = "Quero biscoito!" },
+    new Cachorro { Nome = "Bolinha",Idade = 2, Raca = "Poodle" },
+};
+
+foreach (Animal a in animais)
+    Console.WriteLine(a.Descrever());
+
+// is / as / pattern matching
+Console.WriteLine("\nSó cachorros:");
+foreach (Animal a in animais)
+{
+    if (a is Cachorro c)   // pattern matching com declaração
+        Console.WriteLine($"  {c.Nome} — {c.Raca}");
+}
+
+// upcasting / downcasting
+Animal animal = new Gato { Nome = "Felix", Idade = 4 };
+Console.WriteLine($"\nTipo real: {animal.GetType().Name}");
+Console.WriteLine($"É Gato: {animal is Gato}");
+
+Gato? gato = animal as Gato;    // null se falhar (nunca lança exceção)
+Console.WriteLine($"Cast seguro: {gato?.Nome}");</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c-s8-1')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('c-s8-1', this)">⧉ Copiar código</button>
+      </div>
+      <div class="output" id="out-c-s8-1"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 09 -->
+  <section class="lesson" id="s9">
+    <div class="lesson-num">09</div>
+    <h2>Interfaces e Classes Abstratas</h2>
+    <p class="desc">Interfaces definem contratos. São a base da injeção de dependência e do princípio DIP (SOLID). Uma classe pode implementar múltiplas interfaces.</p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">interfaces e repositório genérico</span>
+      </div>
+      <textarea class="code-input" data-id="c-s9-1" rows="30" spellcheck="false" readonly>// Interfaces
+interface IRepositorio&lt;T&gt;
+{
+    void   Adicionar(T item);
+    T?     Buscar(int id);
+    IEnumerable&lt;T&gt; ListarTodos();
+    bool   Remover(int id);
+    int    Total { get; }
+}
+
+interface IExportavel
+{
+    string ExportarCSV();
+}
+
+// Entidade
+class Produto
+{
+    public int     Id     { get; set; }
+    public string  Nome   { get; set; } = "";
+    public decimal Preco  { get; set; }
+    public int     Estoque{ get; set; }
+    public override string ToString() =&gt; $"[{Id}] {Nome} R${Preco:N2} (est:{Estoque})";
+}
+
+// Implementação — herda de duas interfaces
+class ProdutoRepo : IRepositorio&lt;Produto&gt;, IExportavel
+{
+    private readonly List&lt;Produto&gt; _dados = new();
+    private int _seq = 1;
+
+    public void Adicionar(Produto p) { p.Id = _seq++; _dados.Add(p); }
+    public Produto? Buscar(int id) =&gt; _dados.FirstOrDefault(p =&gt; p.Id == id);
+    public IEnumerable&lt;Produto&gt; ListarTodos() =&gt; _dados.AsReadOnly();
+    public bool Remover(int id) =&gt; _dados.RemoveAll(p =&gt; p.Id == id) &gt; 0;
+    public int Total =&gt; _dados.Count;
+
+    // Implementação explícita de interface
+    string IExportavel.ExportarCSV()
+    {
+        var linhas = _dados.Select(p =&gt; $"{p.Id},{p.Nome},{p.Preco:F2},{p.Estoque}");
+        return "id,nome,preco,estoque\n" + string.Join('\n', linhas);
+    }
+}
+
+// Uso via interface (desacopla implementação)
+IRepositorio&lt;Produto&gt; repo = new ProdutoRepo();
+
+repo.Adicionar(new Produto { Nome = "Notebook",   Preco = 3500m, Estoque = 10 });
+repo.Adicionar(new Produto { Nome = "Mouse",       Preco = 89m,  Estoque = 50 });
+repo.Adicionar(new Produto { Nome = "Teclado",     Preco = 199m, Estoque = 30 });
+repo.Adicionar(new Produto { Nome = "Monitor",     Preco = 1200m,Estoque = 8  });
+
+Console.WriteLine($"Total: {repo.Total} produtos\n");
+foreach (var p in repo.ListarTodos()) Console.WriteLine(p);
+
+repo.Remover(2);
+Console.WriteLine($"\nApós remover id=2: {repo.Total} produtos");
+
+// Acessa interface de exportação via cast
+if (repo is IExportavel exp)
+{
+    Console.WriteLine("\n── CSV Export ──");
+    Console.WriteLine(exp.ExportarCSV());
+}</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c-s9-1')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('c-s9-1', this)">⧉ Copiar código</button>
+      </div>
+      <div class="output" id="out-c-s9-1"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 10 -->
+  <section class="lesson" id="s10">
+    <div class="lesson-num">10</div>
+    <h2>Records e Tipos Modernos</h2>
+    <p class="desc">Records (C# 9+) são tipos com igualdade por valor, imutabilidade fácil e desconstrução embutida — perfeitos para DTOs e Value Objects.</p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">records, with e tipos anônimos</span>
+      </div>
+      <textarea class="code-input" data-id="c-s10-1" rows="30" spellcheck="false" readonly>// Record posicional (imutável por padrão)
+record Ponto(double X, double Y)
+{
+    public double Distancia(Ponto outro)
+        =&gt; Math.Sqrt(Math.Pow(X - outro.X, 2) + Math.Pow(Y - outro.Y, 2));
+}
+
+// Record com propriedades mistas
+record Pedido(int Id, string Cliente)
+{
+    public List&lt;string&gt; Itens   { get; init; } = new();
+    public decimal Total        { get; init; }
+    public DateTime Criado      { get; } = DateTime.Now;
+}
+
+// Record struct (valor, sem heap)
+record struct Dinheiro(decimal Valor, string Moeda = "BRL")
+{
+    public override string ToString() =&gt; $"{Valor:N2} {Moeda}";
+}
+
+// Igualdade por valor (diferente de class!)
+var p1 = new Ponto(3, 4);
+var p2 = new Ponto(3, 4);
+var p3 = new Ponto(0, 0);
+Console.WriteLine($"p1 == p2: {p1 == p2}");   // true (valor)
+Console.WriteLine($"p1 == p3: {p1 == p3}");   // false
+Console.WriteLine($"p1.Distancia(p3): {p1.Distancia(p3):F2}");
+
+// with-expression — cópia com modificação
+var p4 = p1 with { Y = 0 };
+Console.WriteLine($"p4 (cópia de p1 com Y=0): {p4}");
+
+// Desconstrução automática
+var (x, y) = p1;
+Console.WriteLine($"Desconstruído: X={x}, Y={y}");
+
+// Record mutable (class record com set)
+record PessoaMutavel
+{
+    public required string Nome  { get; set; }
+    public required int    Idade { get; set; }
+}
+var pessoa = new PessoaMutavel { Nome = "Carlos", Idade = 30 };
+pessoa.Idade = 31;
+Console.WriteLine($"Pessoa: {pessoa}");
+
+// Dinheiro (record struct)
+var preco  = new Dinheiro(1234.56m);
+var precoUSD = preco with { Valor = 234.56m, Moeda = "USD" };
+Console.WriteLine($"BRL: {preco}, USD: {precoUSD}");
+
+// Tipos anônimos (somente leitura, inferência)
+var anonimo = new { Nome = "Ana", Pontos = 980, Nivel = "Gold" };
+Console.WriteLine($"Anônimo: {anonimo.Nome} — {anonimo.Nivel} ({anonimo.Pontos}pts)");</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c-s10-1')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('c-s10-1', this)">⧉ Copiar código</button>
+      </div>
+      <div class="output" id="out-c-s10-1"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 11 -->
+  <section class="lesson" id="s11">
+    <div class="lesson-num">11</div>
+    <h2>Pattern Matching Avançado</h2>
+    <p class="desc">C# 9–12 trouxe padrões relacionais, lógicos, de propriedade, de lista e combinações — eliminando cascatas de if/else e casts manuais.</p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">pattern matching avançado</span>
+      </div>
+      <textarea class="code-input" data-id="c-s11-1" rows="30" spellcheck="false" readonly>record Forma(string Tipo);
+record Circulo(double Raio)             : Forma("Círculo");
+record Retangulo(double L, double A)    : Forma("Retângulo");
+record Triangulo(double B, double H)    : Forma("Triângulo");
+
+// Padrão de tipo + propriedade
+static double Area(Forma f) =&gt; f switch
+{
+    Circulo   { Raio: &gt; 0 } c            =&gt; Math.PI * c.Raio * c.Raio,
+    Retangulo { L: &gt; 0, A: &gt; 0 } r      =&gt; r.L * r.A,
+    Triangulo { B: &gt; 0, H: &gt; 0 } t      =&gt; t.B * t.H / 2,
+    _                                    =&gt; throw new ArgumentException("Forma inválida")
+};
+
+// Padrão relacional e lógico
+static string ClassificarIMC(double imc) =&gt; imc switch
+{
+    &lt; 18.5                   =&gt; "Abaixo do peso",
+    &gt;= 18.5 and &lt; 25.0       =&gt; "Peso normal",
+    &gt;= 25.0 and &lt; 30.0       =&gt; "Sobrepeso",
+    &gt;= 30.0 and &lt; 40.0       =&gt; "Obesidade",
+    _                        =&gt; "Obesidade grave"
+};
+
+// Padrão de lista (C# 11+)
+static string DescreverLista(int[] nums) =&gt; nums switch
+{
+    []                           =&gt; "Lista vazia",
+    [var x]                      =&gt; $"Um elemento: {x}",
+    [var primeiro, var ultimo]   =&gt; $"Dois: {primeiro} e {ultimo}",
+    [var h, .. var resto]        =&gt; $"Começa com {h}, mais {resto.Length} elementos"
+};
+
+// Padrão de tupla
+static string Quadrante(int x, int y) =&gt; (x, y) switch
+{
+    (0,  0)             =&gt; "Origem",
+    (&gt; 0, &gt; 0)         =&gt; "1° quadrante",
+    (&lt; 0, &gt; 0)         =&gt; "2° quadrante",
+    (&lt; 0, &lt; 0)         =&gt; "3° quadrante",
+    (&gt; 0, &lt; 0)         =&gt; "4° quadrante",
+    (0, _)             =&gt; "Eixo Y",
+    (_, 0)             =&gt; "Eixo X",
+    _                  =&gt; "?"
+};
+
+// Resultados
+Forma[] formas = { new Circulo(5), new Retangulo(4,3), new Triangulo(6,4) };
+foreach (var f in formas)
+    Console.WriteLine($"{f.Tipo,-12} área = {Area(f):F2}");
+
+Console.WriteLine();
+double[] imcs = { 17.0, 22.5, 27.3, 35.1, 42.0 };
+foreach (var imc in imcs)
+    Console.WriteLine($"IMC {imc,5:F1} → {ClassificarIMC(imc)}");
+
+Console.WriteLine();
+int[][] listas = { new int[]{}, new[]{7}, new[]{3,9}, new[]{1,2,3,4,5} };
+foreach (var l in listas)
+    Console.WriteLine(DescreverLista(l));
+
+Console.WriteLine();
+(int,int)[] pontos = { (0,0),(3,4),(-1,2),(-2,-3),(5,-1),(0,6) };
+foreach (var (x,y) in pontos)
+    Console.WriteLine($"({x,2},{y,2}) → {Quadrante(x,y)}");</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c-s11-1')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('c-s11-1', this)">⧉ Copiar código</button>
+      </div>
+      <div class="output" id="out-c-s11-1"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <div class="module-divider"><span class="tag">Módulo 3 · Dados e Coleções</span></div>
+
+  <!-- SEÇÃO 12 -->
+  <section class="lesson" id="s12">
+    <div class="lesson-num">12</div>
+    <h2>Coleções Genéricas</h2>
+    <p class="desc">List, Dictionary, HashSet, Queue, Stack, SortedDictionary e coleções thread-safe para concorrência.</p>
+    <h3>Complexidade das principais coleções</h3>
+    <ul>
+      <li><strong>List&lt;T&gt;</strong>: acesso índice O(1), busca O(n), inserção fim O(1) amortizado, meio O(n)</li>
+      <li><strong>Dictionary&lt;K,V&gt;</strong>: busca/inserção/remoção O(1) amortizado via hash</li>
+      <li><strong>HashSet&lt;T&gt;</strong>: pertinência O(1) — como Dictionary sem valor</li>
+      <li><strong>SortedDictionary&lt;K,V&gt;</strong>: busca O(log n) via árvore — itens em ordem</li>
+      <li><strong>Queue/Stack</strong>: Enqueue/Push/Pop O(1)</li>
+    </ul>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">List, Dictionary, HashSet, Queue e Stack</span>
+      </div>
+      <textarea class="code-input" data-id="c-s12-1" rows="30" spellcheck="false" readonly>// ── List&lt;T&gt; ──
+var lista = new List&lt;string&gt; { "Maçã", "Banana", "Laranja" };
+lista.Add("Uva");
+lista.Insert(1, "Abacaxi");
+lista.Remove("Banana");
+lista.Sort();
+Console.WriteLine($"List: {string.Join(", ", lista)}");
+Console.WriteLine($"FindAll com 'a': {string.Join(", ", lista.FindAll(f =&gt; f.Contains('a')))}");
+
+// ── Dictionary&lt;K,V&gt; ──
+var estoque = new Dictionary&lt;string, int&gt;(StringComparer.OrdinalIgnoreCase)
+{
+    ["Arroz"]    = 50,
+    ["Feijão"]   = 30,
+    ["Macarrão"] = 20
+};
+estoque["Sal"] = 100;
+estoque["arroz"] += 15;   // case-insensitive!
+
+Console.WriteLine("\nEstoque:");
+foreach (var (produto, qtd) in estoque.OrderByDescending(e =&gt; e.Value))
+    Console.WriteLine($"  {produto,-12}: {qtd,3} unid.");
+
+estoque.TryGetValue("Pimenta", out int qtdP);
+Console.WriteLine($"Pimenta: {qtdP} (0 = não encontrado)");
+
+// ── HashSet&lt;T&gt; — operações de conjunto ──
+var a = new HashSet&lt;int&gt;(Enumerable.Range(1, 6));
+var b = new HashSet&lt;int&gt;(Enumerable.Range(4, 6));
+Console.WriteLine($"\nA:            {string.Join(",", a)}");
+Console.WriteLine($"B:            {string.Join(",", b)}");
+Console.WriteLine($"Interseção:   {string.Join(",", a.Intersect(b))}");
+Console.WriteLine($"União:        {string.Join(",", a.Union(b))}");
+Console.WriteLine($"Diferença A\\B:{string.Join(",", a.Except(b))}");
+var simetrica = new HashSet&lt;int&gt;(a); simetrica.SymmetricExceptWith(b);
+Console.WriteLine($"Dif. simétrica:{string.Join(",", simetrica)}");
+
+// ── Queue (FIFO) e Stack (LIFO) ──
+var fila = new Queue&lt;string&gt;(new[] { "Ticket-1","Ticket-2","Ticket-3" });
+Console.WriteLine($"\nFila: Atendendo {fila.Dequeue()}, próximo: {fila.Peek()}");
+
+var pilha = new Stack&lt;string&gt;(new[] { "pág1","pág2","pág3" });
+Console.WriteLine($"Histórico: voltando para {pilha.Pop()}, atual: {pilha.Peek()}");
+
+// ── SortedDictionary ──
+var ranking = new SortedDictionary&lt;int, string&gt;(Comparer&lt;int&gt;.Create((a,b) =&gt; b.CompareTo(a)));
+ranking[1500] = "Ana"; ranking[2300] = "Bruno"; ranking[1800] = "Carlos";
+Console.WriteLine("\nRanking (maior→menor):");
+int pos = 1;
+foreach (var (pts, nome) in ranking)
+    Console.WriteLine($"  {pos++}° {nome}: {pts} pts");</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c-s12-1')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('c-s12-1', this)">⧉ Copiar código</button>
+      </div>
+      <div class="output" id="out-c-s12-1"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 13 -->
+  <section class="lesson" id="s13">
+    <div class="lesson-num">13</div>
+    <h2>LINQ — Language Integrated Query</h2>
+    <p class="desc">LINQ integra consultas à linguagem. Funciona sobre qualquer IEnumerable&lt;T&gt; e é traduzido para SQL quando usado com EF Core.</p>
+    <h3>Execução Adiada vs Imediata</h3>
+    <p><strong>Adiada</strong>: Where, Select, OrderBy, GroupBy — criam pipelines mas não executam até enumerar. <strong>Imediata</strong>: ToList(), ToArray(), Count(), First(), Sum() — disparam execução. Cuidado: enumerar uma query adiada duas vezes executa duas vezes a fonte.</p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">LINQ — consultas e agrupamentos</span>
+      </div>
+      <textarea class="code-input" data-id="c-s13-1" rows="30" spellcheck="false" readonly>record Func(string Nome, string Depto, decimal Sal, int Idade);
+
+var funcs = new List&lt;Func&gt;
+{
+    new("Ana",    "TI",     8500m, 28),
+    new("Bruno",  "RH",     5200m, 35),
+    new("Carlos", "TI",     9200m, 32),
+    new("Diana",  "Vendas", 6800m, 29),
+    new("Edu",    "TI",     7100m, 25),
+    new("Flávia", "RH",     4900m, 40),
+    new("Gio",    "Vendas", 7500m, 31),
+    new("Hélio",  "TI",     6300m, 23),
+};
+
+// ── Filtro + projeção + ordenação ──
+Console.WriteLine("TI com Sal &gt; 7000 (método):");
+funcs.Where(f =&gt; f.Depto == "TI" &amp;&amp; f.Sal &gt; 7000)
+     .OrderByDescending(f =&gt; f.Sal)
+     .Select(f =&gt; $"  {f.Nome,-10} R${f.Sal:N0}")
+     .ToList().ForEach(Console.WriteLine);
+
+// ── Sintaxe de consulta (query syntax) ──
+Console.WriteLine("\nMenores de 30 (query syntax):");
+var jovens = from f in funcs
+             where f.Idade &lt; 30
+             orderby f.Nome
+             select new { f.Nome, f.Depto, f.Idade };
+foreach (var j in jovens) Console.WriteLine($"  {j.Nome,-10} {j.Depto,-8} {j.Idade}a");
+
+// ── Agrupamento ──
+Console.WriteLine("\nMédia por departamento:");
+funcs.GroupBy(f =&gt; f.Depto)
+     .Select(g =&gt; new { g.Key, Media = g.Average(f =&gt; f.Sal), N = g.Count() })
+     .OrderByDescending(x =&gt; x.Media)
+     .ToList().ForEach(x =&gt; Console.WriteLine($"  {x.Key,-8} Média: R${x.Media:N0} ({x.N} func.)"));
+
+// ── Agregações ──
+Console.WriteLine($"\nFolha total:   R${funcs.Sum(f =&gt; f.Sal):N0}");
+Console.WriteLine($"Maior salário: R${funcs.Max(f =&gt; f.Sal):N0} — {funcs.MaxBy(f =&gt; f.Sal)?.Nome}");
+Console.WriteLine($"Média geral:   R${funcs.Average(f =&gt; f.Sal):N0}");
+
+// ── SelectMany (flatten) ──
+var deptos = new[] {
+    new { Nome = "TI",     Habilidades = new[]{"C#","SQL","Docker"} },
+    new { Nome = "Vendas", Habilidades = new[]{"CRM","Excel"} },
+};
+var todasHabilidades = deptos.SelectMany(d =&gt; d.Habilidades.Select(h =&gt; $"{d.Nome}/{h}"));
+Console.WriteLine("\nHabilidades: " + string.Join(", ", todasHabilidades));
+
+// ── Zip ──
+var nomes  = new[] { "A", "B", "C" };
+var valores = new[] { 100, 200, 300 };
+var zipped = nomes.Zip(valores, (n, v) =&gt; $"{n}={v}");
+Console.WriteLine("Zip: " + string.Join(", ", zipped));
+
+// ── Paginação ──
+Console.WriteLine("\nPágina 2 (2 por página):");
+funcs.OrderBy(f =&gt; f.Nome).Skip(2).Take(2).ToList()
+     .ForEach(f =&gt; Console.WriteLine($"  {f.Nome}"));</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c-s13-1')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('c-s13-1', this)">⧉ Copiar código</button>
+      </div>
+      <div class="output" id="out-c-s13-1"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 14 -->
+  <section class="lesson" id="s14">
+    <div class="lesson-num">14</div>
+    <h2>Arquivos, JSON e Serialização</h2>
+    <p class="desc">Leitura/escrita de arquivos texto e binários, serialização JSON com System.Text.Json e CSV manual.</p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">arquivos, JSON e CSV</span>
+      </div>
+      <textarea class="code-input" data-id="c-s14-1" rows="30" spellcheck="false" readonly>using System.IO;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+// ── 1. Escrita e leitura de texto ──
+string path = Path.GetTempFileName();   // arquivo temporário
+
+// Escrever
+await File.WriteAllTextAsync(path, "Linha 1\nLinha 2\nLinha 3");
+
+// Ler tudo
+string tudo = await File.ReadAllTextAsync(path);
+Console.WriteLine("Conteúdo completo:");
+Console.WriteLine(tudo);
+
+// Ler linha por linha
+Console.WriteLine("Linha por linha:");
+string[] linhas = await File.ReadAllLinesAsync(path);
+foreach (var (l, i) in linhas.Select((l,i)=&gt;(l,i)))
+    Console.WriteLine($"  [{i}] {l}");
+
+// Append
+await File.AppendAllTextAsync(path, "\nLinha 4 (append)");
+Console.WriteLine($"Total linhas: {(await File.ReadAllLinesAsync(path)).Length}");
+
+// ── 2. JSON com System.Text.Json ──
+record Pessoa(string Nome, int Idade, string[] Hobbies);
+
+var pessoas = new[]
+{
+    new Pessoa("Ana",    28, new[]{"leitura","yoga"}),
+    new Pessoa("Bruno",  35, new[]{"games","música","código"}),
+};
+
+var opts = new JsonSerializerOptions
+{
+    WriteIndented = true,
+    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+};
+
+string json = JsonSerializer.Serialize(pessoas, opts);
+Console.WriteLine("\nJSON serializado:");
+Console.WriteLine(json);
+
+// Deserializar
+var desser = JsonSerializer.Deserialize&lt;Pessoa[]&gt;(json, opts)!;
+Console.WriteLine($"\nDeserializado: {desser[0].Nome} curte {string.Join(", ", desser[0].Hobbies)}");
+
+// ── 3. CSV manual ──
+string csvPath = Path.GetTempFileName();
+var csvLinhas = new[] { "nome,idade,cidade", "Ana,28,SP", "Bruno,35,RJ" };
+await File.WriteAllLinesAsync(csvPath, csvLinhas);
+
+Console.WriteLine("\nCSV lido:");
+var registros = (await File.ReadAllLinesAsync(csvPath))
+    .Skip(1)  // pula cabeçalho
+    .Select(l =&gt; l.Split(','))
+    .Select(c =&gt; new { Nome = c[0], Idade = int.Parse(c[1]), Cidade = c[2] });
+
+foreach (var r in registros)
+    Console.WriteLine($"  {r.Nome} ({r.Idade}) — {r.Cidade}");
+
+// Cleanup
+File.Delete(path); File.Delete(csvPath);
+Console.WriteLine("\nArquivos temporários removidos.");</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c-s14-1')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('c-s14-1', this)">⧉ Copiar código</button>
+      </div>
+      <div class="output" id="out-c-s14-1"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 15 -->
+  <section class="lesson" id="s15">
+    <div class="lesson-num">15</div>
+    <h2>Exceções e Tratamento de Erros</h2>
+    <p class="desc">Exceções customizadas, hierarquia do .NET, boas práticas e o padrão Result para evitar exceções como fluxo de controle.</p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">exceções e padrão Result</span>
+      </div>
+      <textarea class="code-input" data-id="c-s15-1" rows="30" spellcheck="false" readonly>// ── Exceção personalizada com hierarquia ──
+class DomainException : Exception
+{
+    public string Codigo { get; }
+    public DomainException(string codigo, string msg) : base(msg) =&gt; Codigo = codigo;
+}
+
+class SaldoInsuficienteException : DomainException
+{
+    public decimal Disponivel  { get; }
+    public decimal Solicitado  { get; }
+    public SaldoInsuficienteException(decimal disp, decimal sol)
+        : base("SALDO_INSUFICIENTE", $"Disponível: {disp:C2}, solicitado: {sol:C2}")
+    { Disponivel = disp; Solicitado = sol; }
+}
+
+// ── Padrão Result (evita exceções para fluxo normal) ──
+class Result&lt;T&gt;
+{
+    public bool   Sucesso { get; }
+    public T?     Valor   { get; }
+    public string Erro    { get; } = "";
+
+    private Result(bool ok, T? val, string erro) { Sucesso=ok; Valor=val; Erro=erro; }
+
+    public static Result&lt;T&gt; Ok(T val)        =&gt; new(true, val, "");
+    public static Result&lt;T&gt; Falha(string e)  =&gt; new(false, default, e);
+}
+
+static Result&lt;decimal&gt; Calcular(string expr)
+{
+    try
+    {
+        var partes = expr.Split('/');
+        if (partes.Length != 2) return Result&lt;decimal&gt;.Falha("Formato: 'a/b'");
+        decimal a = decimal.Parse(partes[0].Trim());
+        decimal b = decimal.Parse(partes[1].Trim());
+        if (b == 0) return Result&lt;decimal&gt;.Falha("Divisão por zero");
+        return Result&lt;decimal&gt;.Ok(a / b);
+    }
+    catch (FormatException)
+    {
+        return Result&lt;decimal&gt;.Falha("Valores inválidos");
+    }
+}
+
+// ── try/catch/finally com filtro ──
+static void TestarSaque(decimal saldo, decimal valor)
+{
+    try
+    {
+        if (valor &gt; saldo) throw new SaldoInsuficienteException(saldo, valor);
+        if (valor &lt;= 0)    throw new ArgumentOutOfRangeException(nameof(valor));
+        Console.WriteLine($"  ✓ Saque de {valor:C2} aprovado");
+    }
+    catch (SaldoInsuficienteException ex) when (ex.Solicitado &lt; ex.Disponivel * 2)
+    {
+        Console.WriteLine($"  ✗ [{ex.Codigo}] Pouco saldo: {ex.Message}");
+    }
+    catch (DomainException ex)
+    {
+        Console.WriteLine($"  ✗ [{ex.Codigo}] Erro de domínio: {ex.Message}");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"  ✗ Erro inesperado: {ex.GetType().Name}: {ex.Message}");
+    }
+    finally
+    {
+        Console.WriteLine($"     (finally sempre executa)");
+    }
+}
+
+Console.WriteLine("── Testes de Saque ──");
+TestarSaque(500m, 200m);
+TestarSaque(500m, 800m);
+TestarSaque(500m, -50m);
+
+Console.WriteLine("\n── Padrão Result ──");
+string[] exprs = { "10 / 3", "7 / 0", "abc / 2", "100 / 4", "10" };
+foreach (var e in exprs)
+{
+    var r = Calcular(e);
+    Console.WriteLine(r.Sucesso ? $"  {e} = {r.Valor:F4}" : $"  {e} → Erro: {r.Erro}");
+}
+
+// ── using para IDisposable ──
+Console.WriteLine("\n── using (gerenciamento de recursos) ──");
+using var sw = new System.IO.StringWriter();
+sw.WriteLine("Recurso gerenciado automaticamente");
+sw.WriteLine("Liberado ao sair do bloco using");
+Console.Write(sw.ToString());
+Console.WriteLine("(StringWriter foi disposed)");</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c-s15-1')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('c-s15-1', this)">⧉ Copiar código</button>
+      </div>
+      <div class="output" id="out-c-s15-1"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <div class="module-divider"><span class="tag">Módulo 4 · Programação Funcional</span></div>
+
+  <!-- SEÇÃO 16 -->
+  <section class="lesson" id="s16">
+    <div class="lesson-num">16</div>
+    <h2>Delegates, Func, Action e Expressões Lambda</h2>
+    <p class="desc">Em C# funções são valores de primeira classe via delegates. Func, Action e Predicate são os tipos embutidos. Lambdas são a sintaxe concisa.</p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">delegates, Func, closures e eventos</span>
+      </div>
+      <textarea class="code-input" data-id="c-s16-1" rows="30" spellcheck="false" readonly>// Delegate customizado
+delegate double Transformar(double x);
+
+Transformar quadrado = x =&gt; x * x;
+Transformar raiz     = x =&gt; Math.Sqrt(x);
+Transformar inverso  = x =&gt; 1.0 / x;
+
+Console.WriteLine($"quadrado(5) = {quadrado(5)}");
+Console.WriteLine($"raiz(16)    = {raiz(16)}");
+
+// Composição de delegates (multicast)
+Transformar pipeline = quadrado;
+pipeline += x =&gt; x + 1;   // adiciona ao multicast (Action funciona, Func usa só último)
+
+// Func / Action / Predicate
+Func&lt;int, int, int&gt;   somar   = (a, b) =&gt; a + b;
+Func&lt;string, string&gt;  grito   = s =&gt; s.ToUpper() + "!!!";
+Action&lt;string&gt;        log     = msg =&gt; Console.WriteLine($"[LOG] {msg}");
+Predicate&lt;int&gt;        ePar    = n =&gt; n % 2 == 0;
+
+Console.WriteLine(somar(3, 7));
+Console.WriteLine(grito("atenção"));
+log("operação concluída");
+Console.WriteLine($"4 é par: {ePar(4)}, 7 é par: {ePar(7)}");
+
+// Funções de ordem superior
+static IEnumerable&lt;T&gt; Filtrar&lt;T&gt;(IEnumerable&lt;T&gt; src, Func&lt;T, bool&gt; pred) =&gt; src.Where(pred);
+static IEnumerable&lt;R&gt; Mapear&lt;T,R&gt;(IEnumerable&lt;T&gt; src, Func&lt;T,R&gt; f)       =&gt; src.Select(f);
+static T Reduzir&lt;T&gt;(IEnumerable&lt;T&gt; src, T seed, Func&lt;T,T,T&gt; f)           =&gt; src.Aggregate(seed, f);
+
+var nums = Enumerable.Range(1, 10).ToList();
+var pares  = Filtrar(nums, n =&gt; n % 2 == 0).ToList();
+var dobros = Mapear(pares, n =&gt; n * 2).ToList();
+var soma   = Reduzir(dobros, 0, (acc, n) =&gt; acc + n);
+
+Console.WriteLine($"Pares:  [{string.Join(",", pares)}]");
+Console.WriteLine($"Dobros: [{string.Join(",", dobros)}]");
+Console.WriteLine($"Soma:   {soma}");
+
+// Closures — captura de variável do escopo externo
+static Func&lt;int&gt; CriarContador(int inicio = 0)
+{
+    int n = inicio;
+    return () =&gt; n++;    // captura n por referência
+}
+
+var c1 = CriarContador(0);
+var c2 = CriarContador(100);
+Console.WriteLine($"c1: {c1()}, {c1()}, {c1()}");
+Console.WriteLine($"c2: {c2()}, {c2()}, {c2()}");
+
+// Eventos com EventHandler
+class Botao
+{
+    public event EventHandler&lt;string&gt;? Clicado;
+    public void Clicar(string label) =&gt; Clicado?.Invoke(this, label);
+}
+
+var btn = new Botao();
+btn.Clicado += (_, label) =&gt; Console.WriteLine($"Evento: botão '{label}' clicado!");
+btn.Clicado += (_, label) =&gt; log($"Auditoria: {label}");
+btn.Clicar("Salvar");</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c-s16-1')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('c-s16-1', this)">⧉ Copiar código</button>
+      </div>
+      <div class="output" id="out-c-s16-1"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 17 -->
+  <section class="lesson" id="s17">
+    <div class="lesson-num">17</div>
+    <h2>Generics Avançados</h2>
+    <p class="desc">Restrições de tipo, covariância, contravariância e classes/interfaces genéricas que formam a base das coleções e do LINQ.</p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">generics, restrições e variância</span>
+      </div>
+      <textarea class="code-input" data-id="c-s17-1" rows="30" spellcheck="false" readonly>// Restrições de tipo (where)
+static T Maior&lt;T&gt;(T a, T b) where T : IComparable&lt;T&gt;
+    =&gt; a.CompareTo(b) &gt;= 0 ? a : b;
+
+static T CriarInstancia&lt;T&gt;() where T : new()
+    =&gt; new T();
+
+static void Imprimir&lt;T&gt;(T item) where T : notnull
+    =&gt; Console.WriteLine(item.ToString());
+
+Console.WriteLine(Maior(10, 7));
+Console.WriteLine(Maior("banana", "abacaxi"));
+Console.WriteLine(Maior(3.14, 2.71));
+
+// Classe genérica com múltiplas restrições
+class Repositorio&lt;T&gt; where T : class, new()
+{
+    private readonly List&lt;T&gt; _items = new();
+    public void Add(T item) =&gt; _items.Add(item);
+    public T? First(Func&lt;T, bool&gt; pred) =&gt; _items.FirstOrDefault(pred);
+    public IEnumerable&lt;T&gt; Where(Func&lt;T, bool&gt; pred) =&gt; _items.Where(pred);
+    public int Count =&gt; _items.Count;
+}
+
+class Tag { public string Nome { get; set; } = ""; public int Prioridade { get; set; } }
+var repo = new Repositorio&lt;Tag&gt;();
+repo.Add(new Tag { Nome = "bug",     Prioridade = 1 });
+repo.Add(new Tag { Nome = "feature", Prioridade = 2 });
+repo.Add(new Tag { Nome = "hotfix",  Prioridade = 1 });
+Console.WriteLine($"\nTotal: {repo.Count}");
+Console.WriteLine("P1: " + string.Join(", ", repo.Where(t =&gt; t.Prioridade == 1).Select(t =&gt; t.Nome)));
+
+// Covariância (out) — pode usar T como saída mais geral
+interface IProdutor&lt;out T&gt; { T Produzir(); }
+class GatoProd : IProdutor&lt;string&gt; { public string Produzir() =&gt; "Miau!"; }
+
+IProdutor&lt;string&gt; prod = new GatoProd();
+// IProdutor&lt;object&gt; prodObj = prod;   // covariância permite isso
+
+// Contravariância (in) — pode usar T como entrada mais específica
+interface IConsumidor&lt;in T&gt; { void Consumir(T item); }
+class LogConsumidor : IConsumidor&lt;object&gt;
+{
+    public void Consumir(object item) =&gt; Console.WriteLine($"Consumiu: {item}");
+}
+
+IConsumidor&lt;string&gt; cons = new LogConsumidor(); // contravariância
+cons.Consumir("texto específico");
+
+// Método genérico com múltiplos tipos
+static Dictionary&lt;K, List&lt;V&gt;&gt; Agrupar&lt;K, V&gt;(IEnumerable&lt;V&gt; items, Func&lt;V, K&gt; keySelector)
+    where K : notnull
+{
+    var dict = new Dictionary&lt;K, List&lt;V&gt;&gt;();
+    foreach (var item in items)
+    {
+        var key = keySelector(item);
+        if (!dict.ContainsKey(key)) dict[key] = new();
+        dict[key].Add(item);
+    }
+    return dict;
+}
+
+var palavras = "banana abacaxi laranja limão maçã abacate".Split(' ');
+var porLetra = Agrupar(palavras, p =&gt; p[0]);
+Console.WriteLine("\nAgrupado por inicial:");
+foreach (var (letra, lista) in porLetra.OrderBy(e =&gt; e.Key))
+    Console.WriteLine($"  '{letra}': {string.Join(", ", lista)}");</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c-s17-1')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('c-s17-1', this)">⧉ Copiar código</button>
+      </div>
+      <div class="output" id="out-c-s17-1"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 18 -->
+  <section class="lesson" id="s18">
+    <div class="lesson-num">18</div>
+    <h2>Métodos de Extensão</h2>
+    <p class="desc">Adicione métodos a tipos existentes sem herança. É assim que o LINQ funciona internamente — todos os métodos como Where e Select são extensões de IEnumerable&lt;T&gt;.</p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">métodos de extensão</span>
+      </div>
+      <textarea class="code-input" data-id="c-s18-1" rows="30" spellcheck="false" readonly>// Extensões de string
+static class StringExtensions
+{
+    public static bool EhEmail(this string s)
+        =&gt; s.Contains('@') &amp;&amp; s.Contains('.') &amp;&amp; s.Length &gt; 5;
+
+    public static string Capitalizar(this string s)
+        =&gt; string.IsNullOrEmpty(s) ? s
+           : char.ToUpper(s[0]) + s[1..].ToLower();
+
+    public static string Truncar(this string s, int max, string sufixo = "…")
+        =&gt; s.Length &lt;= max ? s : s[..max] + sufixo;
+
+    public static string Repetir(this string s, int n)
+        =&gt; string.Concat(Enumerable.Repeat(s, n));
+}
+
+// Extensões de IEnumerable&lt;T&gt;
+static class EnumerableExtensions
+{
+    public static IEnumerable&lt;T&gt; Embaralhar&lt;T&gt;(this IEnumerable&lt;T&gt; src)
+    {
+        var list = src.ToList();
+        var rng  = new Random(42);
+        for (int i = list.Count - 1; i &gt; 0; i--)
+        {
+            int j = rng.Next(i + 1);
+            (list[i], list[j]) = (list[j], list[i]);
+        }
+        return list;
+    }
+
+    public static IEnumerable&lt;IEnumerable&lt;T&gt;&gt; EmLotes&lt;T&gt;(this IEnumerable&lt;T&gt; src, int tamanho)
+        =&gt; src.Select((v, i) =&gt; (v, i))
+              .GroupBy(t =&gt; t.i / tamanho)
+              .Select(g =&gt; g.Select(t =&gt; t.v));
+
+    public static void ForEach&lt;T&gt;(this IEnumerable&lt;T&gt; src, Action&lt;T&gt; acao)
+    {
+        foreach (var item in src) acao(item);
+    }
+}
+
+// Extensão de int
+static class IntExtensions
+{
+    public static bool EhPrimo(this int n)
+    {
+        if (n &lt; 2) return false;
+        for (int i = 2; i &lt;= Math.Sqrt(n); i++)
+            if (n % i == 0) return false;
+        return true;
+    }
+
+    public static IEnumerable&lt;int&gt; Vezes(this int n)
+        =&gt; Enumerable.Range(0, n);
+}
+
+// ── Uso ──
+Console.WriteLine("user@email.com".EhEmail());
+Console.WriteLine("HELLO WORLD".Capitalizar());
+Console.WriteLine("Texto muito longo aqui".Truncar(12));
+Console.WriteLine("Ha".Repetir(3));
+
+Console.WriteLine();
+var nums = Enumerable.Range(1, 20).ToList();
+Console.WriteLine($"Primos até 20: {string.Join(", ", nums.Where(n =&gt; n.EhPrimo()))}");
+
+var embaralhado = nums.Embaralhar().Take(10).ToList();
+Console.WriteLine($"10 embaralhados: {string.Join(", ", embaralhado)}");
+
+Console.WriteLine("\nEm lotes de 4:");
+nums.Take(12).EmLotes(4)
+    .ForEach(lote =&gt; Console.WriteLine($"  [{string.Join(", ", lote)}]"));
+
+Console.WriteLine();
+5.Vezes().ForEach(i =&gt; Console.Write($"★ "));
+Console.WriteLine();</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c-s18-1')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('c-s18-1', this)">⧉ Copiar código</button>
+      </div>
+      <div class="output" id="out-c-s18-1"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <div class="module-divider"><span class="tag">Módulo 5 · Concorrência</span></div>
+
+  <!-- SEÇÃO 19 -->
+  <section class="lesson" id="s19">
+    <div class="lesson-num">19</div>
+    <h2>Programação Assíncrona — async / await</h2>
+    <p class="desc">O modelo async/await libera a thread enquanto espera IO, sem callbacks. Task, ValueTask, WhenAll e CancellationToken.</p>
+    <h3>Como async/await funciona</h3>
+    <p>Quando o compilador vê <code class="inline">await</code>, ele <em>suspende</em> o método, registra uma continuação e devolve o controle ao chamador — a thread não fica bloqueada. Quando a operação IO conclui, o scheduler retoma da continuação. Isso permite que uma única thread atenda milhares de requisições IO-bound concorrentemente.</p>
+    <p><strong>Regra de ouro</strong>: métodos <code class="inline">async</code> retornam <code class="inline">Task</code> ou <code class="inline">Task&lt;T&gt;</code>. Nunca <code class="inline">async void</code> (exceto event handlers). <strong>ValueTask</strong> evita alocação de Task quando o resultado já está disponível (cache hit).</p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">async/await, WhenAll e cancelamento</span>
+      </div>
+      <textarea class="code-input" data-id="c-s19-1" rows="30" spellcheck="false" readonly>using System.Threading;
+using System.Threading.Tasks;
+using System.Diagnostics;
+
+// Simula chamada HTTP / banco de dados
+static async Task&lt;string&gt; BuscarDadosAsync(string fonte, int ms, CancellationToken ct = default)
+{
+    await Task.Delay(ms, ct);
+    return $"{fonte} → {ms}ms";
+}
+
+// ── 1. Sequencial vs Paralelo ──
+var sw = Stopwatch.StartNew();
+
+// Sequencial (ruim para IO independente)
+var r1 = await BuscarDadosAsync("API-A", 100);
+var r2 = await BuscarDadosAsync("API-B", 150);
+var r3 = await BuscarDadosAsync("BD",     80);
+sw.Stop();
+Console.WriteLine($"Sequencial: {sw.ElapsedMilliseconds}ms");
+Console.WriteLine($"  {r1}\n  {r2}\n  {r3}");
+
+// Paralelo com WhenAll (correto!)
+sw.Restart();
+var ta = BuscarDadosAsync("API-A", 100);
+var tb = BuscarDadosAsync("API-B", 150);
+var tc = BuscarDadosAsync("BD",     80);
+var res = await Task.WhenAll(ta, tb, tc);
+var (ra, rb, rc) = (res[0], res[1], res[2]);
+sw.Stop();
+Console.WriteLine($"\nParalelo: {sw.ElapsedMilliseconds}ms (máx 150ms)");
+Console.WriteLine($"  {ra}\n  {rb}\n  {rc}");
+
+// ── 2. CancellationToken ──
+Console.WriteLine("\nCancelamento:");
+var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(120));
+try
+{
+    string resultado = await BuscarDadosAsync("Lenta", 500, cts.Token);
+    Console.WriteLine(resultado);
+}
+catch (OperationCanceledException)
+{
+    Console.WriteLine("  Operação cancelada após 120ms timeout!");
+}
+
+// ── 3. WhenAny — corrida entre tasks ──
+Console.WriteLine("\nWhenAny (primeiro que responder):");
+var tasks = new[]
+{
+    BuscarDadosAsync("Servidor-A", 300),
+    BuscarDadosAsync("Servidor-B", 100),
+    BuscarDadosAsync("Servidor-C", 200),
+};
+var primeiro = await await Task.WhenAny(tasks);
+Console.WriteLine($"  Vencedor: {primeiro}");
+
+// ── 4. ValueTask — sem alocação quando cache hit ──
+var cache = new Dictionary&lt;string, string&gt;();
+static async ValueTask&lt;string&gt; ObterOuBuscarAsync(Dictionary&lt;string,string&gt; c, string key)
+{
+    if (c.TryGetValue(key, out var val)) return val;      // sem alocação
+    await Task.Delay(50);                                   // simula IO
+    c[key] = $"valor-{key}";
+    return c[key];
+}
+
+string v1 = await ObterOuBuscarAsync(cache, "token");   // IO
+string v2 = await ObterOuBuscarAsync(cache, "token");   // cache hit
+Console.WriteLine($"\nValueTask: {v1} | {v2} (mesmos)");</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c-s19-1')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('c-s19-1', this)">⧉ Copiar código</button>
+      </div>
+      <div class="output" id="out-c-s19-1"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 20 -->
+  <section class="lesson" id="s20">
+    <div class="lesson-num">20</div>
+    <h2>Paralelismo e Thread-Safety</h2>
+    <p class="desc">Parallel.For, PLINQ, lock, SemaphoreSlim e coleções thread-safe para operações CPU-bound em múltiplas threads.</p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">lock, Interlocked, Parallel e PLINQ</span>
+      </div>
+      <textarea class="code-input" data-id="c-s20-1" rows="30" spellcheck="false" readonly>using System.Collections.Concurrent;
+using System.Threading;
+using System.Threading.Tasks;
+
+// ── 1. Race condition (bug) vs lock (correto) ──
+int contadorInseguro = 0;
+int contadorSeguro   = 0;
+object _lock = new();
+
+var tasks = Enumerable.Range(0, 1000).Select(_ =&gt; Task.Run(() =&gt;
+{
+    contadorInseguro++;                          // race condition!
+    lock (_lock) { contadorSeguro++; }           // thread-safe
+})).ToArray();
+await Task.WhenAll(tasks);
+
+Console.WriteLine($"Sem lock: {contadorInseguro} (esperado 1000, pode ser menos)");
+Console.WriteLine($"Com lock: {contadorSeguro} (sempre 1000)");
+
+// ── 2. Interlocked — atômico sem lock (mais performático) ──
+int atomico = 0;
+await Task.WhenAll(Enumerable.Range(0, 1000).Select(_ =&gt;
+    Task.Run(() =&gt; Interlocked.Increment(ref atomico))));
+Console.WriteLine($"Interlocked: {atomico}");
+
+// ── 3. ConcurrentDictionary ──
+var contagens = new ConcurrentDictionary&lt;char, int&gt;();
+string texto = "abracadabra banana manga";
+Parallel.ForEach(texto.Where(char.IsLetter), c =&gt;
+    contagens.AddOrUpdate(c, 1, (_, v) =&gt; v + 1));
+
+Console.WriteLine("\nFrequência de letras:");
+foreach (var (c, n) in contagens.OrderByDescending(e =&gt; e.Value).Take(5))
+    Console.WriteLine($"  '{c}': {n}");
+
+// ── 4. Parallel.For ──
+var resultados = new int[10];
+Parallel.For(0, 10, i =&gt; resultados[i] = i * i);
+Console.WriteLine($"\nQuadrados paralelos: [{string.Join(",", resultados)}]");
+
+// ── 5. PLINQ ──
+var primos = Enumerable.Range(2, 10000)
+    .AsParallel()
+    .Where(n =&gt; Enumerable.Range(2, (int)Math.Sqrt(n)).All(d =&gt; n % d != 0))
+    .OrderBy(n =&gt; n)
+    .Take(10)
+    .ToList();
+Console.WriteLine($"10 primeiros primos: [{string.Join(",", primos)}]");
+
+// ── 6. SemaphoreSlim — controla concorrência ──
+var semaforo = new SemaphoreSlim(3); // máximo 3 simultâneos
+var log = new ConcurrentBag&lt;string&gt;();
+
+await Task.WhenAll(Enumerable.Range(1, 7).Select(async i =&gt;
+{
+    await semaforo.WaitAsync();
+    try
+    {
+        log.Add($"Worker {i} iniciou");
+        await Task.Delay(20);
+        log.Add($"Worker {i} terminou");
+    }
+    finally { semaforo.Release(); }
+}));
+
+Console.WriteLine($"\nSemáforo (máx 3): {log.Count} eventos registrados");</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c-s20-1')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('c-s20-1', this)">⧉ Copiar código</button>
+      </div>
+      <div class="output" id="out-c-s20-1"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <div class="module-divider"><span class="tag">Módulo 6 · Banco de Dados</span></div>
+
+  <!-- SEÇÃO 21 -->
+  <section class="lesson" id="s21">
+    <div class="lesson-num">21</div>
+    <h2>ADO.NET — Acesso de Baixo Nível</h2>
+    <p class="desc">ADO.NET é a camada mais próxima do banco. SqlConnection, SqlCommand, parâmetros e proteção contra SQL Injection.</p>
+    <h3>ADO.NET vs ORM</h3>
+    <p><strong>ADO.NET</strong>: controle total do SQL, máxima performance, mais verboso. <strong>ORM (EF Core)</strong>: produtividade, mapeamento automático, migrations. <em>Use ADO.NET quando precisar de queries complexas, stored procedures ou máximo desempenho.</em></p>
+    <p><strong>SEMPRE</strong> use parâmetros (<code class="inline">@nome</code>) em vez de concatenar strings — evita SQL Injection. <strong>SEMPRE</strong> feche conexões com <code class="inline">using</code>.</p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">ADO.NET com SQLite</span>
+      </div>
+      <textarea class="code-input" data-id="c-s21-1" rows="30" spellcheck="false" readonly>// ══ ADO.NET — exemplo conceitual (simulado sem driver real) ══
+// Na prática: dotnet add package Microsoft.Data.Sqlite
+// ou System.Data.SqlClient para SQL Server
+
+// Padrão de código ADO.NET com SqlClient / Sqlite:
+
+using System.Data;
+// using Microsoft.Data.Sqlite;   // descomente ao usar de verdade
+
+string connStr = "Data Source=:memory:";   // SQLite in-memory
+
+/*
+// ── Criar tabela ──
+using var conn = new SqliteConnection(connStr);
+await conn.OpenAsync();
+
+using var createCmd = conn.CreateCommand();
+createCmd.CommandText = @"
+    CREATE TABLE IF NOT EXISTS Clientes (
+        Id      INTEGER PRIMARY KEY AUTOINCREMENT,
+        Nome    TEXT    NOT NULL,
+        Email   TEXT    UNIQUE NOT NULL,
+        Saldo   REAL    DEFAULT 0
+    )";
+await createCmd.ExecuteNonQueryAsync();
+
+// ── INSERT parametrizado (evita SQL Injection) ──
+static async Task InserirCliente(SqliteConnection c, string nome, string email, decimal saldo)
+{
+    using var cmd = c.CreateCommand();
+    cmd.CommandText = "INSERT INTO Clientes (Nome, Email, Saldo) VALUES (@nome, @email, @saldo)";
+    cmd.Parameters.AddWithValue("@nome",  nome);
+    cmd.Parameters.AddWithValue("@email", email);
+    cmd.Parameters.AddWithValue("@saldo", (double)saldo);
+    await cmd.ExecuteNonQueryAsync();
+}
+
+await InserirCliente(conn, "Ana Silva",   "ana@email.com",    1500.00m);
+await InserirCliente(conn, "Bruno Costa", "bruno@email.com",  800.50m);
+await InserirCliente(conn, "Clara Dutra", "clara@email.com",  2200.00m);
+
+// ── SELECT com DataReader ──
+using var selectCmd = conn.CreateCommand();
+selectCmd.CommandText = "SELECT * FROM Clientes WHERE Saldo &gt; @min ORDER BY Nome";
+selectCmd.Parameters.AddWithValue("@min", 1000.0);
+
+using var reader = await selectCmd.ExecuteReaderAsync();
+Console.WriteLine("Clientes com saldo &gt; R$1000:");
+while (await reader.ReadAsync())
+{
+    int    id    = reader.GetInt32(0);
+    string nome  = reader.GetString(1);
+    string email = reader.GetString(2);
+    double saldo = reader.GetDouble(3);
+    Console.WriteLine($"  [{id}] {nome,-15} {email,-20} R${saldo:N2}");
+}
+
+// ── Transação ──
+using var tx = conn.BeginTransaction();
+try
+{
+    using var cmd1 = conn.CreateCommand();
+    cmd1.Transaction = tx;
+    cmd1.CommandText = "UPDATE Clientes SET Saldo = Saldo - 500 WHERE Email = @email";
+    cmd1.Parameters.AddWithValue("@email", "ana@email.com");
+    await cmd1.ExecuteNonQueryAsync();
+
+    using var cmd2 = conn.CreateCommand();
+    cmd2.Transaction = tx;
+    cmd2.CommandText = "UPDATE Clientes SET Saldo = Saldo + 500 WHERE Email = @email";
+    cmd2.Parameters.AddWithValue("@email", "bruno@email.com");
+    await cmd2.ExecuteNonQueryAsync();
+
+    await tx.CommitAsync();
+    Console.WriteLine("Transferência concluída!");
+}
+catch
+{
+    await tx.RollbackAsync();
+    Console.WriteLine("Transferência revertida!");
+    throw;
+}
+*/
+
+// ── Simulação da saída esperada ──
+Console.WriteLine("Conexão ADO.NET estabelecida: Data Source=:memory:");
+Console.WriteLine("Tabela 'Clientes' criada com sucesso");
+Console.WriteLine("\nInserts realizados:");
+Console.WriteLine("  [1] Ana Silva   | ana@email.com   | R$1.500,00");
+Console.WriteLine("  [2] Bruno Costa | bruno@email.com | R$800,50");
+Console.WriteLine("  [3] Clara Dutra | clara@email.com | R$2.200,00");
+Console.WriteLine("\nClientes com saldo &gt; R$1000:");
+Console.WriteLine("  [1] Ana Silva       ana@email.com        R$1.500,00");
+Console.WriteLine("  [3] Clara Dutra     clara@email.com      R$2.200,00");
+Console.WriteLine("\nTransferência (Ana → Bruno): R$500,00");
+Console.WriteLine("  Ana:   R$1.500,00 → R$1.000,00");
+Console.WriteLine("  Bruno: R$800,50   → R$1.300,50");
+Console.WriteLine("Transação COMMIT realizado com sucesso!");</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c-s21-1')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('c-s21-1', this)">⧉ Copiar código</button>
+      </div>
+      <div class="output" id="out-c-s21-1"></div>
+    </div>
+    <div class="callout"><strong>Para rodar:</strong> <code class="inline">dotnet add package Microsoft.Data.Sqlite</code> — descomente o bloco e remova o bloco de simulação. O padrão do código é idêntico para SQL Server (<code class="inline">System.Data.SqlClient</code>), apenas a string de conexão muda.</div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 22 -->
+  <section class="lesson" id="s22">
+    <div class="lesson-num">22</div>
+    <h2>Entity Framework Core</h2>
+    <p class="desc">ORM oficial do .NET. Code-First, migrations, LINQ traduzido para SQL, relacionamentos e rastreamento de entidades.</p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">Entity Framework Core</span>
+      </div>
+      <textarea class="code-input" data-id="c-s22-1" rows="30" spellcheck="false" readonly>// dotnet add package Microsoft.EntityFrameworkCore.InMemory
+// (Troque por .Sqlite ou .SqlServer para produção)
+
+using Microsoft.EntityFrameworkCore;
+
+// ── Entidades ──
+class Categoria
+{
+    public int            Id       { get; set; }
+    public string         Nome     { get; set; } = "";
+    public List&lt;Produto&gt;  Produtos { get; set; } = new();
+}
+
+class Produto
+{
+    public int       Id          { get; set; }
+    public string    Nome        { get; set; } = "";
+    public decimal   Preco       { get; set; }
+    public int       Estoque     { get; set; }
+    public bool      Ativo       { get; set; } = true;
+    public int       CategoriaId { get; set; }
+    public Categoria? Categoria   { get; set; }
+}
+
+// ── DbContext ──
+class LojaDb : DbContext
+{
+    public DbSet&lt;Produto&gt;   Produtos    =&gt; Set&lt;Produto&gt;();
+    public DbSet&lt;Categoria&gt; Categorias  =&gt; Set&lt;Categoria&gt;();
+
+    protected override void OnConfiguring(DbContextOptionsBuilder o)
+        =&gt; o.UseInMemoryDatabase("loja");
+
+    protected override void OnModelCreating(ModelBuilder mb)
+    {
+        mb.Entity&lt;Produto&gt;(e =&gt; {
+            e.Property(p =&gt; p.Preco).HasPrecision(18, 2);
+            e.HasOne(p =&gt; p.Categoria)
+             .WithMany(c =&gt; c.Produtos)
+             .HasForeignKey(p =&gt; p.CategoriaId)
+             .OnDelete(DeleteBehavior.Restrict);
+        });
+    }
+}
+
+await using var db = new LojaDb();
+await db.Database.EnsureCreatedAsync();
+
+// ── Seed ──
+var eletro = new Categoria { Nome = "Eletrônicos" };
+var roupa  = new Categoria { Nome = "Roupas" };
+db.Categorias.AddRange(eletro, roupa);
+
+db.Produtos.AddRange(
+    new Produto { Nome="Notebook",   Preco=3500m, Estoque=10, Categoria=eletro },
+    new Produto { Nome="Smartphone", Preco=1800m, Estoque=25, Categoria=eletro },
+    new Produto { Nome="Fone BT",    Preco=350m,  Estoque=50, Categoria=eletro },
+    new Produto { Nome="Camiseta",   Preco=89m,   Estoque=100,Categoria=roupa  },
+    new Produto { Nome="Jaqueta",    Preco=299m,  Estoque=30, Categoria=roupa  }
+);
+await db.SaveChangesAsync();
+
+// ── Consulta com Include (Eager Loading) ──
+Console.WriteLine("── Produtos (eager loading) ──");
+var prods = await db.Produtos
+    .Include(p =&gt; p.Categoria)
+    .Where(p =&gt; p.Ativo)
+    .OrderBy(p =&gt; p.Categoria!.Nome)
+    .ThenByDescending(p =&gt; p.Preco)
+    .ToListAsync();
+
+foreach (var p in prods)
+    Console.WriteLine($"  [{p.Categoria?.Nome,-12}] {p.Nome,-15} R${p.Preco:N0}  est:{p.Estoque}");
+
+// ── Agrupamento ──
+Console.WriteLine("\n── Resumo por Categoria ──");
+var resumo = await db.Produtos
+    .GroupBy(p =&gt; p.Categoria!.Nome)
+    .Select(g =&gt; new { Cat = g.Key, Total = g.Count(), ValorEstoque = g.Sum(p =&gt; p.Preco * p.Estoque) })
+    .OrderByDescending(x =&gt; x.ValorEstoque)
+    .ToListAsync();
+
+foreach (var r in resumo)
+    Console.WriteLine($"  {r.Cat,-14}: {r.Total} prods, estoque R${r.ValorEstoque:N0}");
+
+// ── UPDATE ──
+var notebook = await db.Produtos.FirstAsync(p =&gt; p.Nome == "Notebook");
+notebook.Preco   = 3200m;   // desconto
+notebook.Estoque = 8;
+await db.SaveChangesAsync();
+Console.WriteLine($"\nNotebook atualizado: R${notebook.Preco:N0}, est:{notebook.Estoque}");
+
+// ── Soft delete (desativar em vez de deletar) ──
+var fone = await db.Produtos.FirstAsync(p =&gt; p.Nome == "Fone BT");
+fone.Ativo = false;
+await db.SaveChangesAsync();
+
+int ativos = await db.Produtos.CountAsync(p =&gt; p.Ativo);
+Console.WriteLine($"Produtos ativos: {ativos}/{await db.Produtos.CountAsync()}");</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c-s22-1')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('c-s22-1', this)">⧉ Copiar código</button>
+      </div>
+      <div class="output" id="out-c-s22-1"></div>
+    </div>
+    <div class="analogy"><strong>Migrations no projeto real:</strong> <code class="inline">dotnet ef migrations add Inicial</code> → <code class="inline">dotnet ef database update</code>. Isso gera e aplica o schema SQL automaticamente baseado nas suas entidades.</div>
+  </section>
+
+  <hr class="divider">
+
+  <div class="module-divider"><span class="tag">Módulo 7 · Web e Arquitetura</span></div>
+
+  <!-- SEÇÃO 23 -->
+  <section class="lesson" id="s23">
+    <div class="lesson-num">23</div>
+    <h2>API REST com ASP.NET Core</h2>
+    <p class="desc">Minimal APIs (C# 10+), middleware, injeção de dependência, validação e JWT — tudo para uma API profissional.</p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">Minimal API com ASP.NET Core</span>
+      </div>
+      <textarea class="code-input" data-id="c-s23-1" rows="30" spellcheck="false" readonly>// ══ ASP.NET Core Minimal API — Program.cs ══
+// dotnet new webapi -minimal -n MinhaApi
+// dotnet add package Microsoft.EntityFrameworkCore.InMemory
+
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using System.ComponentModel.DataAnnotations;
+
+// ── DTOs e Modelos ──
+record CriarTarefaDto([Required] string Titulo, string? Descricao = null, int Prioridade = 0);
+record AtualizarTarefaDto(string? Titulo, bool? Concluida, int? Prioridade);
+
+class Tarefa
+{
+    public int      Id        { get; set; }
+    public string   Titulo    { get; set; } = "";
+    public string?  Descricao { get; set; }
+    public bool     Concluida { get; set; }
+    public int      Prioridade{ get; set; }
+    public DateTime Criada    { get; set; } = DateTime.UtcNow;
+    public DateTime? Atualizada{ get; set; }
+}
+
+class AppDb : DbContext
+{
+    public AppDb(DbContextOptions&lt;AppDb&gt; o) : base(o) {}
+    public DbSet&lt;Tarefa&gt; Tarefas =&gt; Set&lt;Tarefa&gt;();
+}
+
+// ── Serviço de negócio (injetável) ──
+class TarefaService
+{
+    private readonly AppDb _db;
+    public TarefaService(AppDb db) =&gt; _db = db;
+
+    public async Task&lt;List&lt;Tarefa&gt;&gt; ListarAsync(bool? concluida = null)
+    {
+        var q = _db.Tarefas.AsQueryable();
+        if (concluida.HasValue) q = q.Where(t =&gt; t.Concluida == concluida);
+        return await q.OrderBy(t =&gt; t.Prioridade).ThenBy(t =&gt; t.Criada).ToListAsync();
+    }
+
+    public async Task&lt;Tarefa?&gt; BuscarAsync(int id)
+        =&gt; await _db.Tarefas.FindAsync(id);
+
+    public async Task&lt;Tarefa&gt; CriarAsync(CriarTarefaDto dto)
+    {
+        var t = new Tarefa { Titulo = dto.Titulo, Descricao = dto.Descricao, Prioridade = dto.Prioridade };
+        _db.Tarefas.Add(t);
+        await _db.SaveChangesAsync();
+        return t;
+    }
+
+    public async Task&lt;bool&gt; AtualizarAsync(int id, AtualizarTarefaDto dto)
+    {
+        var t = await _db.Tarefas.FindAsync(id);
+        if (t is null) return false;
+        if (dto.Titulo is not null) t.Titulo = dto.Titulo;
+        if (dto.Concluida.HasValue) t.Concluida = dto.Concluida.Value;
+        if (dto.Prioridade.HasValue) t.Prioridade = dto.Prioridade.Value;
+        t.Atualizada = DateTime.UtcNow;
+        await _db.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task&lt;bool&gt; RemoverAsync(int id)
+    {
+        var t = await _db.Tarefas.FindAsync(id);
+        if (t is null) return false;
+        _db.Tarefas.Remove(t);
+        await _db.SaveChangesAsync();
+        return true;
+    }
+}
+
+// ── Bootstrap ──
+var builder = WebApplication.CreateBuilder();
+builder.Services.AddDbContext&lt;AppDb&gt;(o =&gt; o.UseInMemoryDatabase("tarefas"));
+builder.Services.AddScoped&lt;TarefaService&gt;();
+builder.Services.AddEndpointsApiExplorer();
+
+var app = builder.Build();
+
+// ── Middleware customizado ──
+app.Use(async (ctx, next) =&gt;
+{
+    Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] {ctx.Request.Method} {ctx.Request.Path}");
+    await next();
+    Console.WriteLine($"  → {ctx.Response.StatusCode}");
+});
+
+// ── Endpoints ──
+var api = app.MapGroup("/api/tarefas").WithTags("Tarefas");
+
+api.MapGet("/", async (TarefaService svc, bool? concluida) =&gt;
+    Results.Ok(await svc.ListarAsync(concluida)));
+
+api.MapGet("/{id:int}", async (int id, TarefaService svc) =&gt;
+    await svc.BuscarAsync(id) is Tarefa t ? Results.Ok(t) : Results.NotFound());
+
+api.MapPost("/", async (CriarTarefaDto dto, TarefaService svc) =&gt;
+{
+    if (string.IsNullOrWhiteSpace(dto.Titulo))
+        return Results.BadRequest(new { erro = "Título obrigatório" });
+    var tarefa = await svc.CriarAsync(dto);
+    return Results.Created($"/api/tarefas/{tarefa.Id}", tarefa);
+});
+
+api.MapPatch("/{id:int}", async (int id, AtualizarTarefaDto dto, TarefaService svc) =&gt;
+    await svc.AtualizarAsync(id, dto) ? Results.Ok() : Results.NotFound());
+
+api.MapDelete("/{id:int}", async (int id, TarefaService svc) =&gt;
+    await svc.RemoverAsync(id) ? Results.NoContent() : Results.NotFound());
+
+// Status especial
+api.MapGet("/stats", async (AppDb db) =&gt; Results.Ok(new
+{
+    Total       = await db.Tarefas.CountAsync(),
+    Concluidas  = await db.Tarefas.CountAsync(t =&gt; t.Concluida),
+    Pendentes   = await db.Tarefas.CountAsync(t =&gt; !t.Concluida),
+}));
+
+// app.Run();   // descomente para rodar de verdade → http://localhost:5000
+Console.WriteLine("=== ASP.NET Core Minimal API ===");
+Console.WriteLine("Endpoints registrados:");
+Console.WriteLine("  GET    /api/tarefas          → lista (filtro ?concluida=true/false)");
+Console.WriteLine("  GET    /api/tarefas/{id}     → busca por ID");
+Console.WriteLine("  POST   /api/tarefas          → cria nova tarefa");
+Console.WriteLine("  PATCH  /api/tarefas/{id}     → atualiza parcialmente");
+Console.WriteLine("  DELETE /api/tarefas/{id}     → remove");
+Console.WriteLine("  GET    /api/tarefas/stats    → estatísticas");
+Console.WriteLine("\nTeste rápido (curl):");
+Console.WriteLine("""  curl -X POST http://localhost:5000/api/tarefas \""");
+Console.WriteLine("""       -H "Content-Type: application/json" \""");
+Console.WriteLine("""       -d '{"titulo":"Estudar C#","prioridade":1}'""");</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c-s23-1')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('c-s23-1', this)">⧉ Copiar código</button>
+      </div>
+      <div class="output" id="out-c-s23-1"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 24 -->
+  <section class="lesson" id="s24">
+    <div class="lesson-num">24</div>
+    <h2>SOLID e Design Patterns</h2>
+    <p class="desc">Os 5 princípios SOLID e os padrões mais usados na prática: Strategy, Repository, Factory, Observer e Decorator.</p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">Strategy, Observer, Decorator e Factory</span>
+      </div>
+      <textarea class="code-input" data-id="c-s24-1" rows="30" spellcheck="false" readonly>// ═══ STRATEGY — algoritmo intercambiável ═══
+interface IOrdenacao&lt;T&gt;
+{
+    IEnumerable&lt;T&gt; Ordenar(IEnumerable&lt;T&gt; itens);
+}
+
+class OrdenarPorNome  : IOrdenacao&lt;string&gt; { public IEnumerable&lt;string&gt; Ordenar(IEnumerable&lt;string&gt; i) =&gt; i.OrderBy(s =&gt; s); }
+class OrdenarPorTamanho : IOrdenacao&lt;string&gt; { public IEnumerable&lt;string&gt; Ordenar(IEnumerable&lt;string&gt; i) =&gt; i.OrderBy(s =&gt; s.Length); }
+class OrdenarInverso  : IOrdenacao&lt;string&gt; { public IEnumerable&lt;string&gt; Ordenar(IEnumerable&lt;string&gt; i) =&gt; i.OrderByDescending(s =&gt; s); }
+
+class Sorter&lt;T&gt;
+{
+    private IOrdenacao&lt;T&gt; _estrategia;
+    public Sorter(IOrdenacao&lt;T&gt; e) =&gt; _estrategia = e;
+    public void MudarEstrategia(IOrdenacao&lt;T&gt; e) =&gt; _estrategia = e;
+    public IEnumerable&lt;T&gt; Executar(IEnumerable&lt;T&gt; itens) =&gt; _estrategia.Ordenar(itens);
+}
+
+var palavras = new[] { "banana", "maçã", "kiwi", "abacaxi", "uva" };
+var sorter = new Sorter&lt;string&gt;(new OrdenarPorNome());
+Console.WriteLine("Por nome:    " + string.Join(", ", sorter.Executar(palavras)));
+sorter.MudarEstrategia(new OrdenarPorTamanho());
+Console.WriteLine("Por tamanho: " + string.Join(", ", sorter.Executar(palavras)));
+
+// ═══ OBSERVER — eventos tipados ═══
+class PedidoEventArgs : EventArgs { public int Id { get; init; } public decimal Valor { get; init; } }
+
+class SistemaPedidos
+{
+    public event EventHandler&lt;PedidoEventArgs&gt;? PedidoCriado;
+    public event EventHandler&lt;PedidoEventArgs&gt;? PedidoCancelado;
+
+    public void Criar(int id, decimal valor)
+    {
+        Console.WriteLine($"\n[Pedido] Criado #{id} R${valor:N2}");
+        PedidoCriado?.Invoke(this, new PedidoEventArgs { Id = id, Valor = valor });
+    }
+}
+
+var pedidos = new SistemaPedidos();
+pedidos.PedidoCriado += (_, e) =&gt; Console.WriteLine($"  [Email]  Confirmação enviada para pedido #{e.Id}");
+pedidos.PedidoCriado += (_, e) =&gt; Console.WriteLine($"  [Estoque] Reserva feita: R${e.Valor:N2}");
+pedidos.PedidoCriado += (_, e) =&gt; Console.WriteLine($"  [Log]    Auditoria: pedido #{e.Id} registrado");
+
+pedidos.Criar(101, 350m);
+pedidos.Criar(102, 1200m);
+
+// ═══ DECORATOR — adiciona comportamento sem herança ═══
+interface INotificador { void Enviar(string msg); }
+
+class NotificadorConsole : INotificador
+{
+    public void Enviar(string msg) =&gt; Console.WriteLine($"\n[Console] {msg}");
+}
+
+class NotificadorComTimestamp : INotificador
+{
+    private readonly INotificador _inner;
+    public NotificadorComTimestamp(INotificador inner) =&gt; _inner = inner;
+    public void Enviar(string msg) =&gt; _inner.Enviar($"[{DateTime.Now:HH:mm:ss}] {msg}");
+}
+
+class NotificadorComPrefixo : INotificador
+{
+    private readonly INotificador _inner;
+    private readonly string _prefixo;
+    public NotificadorComPrefixo(INotificador inner, string p) { _inner = inner; _prefixo = p; }
+    public void Enviar(string msg) =&gt; _inner.Enviar($"{_prefixo}: {msg}");
+}
+
+// Compõe decoradores
+INotificador notif = new NotificadorComPrefixo(
+    new NotificadorComTimestamp(new NotificadorConsole()),
+    "INFO");
+
+notif.Enviar("Sistema iniciado");
+notif.Enviar("Usuário logado");
+
+// ═══ FACTORY ═══
+interface IAnimal { string Falar(); }
+class Cachorro2 : IAnimal { public string Falar() =&gt; "Au au!"; }
+class Gato2     : IAnimal { public string Falar() =&gt; "Miau!"; }
+class Passaro   : IAnimal { public string Falar() =&gt; "Piu piu!"; }
+
+static IAnimal CriarAnimal(string tipo) =&gt; tipo.ToLower() switch
+{
+    "cachorro" =&gt; new Cachorro2(),
+    "gato"     =&gt; new Gato2(),
+    "passaro"  =&gt; new Passaro(),
+    _          =&gt; throw new ArgumentException($"Animal desconhecido: {tipo}")
+};
+
+foreach (var tipo in new[] { "cachorro", "gato", "passaro" })
+{
+    var animal = CriarAnimal(tipo);
+    Console.WriteLine($"\n[Factory] {tipo}: {animal.Falar()}");
+}</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c-s24-1')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('c-s24-1', this)">⧉ Copiar código</button>
+      </div>
+      <div class="output" id="out-c-s24-1"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 25 -->
+  <section class="lesson" id="s25">
+    <div class="lesson-num">25</div>
+    <h2>Testes Automatizados com xUnit</h2>
+    <p class="desc">Testes de unidade, TDD (Red-Green-Refactor), Mocks e testes de integração com xUnit e Moq.</p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">testes unitários</span>
+      </div>
+      <textarea class="code-input" data-id="c-s25-1" rows="30" spellcheck="false" readonly>// dotnet new xunit -n MinhaApi.Tests
+// dotnet add package Moq
+// dotnet add package FluentAssertions
+
+// ── Código de produção a ser testado ──
+class Calculadora
+{
+    public int Somar(int a, int b)       =&gt; a + b;
+    public int Subtrair(int a, int b)    =&gt; a - b;
+    public double Dividir(double a, double b)
+    {
+        if (b == 0) throw new DivideByZeroException("Divisor não pode ser zero");
+        return a / b;
+    }
+    public bool EhPrimo(int n)
+    {
+        if (n &lt; 2) return false;
+        for (int i = 2; i &lt;= Math.Sqrt(n); i++)
+            if (n % i == 0) return false;
+        return true;
+    }
+}
+
+// ── Mini framework de testes inline ──
+int passou = 0, falhou = 0;
+void Assert(string nome, bool condicao, string? esperado = null, string? obtido = null)
+{
+    if (condicao) { Console.WriteLine($"  ✓ {nome}"); passou++; }
+    else {
+        string det = esperado != null ? $" (esperado: {esperado}, obtido: {obtido})" : "";
+        Console.WriteLine($"  ✗ {nome}{det}"); falhou++;
+    }
+}
+void AssertThrows&lt;T&gt;(string nome, Action acao) where T : Exception
+{
+    try { acao(); Console.WriteLine($"  ✗ {nome} (não lançou exceção)"); falhou++; }
+    catch (T) { Console.WriteLine($"  ✓ {nome}"); passou++; }
+    catch (Exception ex) { Console.WriteLine($"  ✗ {nome} (exceção errada: {ex.GetType().Name})"); falhou++; }
+}
+
+var calc = new Calculadora();
+
+Console.WriteLine("── Testes: Calculadora ──");
+Assert("Somar(2,3) == 5",        calc.Somar(2,3)    == 5);
+Assert("Somar(-1,1) == 0",       calc.Somar(-1,1)   == 0);
+Assert("Somar(0,0)  == 0",       calc.Somar(0,0)    == 0);
+Assert("Subtrair(10,3) == 7",    calc.Subtrair(10,3)== 7);
+Assert("Dividir(10,2) == 5",     calc.Dividir(10,2) == 5.0);
+Assert("Dividir(1,3) ≈ 0.333",   Math.Abs(calc.Dividir(1,3) - 0.333) &lt; 0.001);
+AssertThrows&lt;DivideByZeroException&gt;("Dividir por zero lança exceção",
+    () =&gt; calc.Dividir(5, 0));
+
+Console.WriteLine("\n── Testes: EhPrimo ──");
+int[] primos  = { 2, 3, 5, 7, 11, 13, 17, 19 };
+int[] nprimos = { 0, 1, 4, 6, 8, 9, 10, 15 };
+foreach (int p in primos)  Assert($"EhPrimo({p,2}) == true",  calc.EhPrimo(p));
+foreach (int n in nprimos) Assert($"EhPrimo({n,2}) == false", !calc.EhPrimo(n));
+
+Console.WriteLine($"\n── Resultado: {passou} ✓ | {falhou} ✗ ──");
+
+// ── Exemplo de como seria com xUnit real ──
+Console.WriteLine("""
+  
+  // Como seria em um projeto xUnit real:
+  
+  public class CalculadoraTests
+  {
+      private readonly Calculadora _sut = new();   // SUT = System Under Test
+      
+      [Fact]
+      public void Somar_DeveRetornarSomaCorreta()
+      {
+          var resultado = _sut.Somar(2, 3);
+          Assert.Equal(5, resultado);
+      }
+      
+      [Theory]
+      [InlineData(2)]  [InlineData(3)]  [InlineData(5)]  [InlineData(7)]
+      public void EhPrimo_ComPrimosConhecidos_DeveRetornarTrue(int n)
+          =&gt; Assert.True(_sut.EhPrimo(n));
+      
+      [Fact]
+      public void Dividir_PorZero_DeveLancarExcecao()
+          =&gt; Assert.Throws&lt;DivideByZeroException&gt;(() =&gt; _sut.Dividir(1, 0));
+  }
+""");</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c-s25-1')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('c-s25-1', this)">⧉ Copiar código</button>
+      </div>
+      <div class="output" id="out-c-s25-1"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <div class="module-divider"><span class="tag">Módulo 8 · Avançado</span></div>
+
+  <!-- SEÇÃO 26 -->
+  <section class="lesson" id="s26">
+    <div class="lesson-num">26</div>
+    <h2>Gerenciamento de Memória e Performance</h2>
+    <p class="desc">Stack vs Heap, Garbage Collector, IDisposable, Span&lt;T&gt;, WeakReference e dicas de profiling.</p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">memória, IDisposable, WeakReference e Span</span>
+      </div>
+      <textarea class="code-input" data-id="c-s26-1" rows="30" spellcheck="false" readonly>using System.Runtime;
+
+// ── 1. Tipos por valor (stack) vs referência (heap) ──
+struct Ponto { public int X, Y; }   // stack
+class  PontoRef { public int X, Y; } // heap
+
+Ponto  s1 = new Ponto  { X=1, Y=2 };
+Ponto  s2 = s1;          // cópia de valor
+s2.X = 99;
+Console.WriteLine($"Struct cópia — s1.X={s1.X}, s2.X={s2.X}");   // 1, 99 (independentes)
+
+PontoRef r1 = new PontoRef { X=1, Y=2 };
+PontoRef r2 = r1;         // cópia de referência (mesmo objeto!)
+r2.X = 99;
+Console.WriteLine($"Class ref — r1.X={r1.X}, r2.X={r2.X}");      // 99, 99 (mesmo)
+
+// ── 2. Boxing e Unboxing ──
+int valorInt = 42;
+object boxed   = valorInt;    // boxing: cópia do int para heap
+int unboxed    = (int)boxed;  // unboxing: extrai de volta
+Console.WriteLine($"\nBoxing: {boxed.GetType().Name}, valor={unboxed}");
+// Evite boxing em hot paths! List&lt;int&gt; não boxa, ArrayList boxa.
+
+// ── 3. IDisposable — liberação determinística ──
+class RecursoExterno : IDisposable
+{
+    private bool _disposed = false;
+    private readonly string _nome;
+
+    public RecursoExterno(string nome)
+    {
+        _nome = nome;
+        Console.WriteLine($"[{_nome}] Recurso ABERTO");
+    }
+
+    public void Usar() { ObjectDisposedException.ThrowIf(_disposed, this); Console.WriteLine($"[{_nome}] Usando recurso"); }
+
+    public void Dispose()
+    {
+        if (!_disposed)
+        {
+            Console.WriteLine($"[{_nome}] Recurso FECHADO");
+            _disposed = true;
+        }
+        GC.SuppressFinalize(this);
+    }
+
+    ~RecursoExterno() =&gt; Dispose();   // Finalizer como segurança
+}
+
+Console.WriteLine("\n── IDisposable com using ──");
+using (var r = new RecursoExterno("Arquivo")) { r.Usar(); }   // Dispose automático
+
+// using declarativo (C# 8+)
+using var r2 = new RecursoExterno("Conexão");
+r2.Usar();
+// Dispose ocorre ao sair do escopo
+
+// ── 4. WeakReference — cache sem impedir GC ──
+Console.WriteLine("\n── WeakReference ──");
+var obj = new int[] { 1, 2, 3, 4, 5 };
+var weak = new WeakReference&lt;int[]&gt;(obj);
+
+if (weak.TryGetTarget(out var arr)) Console.WriteLine($"Vivo: [{string.Join(",", arr)}]");
+
+obj = null!;
+GC.Collect();   // força GC (só para demo)
+Console.WriteLine(weak.TryGetTarget(out _) ? "Ainda vivo" : "Foi coletado pelo GC");
+
+// ── 5. Span&lt;T&gt; — acesso sem alocação ──
+Console.WriteLine("\n── Span&lt;T&gt; (zero-alloc) ──");
+static int SomarSpan(ReadOnlySpan&lt;int&gt; nums)
+{
+    int total = 0;
+    foreach (var n in nums) total += n;
+    return total;
+}
+
+int[] array = Enumerable.Range(1, 10).ToArray();
+Console.WriteLine($"Soma total: {SomarSpan(array)}");
+Console.WriteLine($"Soma [3..7]: {SomarSpan(array.AsSpan(3, 4))}");   // sem alocar sub-array
+
+// ── GC info ──
+Console.WriteLine($"\nMemória usada: {GC.GetTotalMemory(false) / 1024:N0} KB");
+Console.WriteLine($"Gen 0: {GC.CollectionCount(0)}, Gen 1: {GC.CollectionCount(1)}, Gen 2: {GC.CollectionCount(2)}");</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c-s26-1')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('c-s26-1', this)">⧉ Copiar código</button>
+      </div>
+      <div class="output" id="out-c-s26-1"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 27 -->
+  <section class="lesson" id="s27">
+    <div class="lesson-num">27</div>
+    <h2>Recursos Modernos — C# 10 ao 13</h2>
+    <p class="desc">Global using, file-scoped namespaces, primary constructors, collection expressions, required members e outros recursos das versões recentes.</p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">recursos do C# 10 ao 13</span>
+      </div>
+      <textarea class="code-input" data-id="c-s27-1" rows="30" spellcheck="false" readonly>// ── C# 10: Global using (em GlobalUsings.cs do projeto) ──
+// global using System.Collections.Generic;   // disponível em todos os arquivos
+
+// ── C# 10: File-scoped namespace ──
+// namespace MeuApp;   // em vez de namespace MeuApp { ... }
+
+// ── C# 10: Constantes em strings interpoladas ──
+const string PREFIX = "ID";
+const string FMT    = $"{PREFIX}-0001";   // interpolação em const!
+Console.WriteLine($"Constante interpolada: {FMT}");
+
+// ── C# 11: Required members ──
+class Configuracao
+{
+    public required string Host  { get; init; }
+    public required int    Porta { get; init; }
+    public string DbNome         { get; init; } = "app";
+}
+var cfg = new Configuracao { Host = "localhost", Porta = 5432 };
+Console.WriteLine($"Conexão: {cfg.Host}:{cfg.Porta}/{cfg.DbNome}");
+
+// ── C# 11: Raw string literals ──
+string json = """
+    {
+        "nome": "Ana",
+        "idade": 30,
+        "ativo": true
+    }
+    """;
+Console.WriteLine("Raw string:\n" + json);
+
+// ── C# 12: Primary constructors ──
+class Ponto3D(double x, double y, double z)
+{
+    public double X { get; } = x;
+    public double Y { get; } = y;
+    public double Z { get; } = z;
+    public double Modulo =&gt; Math.Sqrt(X*X + Y*Y + Z*Z);
+    public override string ToString() =&gt; $"({X}, {Y}, {Z})";
+}
+
+var p = new Ponto3D(1, 2, 3);
+Console.WriteLine($"\nPonto3D: {p}, módulo={p.Modulo:F3}");
+
+// ── C# 12: Collection expressions ──
+int[] arr1 = [1, 2, 3];
+List&lt;string&gt; nomes = ["Ana", "Bruno", "Carlos"];
+int[] combinado = [.. arr1, 4, 5, .. new[]{6,7}];   // spread operator
+Console.WriteLine($"Array:    [{string.Join(",", arr1)}]");
+Console.WriteLine($"Combinado:[{string.Join(",", combinado)}]");
+
+// ── C# 12: Default lambda params ──
+var saudar = (string nome, string saudacao = "Olá") =&gt; $"{saudacao}, {nome}!";
+Console.WriteLine(saudar("Ana"));
+Console.WriteLine(saudar("Bob", "Oi"));
+
+// ── C# 11: Generic math ──
+static T Somar&lt;T&gt;(T a, T b) where T : System.Numerics.INumber&lt;T&gt; =&gt; a + b;
+Console.WriteLine($"\nGeneric Math: {Somar(3, 4)} | {Somar(1.5, 2.5)} | {Somar(10m, 20m)}");
+
+// ── C# 13: params em coleções ──
+static void Listar(params IEnumerable&lt;string&gt; itens)
+    =&gt; Console.WriteLine(string.Join(", ", itens));
+Listar(["A", "B", "C"]);
+
+// ── Nullable reference types ──
+#nullable enable
+string? nullable = null;
+string nonnull   = "obrigatório";
+Console.WriteLine($"\n#nullable: '{nullable ?? "nulo"}' | '{nonnull}'");
+#nullable restore</textarea>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('c-s27-1')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('c-s27-1', this)">⧉ Copiar código</button>
+      </div>
+      <div class="output" id="out-c-s27-1"></div>
+    </div>
+    <div class="tip"><strong>Parabéns!</strong> Você cobriu todo o guia: de tipos primitivos até ASP.NET Core, EF Core, SOLID, testes e recursos modernos do C# 13. O próximo passo é construir um projeto completo integrando todas essas peças.</div>
+  </section>
+
+  <hr class="divider">
+
+  <footer>
+    Você passou pelo guia de C# de ponta a ponta. <span class="accent">Continue praticando</span> —
+    crie um projeto com <code class="inline">dotnet new console</code> e teste cada exemplo no seu computador.
+  </footer>
+
+</div>
+
+<script>
+/* ───────────────────────────────────────────────────────────────
+   Emulação em JS dos programas C# do notebook (seções 1–15) e
+   saídas fixas das seções 16–27 (geradas na montagem da página).
+   Cultura de formatação: pt-BR (R$ 1.234,56 · 3,14).
+   ─────────────────────────────────────────────────────────────── */
+
+const CULTURE = { dec: ',', grp: '.', cur: 'R$\u00a0', pct: '%' };   // troque para { dec:'.', grp:',', cur:'$', pct:'%' } p/ en-US
+
+/* ── formatação numérica estilo .NET (meio arredondado para longe do zero) ── */
+function _fixed(x, d) {
+  const neg = x < 0 && Math.abs(x) >= 0.5 * Math.pow(10, -d);
+  const s = Math.abs(x).toFixed(Math.min(100, d + 25));
+  const dot = s.indexOf('.');
+  let digits = s.slice(0, dot) + s.slice(dot + 1, dot + 1 + d);
+  if (s.charCodeAt(dot + 1 + d) - 48 >= 5) {
+    const a = digits.split(''); let i = a.length - 1;
+    while (i >= 0) { if (a[i] === '9') { a[i] = '0'; i--; } else { a[i] = String(+a[i] + 1); break; } }
+    if (i < 0) a.unshift('1');
+    digits = a.join('');
+  }
+  const ip = d > 0 ? digits.slice(0, digits.length - d) : digits;
+  const fp = d > 0 ? digits.slice(digits.length - d) : '';
+  return { neg, ip, fp };
+}
+const _group = ip => ip.replace(/\B(?=(\d{3})+(?!\d))/g, CULTURE.grp);
+const F = (x, d = 2) => { const r = _fixed(x, d); return (r.neg ? '-' : '') + r.ip + (d ? CULTURE.dec + r.fp : ''); };
+const N = (x, d = 2) => { const r = _fixed(x, d); return (r.neg ? '-' : '') + _group(r.ip) + (d ? CULTURE.dec + r.fp : ''); };
+const C = (x, d = 2) => { const r = _fixed(x, d); return (r.neg ? '-' : '') + CULTURE.cur + _group(r.ip) + (d ? CULTURE.dec + r.fp : ''); };
+const P = (x, d = 2) => { const r = _fixed(x * 100, d); return (r.neg ? '-' : '') + _group(r.ip) + (d ? CULTURE.dec + r.fp : '') + CULTURE.pct; };
+const X = x => Math.trunc(x).toString(16).toUpperCase();
+const B = (x, w = 0) => Math.trunc(x).toString(2).padStart(w, '0');
+/* ToString() padrão: inteiros normais, doubles com a vírgula da cultura */
+const D = x => (Number.isInteger(x) ? String(x) : String(x).replace('.', CULTURE.dec));
+/* alinhamento de interpolação: {x,5} (direita) e {x,-10} (esquerda) */
+const pad = (s, w) => { s = String(s); return w >= 0 ? s.padStart(w) : s.padEnd(-w); };
+const bool = b => (b ? 'True' : 'False');
+
+const _p2 = n => String(n).padStart(2, '0');
+const hhmmss = (d = new Date()) => `${_p2(d.getHours())}:${_p2(d.getMinutes())}:${_p2(d.getSeconds())}`;
+const hhmm = (d = new Date()) => `${_p2(d.getHours())}:${_p2(d.getMinutes())}`;
+const dmy = (d = new Date()) => `${_p2(d.getDate())}/${_p2(d.getMonth() + 1)}/${d.getFullYear()}`;
+const guid8 = () => Array.from({ length: 8 }, () => '0123456789abcdef'[Math.floor(Math.random() * 16)]).join('');
+
+/* System.Random(seed) do .NET (algoritmo legado, determinístico) */
+class DotNetRandom {
+  constructor(seed) {
+    const MBIG = 2147483647, MSEED = 161803398;
+    this.s = new Array(56).fill(0);
+    let mj = MSEED - Math.abs(seed), mk = 1, ii = 0;
+    this.s[55] = mj;
+    for (let i = 1; i < 55; i++) {
+      ii += 21; if (ii >= 55) ii -= 55;
+      this.s[ii] = mk; mk = mj - mk; if (mk < 0) mk += MBIG; mj = this.s[ii];
+    }
+    for (let k = 1; k < 5; k++) for (let i = 1; i < 56; i++) {
+      let n = i + 30; if (n >= 55) n -= 55;
+      this.s[i] -= this.s[1 + n]; if (this.s[i] < 0) this.s[i] += MBIG;
+    }
+    this.a = 0; this.b = 21;
+  }
+  internal() {
+    let a = this.a + 1; if (a >= 56) a = 1;
+    let b = this.b + 1; if (b >= 56) b = 1;
+    let r = this.s[a] - this.s[b];
+    if (r === 2147483647) r--; if (r < 0) r += 2147483647;
+    this.s[a] = r; this.a = a; this.b = b; return r;
+  }
+  next(max) { return max === undefined ? this.internal() : Math.floor(this.internal() * (1.0 / 2147483647) * max); }
+}
+
+/* ═════════ Seções 1–15: execução por emulação ═════════ */
+const CS = {};
+
+CS['c-s1-1'] = ({ WriteLine }) => {
+  const idade = 30, pop = 8000000000, preco = 19.99, valor = 1234.56, temp = 36.6;
+  const nome = 'Arthur', notaOpcional = 10;
+  const convertido = 42, okInt = false, truncado = 3;
+  WriteLine(`idade=${idade}, pop=${N(pop, 0)}, preco=${C(preco, 2)}`);
+  WriteLine(`decimal=${N(valor, 2)}, float=${F(temp, 1)}`);
+  WriteLine(`nome=${nome} (String)`);
+  WriteLine(`nullable=${notaOpcional ?? 0}`);
+  WriteLine(`Parse=${convertido}, TryParse ok=${bool(okInt)}, Cast=${truncado}`);
+  WriteLine(`sizeof int=4, sizeof double=8`);
+};
+
+CS['c-s1-2'] = ({ WriteLine, Write }) => {
+  const s = '  Olá, Mundo C#!  ';
+  WriteLine(s.trim());
+  WriteLine(s.toUpperCase());
+  WriteLine(s.replace('Mundo', 'Dev'));
+  WriteLine(bool(s.includes('C#')));
+  WriteLine(s.trimStart().substring(0, 4));
+  const nomes = 'Ana,Bob,Carlos,Diana'.split(',');
+  WriteLine(nomes.join(' | '));
+  const valor = 1234567.89;
+  WriteLine(`Moeda:    ${C(valor, 2)}`);
+  WriteLine(`Número:   ${N(valor, 0)}`);
+  WriteLine(`Percent:  ${P(0.856, 1)}`);
+  WriteLine(`Hex:      ${X(255)}`);
+  WriteLine(`Data:     ${dmy()} ${hhmm()}`);
+  let sb = '';
+  for (let i = 1; i <= 5; i++) sb += `  Linha ${i}: ${pad('*', -10)} ${pad(i * i, 5)}\n`;
+  Write(sb);
+  WriteLine('C:\\Users\\Dev\\projetos\\app');
+  WriteLine('{"nome": "Ana", "idade": 30}');
+  WriteLine('World');
+};
+
+CS['c-s2-1'] = ({ WriteLine }) => {
+  WriteLine(`7 + 3 = ${7 + 3}`);
+  WriteLine(`7 - 3 = ${7 - 3}`);
+  WriteLine(`7 * 3 = ${7 * 3}`);
+  WriteLine(`7 / 3 = ${Math.trunc(7 / 3)}   (inteiro!)`);
+  WriteLine(`7.0/3 = ${F(7.0 / 3, 4)}`);
+  WriteLine(`7 % 3 = ${7 % 3}   (resto)`);
+  WriteLine(`2^10  = ${D(Math.pow(2, 10))}`);
+
+  let a = 5;
+  const a1 = a++; WriteLine(`a++=${a1}, a=${a}`);
+  const a2 = ++a; WriteLine(`++a=${a2}, a=${a}`);
+
+  const x = true, y = false;
+  WriteLine(`x && y = ${bool(x && y)}`);
+  WriteLine(`x || y = ${bool(x || y)}`);
+  WriteLine(`!x     = ${bool(!x)}`);
+  WriteLine(`x ^ y  = ${bool(x !== y)}`);
+
+  const b = 0b10101100, c = 0b00111100;
+  WriteLine(`AND:  ${B(b & c, 8)}  = ${b & c}`);
+  WriteLine(`OR:   ${B(b | c, 8)}  = ${b | c}`);
+  WriteLine(`XOR:  ${B(b ^ c, 8)}  = ${b ^ c}`);
+  WriteLine(`SHL:  ${60 << 2}  (60 * 4)`);
+  WriteLine(`SHR:  ${60 >> 1}  (60 / 2)`);
+
+  let s = null;
+  const resultado = s ?? 'padrão';
+  const resultado2 = s?.toUpperCase();
+  s ??= 'atribuído';
+  WriteLine(`?? = ${resultado}`);
+  WriteLine(`?. = ${resultado2 ?? 'null'}`);
+  WriteLine(`??= s agora é: ${s}`);
+
+  const nota = 75;
+  WriteLine(nota >= 60 ? 'Aprovado' : 'Reprovado');
+
+  const arr = [10, 20, 30, 40, 50];
+  WriteLine(`Último: ${arr[arr.length - 1]}, Penúltimo: ${arr[arr.length - 2]}`);
+  WriteLine(`[1..3]: ${arr.slice(1, 3).join(',')}`);
+};
+
+CS['c-s3-1'] = ({ WriteLine, Write }) => {
+  const diaSemana = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][new Date().getDay()];
+  switch (diaSemana) {
+    case 'Saturday':
+    case 'Sunday': WriteLine('Fim de semana!'); break;
+    case 'Monday': WriteLine('Segunda, começo da semana.'); break;
+    default: WriteLine(`Dia útil: ${diaSemana}`);
+  }
+
+  const nota = 83;
+  const conceito = nota >= 90 ? 'A — Excelente' : nota >= 80 ? 'B — Bom' : nota >= 70 ? 'C — Regular' : nota >= 60 ? 'D — Suficiente' : 'F — Reprovado';
+  WriteLine(`Nota ${nota} → ${conceito}`);
+
+  const objetos = [42, 'olá', { d: 3.14 }, true, null, [1, 2, 3]];
+  for (const o of objetos) {
+    let desc;
+    if (typeof o === 'number') desc = o > 0 ? `Inteiro positivo: ${o}` : `Inteiro não-positivo: ${o}`;
+    else if (typeof o === 'string') desc = `String de ${o.length} chars: '${o}'`;
+    else if (o && o.d !== undefined) desc = `Double: ${F(o.d, 2)}`;
+    else if (typeof o === 'boolean') desc = `Bool: ${bool(o)}`;
+    else if (Array.isArray(o)) desc = `Array int[${o.length}]`;
+    else desc = 'null!';
+    WriteLine(`  ${desc}`);
+  }
+
+  const pontos = [[0, 0], [5, 0], [0, 3], [4, 4]];
+  for (const [x, y] of pontos) {
+    let q;
+    if (x === 0 && y === 0) q = 'Origem';
+    else if (x > 0 && y === 0) q = 'Eixo X+';
+    else if (x === 0 && y > 0) q = 'Eixo Y+';
+    else if (x > 0 && y > 0) q = '1° quadrante';
+    else q = 'Outro';
+    WriteLine(`  (${x},${y}) → ${q}`);
+  }
+
+  WriteLine('\nFor clássico:');
+  for (let i = 0; i < 5; i++) Write(`${i} `);
+  WriteLine();
+
+  WriteLine('Foreach com index (C# — LINQ):');
+  ['Maçã', 'Banana', 'Laranja'].forEach((fruta, idx) => Write(`[${idx}]${fruta} `));
+  WriteLine();
+
+  WriteLine('While com break/continue:');
+  let n = 0;
+  while (true) {
+    n++;
+    if (n % 2 === 0) continue;
+    if (n > 9) break;
+    Write(`${n} `);
+  }
+  WriteLine();
+};
+
+CS['c-s4-1'] = ({ WriteLine }) => {
+  const Somar = (...v) => v.reduce((a, b) => a + b, 0);
+  WriteLine(String(Somar(3, 4)));
+  WriteLine(D(Somar(1.5, 2.3)));
+  WriteLine(String(Somar(1, 2, 3, 4, 5)));
+
+  let x = 10, y = 20;
+  [x, y] = [y, x];
+  WriteLine(`Após troca: x=${x}, y=${y}`);
+
+  const Dividir = (a, b) => (b === 0 ? [false, 0] : [true, a / b]);
+  const [okDiv, div] = Dividir(10, 3);
+  if (okDiv) WriteLine(`10/3 = ${F(div, 4)}`);
+
+  const Saudar = (nome, prefixo = 'Olá', formal = false) =>
+    formal ? `Prezado(a) ${prefixo} ${nome}` : `${prefixo}, ${nome}!`;
+  WriteLine(Saudar('Ana'));
+  WriteLine(Saudar('Dr. Costa', 'Bem-vindo', true));
+
+  const CalcularIMC = (peso, altura) => {
+    const v = (val, nome) => { if (val <= 0) throw new Error(`${nome} deve ser positivo`); };
+    v(peso, 'peso'); v(altura, 'altura');
+    return Math.round((peso / (altura * altura)) * 100) / 100;
+  };
+  WriteLine(`IMC: ${D(CalcularIMC(70, 1.75))}`);
+
+  const nums = [3.0, 1.5, 7.0, 2.5, 5.0];
+  const min = Math.min(...nums), max = Math.max(...nums), media = nums.reduce((a, b) => a + b, 0) / nums.length;
+  WriteLine(`Min=${D(min)}, Max=${D(max)}, Média=${F(media, 2)}`);
+};
+
+CS['c-s5-1'] = ({ WriteLine, Write }) => {
+  const nums = [5, 3, 8, 1, 9, 2, 7, 4, 6];
+  WriteLine(`Original: [${nums.join(', ')}]`);
+  nums.sort((a, b) => a - b);
+  WriteLine(`Ordenado: [${nums.join(', ')}]`);
+  nums.reverse();
+  WriteLine(`Invertido: [${nums.join(', ')}]`);
+  WriteLine(`7 está no índice: ${nums.indexOf(7)}`);
+
+  const L = nums.length;
+  WriteLine(`Último:      ${nums[L - 1]}`);
+  WriteLine(`Penúltimo:   ${nums[L - 2]}`);
+  WriteLine(`Fatia [2..5]: [${nums.slice(2, 5).join(',')}]`);
+  WriteLine(`Últimos 3:   [${nums.slice(L - 3).join(',')}]`);
+  WriteLine(`Primeiros 3: [${nums.slice(0, 3).join(',')}]`);
+
+  const mat = [[1, 2, 3], [4, 5, 6], [7, 8, 9]];
+  WriteLine('\nMatriz 3×3:');
+  for (let r = 0; r < 3; r++) {
+    for (let c = 0; c < 3; c++) Write(pad(mat[r][c], 4));
+    WriteLine();
+  }
+  WriteLine(`Diagonal principal: ${mat[0][0]}, ${mat[1][1]}, ${mat[2][2]}`);
+
+  const jagged = [[1, 2], [3, 4, 5], [6]];
+  WriteLine('\nJagged array:');
+  for (const row of jagged) WriteLine(`  [${row.join(', ')}]`);
+
+  const dados = Array.from({ length: 10 }, (_, i) => i);
+  const meio = dados.slice(3, 7);
+  WriteLine(`\nSpan[3..6]: [${meio.join(',')}]`);
+  dados[3] = 99;                                   // o Span é uma janela sobre o array original
+  WriteLine(`dados[3] após Span write: ${dados[3]}`);
+};
+
+CS['c-s6-1'] = ({ WriteLine }) => {
+  const DiaSemana = ['Domingo', 'Segunda', 'Terca', 'Quarta', 'Quinta', 'Sexta', 'Sabado'];
+  const hoje = 3;
+  WriteLine(`Hoje: ${DiaSemana[hoje]} (valor=${hoje})`);
+  WriteLine(`É útil: ${bool(DiaSemana[hoje] !== 'Sabado' && DiaSemana[hoje] !== 'Domingo')}`);
+
+  const HttpStatus = { 200: 'OK', 201: 'Created', 400: 'BadRequest', 404: 'NotFound', 500: 'ServerError' };
+  const status = 404;
+  WriteLine(`HTTP ${status}: ${HttpStatus[status]}`);
+
+  const Perm = { Ler: 1, Escrever: 2, Executar: 4 };
+  const perm = Perm.Ler | Perm.Escrever;
+  const nomesPerm = Object.keys(Perm).filter(k => perm & Perm[k]).join(', ');
+  WriteLine(`Permissões: ${nomesPerm}`);
+  WriteLine(`Pode ler:     ${bool((perm & Perm.Ler) === Perm.Ler)}`);
+  WriteLine(`Pode executar:${bool((perm & Perm.Executar) === Perm.Executar)}`);
+
+  const p1 = { X: 3, Y: 4 };
+  const dist = p => Math.sqrt(p.X * p.X + p.Y * p.Y);
+  const str = p => `(${F(p.X, 1)}, ${F(p.Y, 1)})`;
+  const p2 = { X: p1.X + 1, Y: p1.Y - 2 };
+  WriteLine(`\np1=${str(p1)}, distância=${F(dist(p1), 2)}`);
+  WriteLine(`p2=${str(p2)}`);
+  WriteLine('p3==p1 em memória: False (são structs, sem referência)');
+
+  const aluno = { Nome: 'Ana', Idade: 20, Nota: 9.5 };
+  WriteLine(`\nAluno: ${aluno.Nome}, ${aluno.Idade} anos, nota ${D(aluno.Nota)}`);
+  WriteLine(`Desconstruído: ${aluno.Nome} tem ${aluno.Idade} anos`);
+  WriteLine(`Par: token=${guid8()}`);
+};
+
+CS['c-s7-1'] = ({ WriteLine }) => {
+  class ContaBancaria {
+    constructor(titular, saldoInicial = 0) {
+      if (!titular || !titular.trim()) throw new Error('Titular obrigatório');
+      this.Titular = titular; this.Numero = guid8().toUpperCase();
+      this._saldo = saldoInicial; this._historico = [];
+      this.registrar(`Conta criada. Saldo inicial: ${C(saldoInicial)}`);
+    }
+    get Saldo() { return this._saldo; }
+    depositar(v) {
+      if (v <= 0) throw new Error('valor');
+      this._saldo += v; this.registrar(`Depósito +${C(v)} → saldo ${C(this._saldo)}`);
+    }
+    sacar(v) {
+      if (v > this._saldo) { this.registrar(`Saque recusado: ${C(v)}`); return false; }
+      this._saldo -= v; this.registrar(`Saque -${C(v)} → saldo ${C(this._saldo)}`); return true;
+    }
+    transferir(dest, v) { if (this.sacar(v)) dest.depositar(v); }
+    registrar(msg) { this._historico.push(`[${hhmmss()}] ${msg}`); }
+    toString() { return `Conta ${this.Numero} (${this.Titular}) | Saldo: ${C(this._saldo)}`; }
+  }
+  const c1 = new ContaBancaria('Ana Silva', 1000);
+  const c2 = new ContaBancaria('Bruno Santos');
+  c1.depositar(500);
+  c1.sacar(200);
+  c1.sacar(2000);
+  c1.transferir(c2, 300);
+  WriteLine(c1.toString());
+  WriteLine(c2.toString());
+  WriteLine('\nHistórico c1:');
+  for (const h of c1._historico) WriteLine(`  ${h}`);
+  WriteLine('\nHistórico c2:');
+  for (const h of c2._historico) WriteLine(`  ${h}`);
+};
+
+CS['c-s8-1'] = ({ WriteLine }) => {
+  class Animal {
+    constructor(o) { Object.assign(this, o); }
+    get tipo() { return this.constructor.name; }
+    descrever() { return `${this.tipo} '${this.Nome}' (${this.Idade} anos) diz: ${this.falar()}`; }
+  }
+  class Cachorro extends Animal {
+    falar() { return 'Au au!'; }
+    descrever() { return super.descrever() + ` [Raça: ${this.Raca}]`; }
+  }
+  class Gato extends Animal { falar() { return 'Miau!'; } }
+  class Papagaio extends Animal { falar() { return `'${this.FraseFavorita}'`; } }
+
+  const animais = [
+    new Cachorro({ Nome: 'Rex', Idade: 5, Raca: 'Labrador' }),
+    new Gato({ Nome: 'Mimi', Idade: 3 }),
+    new Papagaio({ Nome: 'Louro', Idade: 10, FraseFavorita: 'Quero biscoito!' }),
+    new Cachorro({ Nome: 'Bolinha', Idade: 2, Raca: 'Poodle' }),
+  ];
+  for (const a of animais) WriteLine(a.descrever());
+
+  WriteLine('\nSó cachorros:');
+  for (const a of animais) if (a instanceof Cachorro) WriteLine(`  ${a.Nome} — ${a.Raca}`);
+
+  const animal = new Gato({ Nome: 'Felix', Idade: 4 });
+  WriteLine(`\nTipo real: ${animal.tipo}`);
+  WriteLine(`É Gato: ${bool(animal instanceof Gato)}`);
+  const gato = animal instanceof Gato ? animal : null;
+  WriteLine(`Cast seguro: ${gato?.Nome ?? ''}`);
+};
+
+CS['c-s9-1'] = ({ WriteLine }) => {
+  class ProdutoRepo {
+    constructor() { this._dados = []; this._seq = 1; }
+    adicionar(p) { p.Id = this._seq++; this._dados.push(p); }
+    listarTodos() { return this._dados; }
+    remover(id) { const n = this._dados.length; this._dados = this._dados.filter(p => p.Id !== id); return this._dados.length < n; }
+    get Total() { return this._dados.length; }
+    exportarCSV() {
+      return 'id,nome,preco,estoque\n' + this._dados.map(p => `${p.Id},${p.Nome},${F(p.Preco, 2)},${p.Estoque}`).join('\n');
+    }
+  }
+  const prodStr = p => `[${p.Id}] ${p.Nome} R$${N(p.Preco, 2)} (est:${p.Estoque})`;
+  const repo = new ProdutoRepo();
+  repo.adicionar({ Nome: 'Notebook', Preco: 3500, Estoque: 10 });
+  repo.adicionar({ Nome: 'Mouse', Preco: 89, Estoque: 50 });
+  repo.adicionar({ Nome: 'Teclado', Preco: 199, Estoque: 30 });
+  repo.adicionar({ Nome: 'Monitor', Preco: 1200, Estoque: 8 });
+
+  WriteLine(`Total: ${repo.Total} produtos\n`);
+  for (const p of repo.listarTodos()) WriteLine(prodStr(p));
+  repo.remover(2);
+  WriteLine(`\nApós remover id=2: ${repo.Total} produtos`);
+  WriteLine('\n── CSV Export ──');
+  WriteLine(repo.exportarCSV());
+};
+
+CS['c-s10-1'] = ({ WriteLine }) => {
+  const Ponto = (X, Y) => ({ X, Y });
+  const eq = (a, b) => a.X === b.X && a.Y === b.Y;
+  const dist = (a, b) => Math.sqrt(Math.pow(a.X - b.X, 2) + Math.pow(a.Y - b.Y, 2));
+  const pStr = p => `Ponto { X = ${D(p.X)}, Y = ${D(p.Y)} }`;
+  const p1 = Ponto(3, 4), p2 = Ponto(3, 4), p3 = Ponto(0, 0);
+  WriteLine(`p1 == p2: ${bool(eq(p1, p2))}`);
+  WriteLine(`p1 == p3: ${bool(eq(p1, p3))}`);
+  WriteLine(`p1.Distancia(p3): ${F(dist(p1, p3), 2)}`);
+  const p4 = { ...p1, Y: 0 };
+  WriteLine(`p4 (cópia de p1 com Y=0): ${pStr(p4)}`);
+  const { X: x, Y: y } = p1;
+  WriteLine(`Desconstruído: X=${x}, Y=${y}`);
+
+  const pessoa = { Nome: 'Carlos', Idade: 30 };
+  pessoa.Idade = 31;
+  WriteLine(`Pessoa: PessoaMutavel { Nome = ${pessoa.Nome}, Idade = ${pessoa.Idade} }`);
+
+  const din = d => `${N(d.Valor, 2)} ${d.Moeda}`;
+  const preco = { Valor: 1234.56, Moeda: 'BRL' };
+  const precoUSD = { ...preco, Valor: 234.56, Moeda: 'USD' };
+  WriteLine(`BRL: ${din(preco)}, USD: ${din(precoUSD)}`);
+
+  const anonimo = { Nome: 'Ana', Pontos: 980, Nivel: 'Gold' };
+  WriteLine(`Anônimo: ${anonimo.Nome} — ${anonimo.Nivel} (${anonimo.Pontos}pts)`);
+};
+
+CS['c-s11-1'] = ({ WriteLine }) => {
+  const Area = f => {
+    if (f.tipo === 'Círculo' && f.Raio > 0) return Math.PI * f.Raio * f.Raio;
+    if (f.tipo === 'Retângulo' && f.L > 0 && f.A > 0) return f.L * f.A;
+    if (f.tipo === 'Triângulo' && f.B > 0 && f.H > 0) return (f.B * f.H) / 2;
+    throw new Error('Forma inválida');
+  };
+  const ClassificarIMC = imc =>
+    imc < 18.5 ? 'Abaixo do peso' : imc < 25.0 ? 'Peso normal' : imc < 30.0 ? 'Sobrepeso' : imc < 40.0 ? 'Obesidade' : 'Obesidade grave';
+  const DescreverLista = n =>
+    n.length === 0 ? 'Lista vazia'
+      : n.length === 1 ? `Um elemento: ${n[0]}`
+      : n.length === 2 ? `Dois: ${n[0]} e ${n[1]}`
+      : `Começa com ${n[0]}, mais ${n.length - 1} elementos`;
+  const Quadrante = (x, y) =>
+    x === 0 && y === 0 ? 'Origem'
+      : x > 0 && y > 0 ? '1° quadrante'
+      : x < 0 && y > 0 ? '2° quadrante'
+      : x < 0 && y < 0 ? '3° quadrante'
+      : x > 0 && y < 0 ? '4° quadrante'
+      : x === 0 ? 'Eixo Y' : y === 0 ? 'Eixo X' : '?';
+
+  const formas = [{ tipo: 'Círculo', Raio: 5 }, { tipo: 'Retângulo', L: 4, A: 3 }, { tipo: 'Triângulo', B: 6, H: 4 }];
+  for (const f of formas) WriteLine(`${pad(f.tipo, -12)} área = ${F(Area(f), 2)}`);
+
+  WriteLine();
+  for (const imc of [17.0, 22.5, 27.3, 35.1, 42.0]) WriteLine(`IMC ${pad(F(imc, 1), 5)} → ${ClassificarIMC(imc)}`);
+
+  WriteLine();
+  for (const l of [[], [7], [3, 9], [1, 2, 3, 4, 5]]) WriteLine(DescreverLista(l));
+
+  WriteLine();
+  for (const [x, y] of [[0, 0], [3, 4], [-1, 2], [-2, -3], [5, -1], [0, 6]])
+    WriteLine(`(${pad(x, 2)},${pad(y, 2)}) → ${Quadrante(x, y)}`);
+};
+
+CS['c-s12-1'] = ({ WriteLine }) => {
+  const cmp = (a, b) => a.localeCompare(b, 'pt-BR');
+  const lista = ['Maçã', 'Banana', 'Laranja'];
+  lista.push('Uva');
+  lista.splice(1, 0, 'Abacaxi');
+  lista.splice(lista.indexOf('Banana'), 1);
+  lista.sort(cmp);
+  WriteLine(`List: ${lista.join(', ')}`);
+  WriteLine(`FindAll com 'a': ${lista.filter(f => f.includes('a')).join(', ')}`);
+
+  const estoque = new Map([['Arroz', 50], ['Feijão', 30], ['Macarrão', 20]]);
+  estoque.set('Sal', 100);
+  estoque.set('Arroz', estoque.get('Arroz') + 15);          // chave sem distinção de maiúsculas
+  WriteLine('\nEstoque:');
+  for (const [produto, qtd] of [...estoque].sort((a, b) => b[1] - a[1]))
+    WriteLine(`  ${pad(produto, -12)}: ${pad(qtd, 3)} unid.`);
+  WriteLine(`Pimenta: ${estoque.get('Pimenta') ?? 0} (0 = não encontrado)`);
+
+  const range = (ini, n) => Array.from({ length: n }, (_, i) => ini + i);
+  const a = range(1, 6), b = range(4, 6);
+  const inter = a.filter(x => b.includes(x));
+  const uniao = [...a, ...b.filter(x => !a.includes(x))];
+  const dif = a.filter(x => !b.includes(x));
+  WriteLine(`\nA:            ${a.join(',')}`);
+  WriteLine(`B:            ${b.join(',')}`);
+  WriteLine(`Interseção:   ${inter.join(',')}`);
+  WriteLine(`União:        ${uniao.join(',')}`);
+  WriteLine(`Diferença A\\B:${dif.join(',')}`);
+  WriteLine(`Dif. simétrica:${[1, 2, 3, 9, 8, 7].join(',')}`);   // ordem interna do HashSet do .NET
+
+  const fila = ['Ticket-1', 'Ticket-2', 'Ticket-3'];
+  const atendido = fila.shift();
+  WriteLine(`\nFila: Atendendo ${atendido}, próximo: ${fila[0]}`);
+
+  const pilha = ['pág1', 'pág2', 'pág3'];
+  const voltou = pilha.pop();
+  WriteLine(`Histórico: voltando para ${voltou}, atual: ${pilha[pilha.length - 1]}`);
+
+  const ranking = [[1500, 'Ana'], [2300, 'Bruno'], [1800, 'Carlos']].sort((x, y) => y[0] - x[0]);
+  WriteLine('\nRanking (maior→menor):');
+  ranking.forEach(([pts, nome], i) => WriteLine(`  ${i + 1}° ${nome}: ${pts} pts`));
+};
+
+CS['c-s13-1'] = ({ WriteLine }) => {
+  const funcs = [
+    ['Ana', 'TI', 8500, 28], ['Bruno', 'RH', 5200, 35], ['Carlos', 'TI', 9200, 32], ['Diana', 'Vendas', 6800, 29],
+    ['Edu', 'TI', 7100, 25], ['Flávia', 'RH', 4900, 40], ['Gio', 'Vendas', 7500, 31], ['Hélio', 'TI', 6300, 23],
+  ].map(([Nome, Depto, Sal, Idade]) => ({ Nome, Depto, Sal, Idade }));
+  const cmp = (a, b) => a.localeCompare(b, 'pt-BR');
+  const soma = a => a.reduce((s, x) => s + x, 0);
+
+  WriteLine('TI com Sal > 7000 (método):');
+  funcs.filter(f => f.Depto === 'TI' && f.Sal > 7000).sort((a, b) => b.Sal - a.Sal)
+    .forEach(f => WriteLine(`  ${pad(f.Nome, -10)} R$${N(f.Sal, 0)}`));
+
+  WriteLine('\nMenores de 30 (query syntax):');
+  funcs.filter(f => f.Idade < 30).sort((a, b) => cmp(a.Nome, b.Nome))
+    .forEach(j => WriteLine(`  ${pad(j.Nome, -10)} ${pad(j.Depto, -8)} ${j.Idade}a`));
+
+  WriteLine('\nMédia por departamento:');
+  const grupos = {};
+  for (const f of funcs) (grupos[f.Depto] ||= []).push(f);
+  Object.entries(grupos)
+    .map(([Key, g]) => ({ Key, Media: soma(g.map(f => f.Sal)) / g.length, N: g.length }))
+    .sort((a, b) => b.Media - a.Media)
+    .forEach(x => WriteLine(`  ${pad(x.Key, -8)} Média: R$${N(x.Media, 0)} (${x.N} func.)`));
+
+  const total = soma(funcs.map(f => f.Sal));
+  const maior = funcs.reduce((m, f) => (f.Sal > m.Sal ? f : m));
+  WriteLine(`\nFolha total:   R$${N(total, 0)}`);
+  WriteLine(`Maior salário: R$${N(maior.Sal, 0)} — ${maior.Nome}`);
+  WriteLine(`Média geral:   R$${N(total / funcs.length, 0)}`);
+
+  const deptos = [{ Nome: 'TI', Habilidades: ['C#', 'SQL', 'Docker'] }, { Nome: 'Vendas', Habilidades: ['CRM', 'Excel'] }];
+  const todas = deptos.flatMap(d => d.Habilidades.map(h => `${d.Nome}/${h}`));
+  WriteLine('\nHabilidades: ' + todas.join(', '));
+
+  const nomes = ['A', 'B', 'C'], valores = [100, 200, 300];
+  WriteLine('Zip: ' + nomes.map((n, i) => `${n}=${valores[i]}`).join(', '));
+
+  WriteLine('\nPágina 2 (2 por página):');
+  funcs.slice().sort((a, b) => cmp(a.Nome, b.Nome)).slice(2, 4).forEach(f => WriteLine(`  ${f.Nome}`));
+};
+
+CS['c-s14-1'] = ({ WriteLine }) => {
+  const disco = {};                                   // sistema de arquivos simulado em memória
+  const path = '/tmp/tmp' + guid8() + '.tmp', csvPath = '/tmp/tmp' + guid8() + '.tmp';
+  disco[path] = 'Linha 1\nLinha 2\nLinha 3';
+  const tudo = disco[path];
+  WriteLine('Conteúdo completo:');
+  WriteLine(tudo);
+
+  WriteLine('Linha por linha:');
+  disco[path].split('\n').forEach((l, i) => WriteLine(`  [${i}] ${l}`));
+
+  disco[path] += '\nLinha 4 (append)';
+  WriteLine(`Total linhas: ${disco[path].split('\n').length}`);
+
+  const pessoas = [
+    { nome: 'Ana', idade: 28, hobbies: ['leitura', 'yoga'] },
+    { nome: 'Bruno', idade: 35, hobbies: ['games', 'música', 'código'] },
+  ];
+  /* System.Text.Json escapa caracteres não-ASCII por padrão (ú → \u00FA) */
+  const esc = s => s.replace(/[^\x00-\x7f]/g, c => '\\u' + c.charCodeAt(0).toString(16).toUpperCase().padStart(4, '0'));
+  const json = JSON.stringify(pessoas, null, 2).replace(/"[^"]*"/g, m => esc(m));
+  WriteLine('\nJSON serializado:');
+  WriteLine(json);
+
+  const desser = JSON.parse(JSON.stringify(pessoas));
+  WriteLine(`\nDeserializado: ${desser[0].nome} curte ${desser[0].hobbies.join(', ')}`);
+
+  disco[csvPath] = 'nome,idade,cidade\nAna,28,SP\nBruno,35,RJ';
+  WriteLine('\nCSV lido:');
+  disco[csvPath].split('\n').slice(1).map(l => l.split(','))
+    .forEach(c => WriteLine(`  ${c[0]} (${parseInt(c[1], 10)}) — ${c[2]}`));
+
+  delete disco[path]; delete disco[csvPath];
+  WriteLine('\nArquivos temporários removidos.');
+};
+
+CS['c-s15-1'] = ({ WriteLine }) => {
+  class DomainException extends Error { constructor(codigo, msg) { super(msg); this.Codigo = codigo; } }
+  class SaldoInsuficienteException extends DomainException {
+    constructor(disp, sol) {
+      super('SALDO_INSUFICIENTE', `Disponível: ${C(disp)}, solicitado: ${C(sol)}`);
+      this.Disponivel = disp; this.Solicitado = sol;
+    }
+  }
+  const Calcular = expr => {
+    const partes = expr.split('/');
+    if (partes.length !== 2) return { ok: false, erro: "Formato: 'a/b'" };
+    const num = s => (/^\s*-?\d+([.,]\d+)?\s*$/.test(s) ? parseFloat(s.trim().replace(',', '.')) : NaN);
+    const a = num(partes[0]), b = num(partes[1]);
+    if (isNaN(a) || isNaN(b)) return { ok: false, erro: 'Valores inválidos' };
+    if (b === 0) return { ok: false, erro: 'Divisão por zero' };
+    return { ok: true, valor: a / b };
+  };
+  const TestarSaque = (saldo, valor) => {
+    try {
+      if (valor > saldo) throw new SaldoInsuficienteException(saldo, valor);
+      if (valor <= 0) { const e = new Error("Specified argument was out of the range of valid values. (Parameter 'valor')"); e.tipo = 'ArgumentOutOfRangeException'; throw e; }
+      WriteLine(`  ✓ Saque de ${C(valor)} aprovado`);
+    } catch (ex) {
+      if (ex instanceof SaldoInsuficienteException && ex.Solicitado < ex.Disponivel * 2)
+        WriteLine(`  ✗ [${ex.Codigo}] Pouco saldo: ${ex.message}`);
+      else if (ex instanceof DomainException)
+        WriteLine(`  ✗ [${ex.Codigo}] Erro de domínio: ${ex.message}`);
+      else
+        WriteLine(`  ✗ Erro inesperado: ${ex.tipo}: ${ex.message}`);
+    } finally {
+      WriteLine('     (finally sempre executa)');
+    }
+  };
+
+  WriteLine('── Testes de Saque ──');
+  TestarSaque(500, 200);
+  TestarSaque(500, 800);
+  TestarSaque(500, -50);
+
+  WriteLine('\n── Padrão Result ──');
+  for (const e of ['10 / 3', '7 / 0', 'abc / 2', '100 / 4', '10']) {
+    const r = Calcular(e);
+    WriteLine(r.ok ? `  ${e} = ${F(r.valor, 4)}` : `  ${e} → Erro: ${r.erro}`);
+  }
+
+  WriteLine('\n── using (gerenciamento de recursos) ──');
+  WriteLine('Recurso gerenciado automaticamente');
+  WriteLine('Liberado ao sair do bloco using');
+  WriteLine('(StringWriter foi disposed)');
+};
+
+/* ═════════ Seções 16–27: saídas fixas (calculadas na montagem) ═════════ */
+const FIXED = {};
+
+FIXED['c-s16-1'] = ({ WriteLine }) => {
+  WriteLine('quadrado(5) = 25');
+  WriteLine('raiz(16)    = 4');
+  WriteLine('10');
+  WriteLine('ATENÇÃO!!!');
+  WriteLine('[LOG] operação concluída');
+  WriteLine('4 é par: True, 7 é par: False');
+  WriteLine('Pares:  [2,4,6,8,10]');
+  WriteLine('Dobros: [4,8,12,16,20]');
+  WriteLine('Soma:   60');
+  WriteLine('c1: 0, 1, 2');
+  WriteLine('c2: 100, 101, 102');
+  WriteLine("Evento: botão 'Salvar' clicado!");
+  WriteLine('[LOG] Auditoria: Salvar');
+};
+
+FIXED['c-s17-1'] = ({ WriteLine }) => {
+  WriteLine('10');
+  WriteLine('banana');
+  WriteLine(D(3.14));
+  WriteLine('\nTotal: 3');
+  WriteLine('P1: bug, hotfix');
+  WriteLine('Consumiu: texto específico');
+  WriteLine('\nAgrupado por inicial:');
+  WriteLine("  'a': abacaxi, abacate");
+  WriteLine("  'b': banana");
+  WriteLine("  'l': laranja, limão");
+  WriteLine("  'm': maçã");
+};
+
+FIXED['c-s18-1'] = ({ WriteLine, Write }) => {
+  WriteLine('True');
+  WriteLine('Hello world');
+  WriteLine('Texto muito …');
+  WriteLine('HaHaHa');
+  WriteLine();
+  WriteLine('Primos até 20: 2, 3, 5, 7, 11, 13, 17, 19');
+  const list = Array.from({ length: 20 }, (_, i) => i + 1), rng = new DotNetRandom(42);
+  for (let i = list.length - 1; i > 0; i--) { const j = rng.next(i + 1); [list[i], list[j]] = [list[j], list[i]]; }
+  WriteLine(`10 embaralhados: ${list.slice(0, 10).join(', ')}`);
+  WriteLine('\nEm lotes de 4:');
+  WriteLine('  [1, 2, 3, 4]');
+  WriteLine('  [5, 6, 7, 8]');
+  WriteLine('  [9, 10, 11, 12]');
+  WriteLine();
+  Write('★ ★ ★ ★ ★ ');
+  WriteLine();
+};
+
+FIXED['c-s19-1'] = ({ WriteLine }) => {
+  WriteLine('Sequencial: 337ms');
+  WriteLine('  API-A → 100ms\n  API-B → 150ms\n  BD → 80ms');
+  WriteLine('\nParalelo: 156ms (máx 150ms)');
+  WriteLine('  API-A → 100ms\n  API-B → 150ms\n  BD → 80ms');
+  WriteLine('\nCancelamento:');
+  WriteLine('  Operação cancelada após 120ms timeout!');
+  WriteLine('\nWhenAny (primeiro que responder):');
+  WriteLine('  Vencedor: Servidor-B → 100ms');
+  WriteLine('\nValueTask: valor-token | valor-token (mesmos)');
+};
+
+FIXED['c-s20-1'] = ({ WriteLine }) => {
+  WriteLine('Sem lock: 1000 (esperado 1000, pode ser menos)');
+  WriteLine('Com lock: 1000 (sempre 1000)');
+  WriteLine('Interlocked: 1000');
+  WriteLine('\nFrequência de letras:');
+  WriteLine("  'a': 10");
+  WriteLine("  'b': 3");
+  WriteLine("  'n': 3");
+  WriteLine("  'r': 2");
+  WriteLine("  'm': 1");
+  WriteLine('\nQuadrados paralelos: [0,1,4,9,16,25,36,49,64,81]');
+  WriteLine('10 primeiros primos: [3,5,7,11,13,17,19,23,29,31]');
+  WriteLine('\nSemáforo (máx 3): 14 eventos registrados');
+};
+
+FIXED['c-s21-1'] = ({ WriteLine }) => {
+  WriteLine('Conexão ADO.NET estabelecida: Data Source=:memory:');
+  WriteLine("Tabela 'Clientes' criada com sucesso");
+  WriteLine('\nInserts realizados:');
+  WriteLine('  [1] Ana Silva   | ana@email.com   | R$1.500,00');
+  WriteLine('  [2] Bruno Costa | bruno@email.com | R$800,50');
+  WriteLine('  [3] Clara Dutra | clara@email.com | R$2.200,00');
+  WriteLine('\nClientes com saldo > R$1000:');
+  WriteLine('  [1] Ana Silva       ana@email.com        R$1.500,00');
+  WriteLine('  [3] Clara Dutra     clara@email.com      R$2.200,00');
+  WriteLine('\nTransferência (Ana → Bruno): R$500,00');
+  WriteLine('  Ana:   R$1.500,00 → R$1.000,00');
+  WriteLine('  Bruno: R$800,50   → R$1.300,50');
+  WriteLine('Transação COMMIT realizado com sucesso!');
+};
+
+FIXED['c-s22-1'] = ({ WriteLine }) => {
+  const prods = [
+    ['Eletrônicos', 'Notebook', 3500, 10], ['Eletrônicos', 'Smartphone', 1800, 25], ['Eletrônicos', 'Fone BT', 350, 50],
+    ['Roupas', 'Jaqueta', 299, 30], ['Roupas', 'Camiseta', 89, 100],
+  ];
+  WriteLine('── Produtos (eager loading) ──');
+  for (const [cat, nome, preco, est] of prods) WriteLine(`  [${pad(cat, -12)}] ${pad(nome, -15)} R$${N(preco, 0)}  est:${est}`);
+  WriteLine('\n── Resumo por Categoria ──');
+  WriteLine(`  ${pad('Eletrônicos', -14)}: 3 prods, estoque R$${N(3500 * 10 + 1800 * 25 + 350 * 50, 0)}`);
+  WriteLine(`  ${pad('Roupas', -14)}: 2 prods, estoque R$${N(89 * 100 + 299 * 30, 0)}`);
+  WriteLine(`\nNotebook atualizado: R$${N(3200, 0)}, est:8`);
+  WriteLine('Produtos ativos: 4/5');
+};
+
+FIXED['c-s23-1'] = ({ WriteLine }) => {
+  WriteLine('=== ASP.NET Core Minimal API ===');
+  WriteLine('Endpoints registrados:');
+  WriteLine('  GET    /api/tarefas          → lista (filtro ?concluida=true/false)');
+  WriteLine('  GET    /api/tarefas/{id}     → busca por ID');
+  WriteLine('  POST   /api/tarefas          → cria nova tarefa');
+  WriteLine('  PATCH  /api/tarefas/{id}     → atualiza parcialmente');
+  WriteLine('  DELETE /api/tarefas/{id}     → remove');
+  WriteLine('  GET    /api/tarefas/stats    → estatísticas');
+  WriteLine('\nTeste rápido (curl):');
+  WriteLine('  curl -X POST http://localhost:5000/api/tarefas \\');
+  WriteLine('       -H "Content-Type: application/json" \\');
+  WriteLine('       -d \'{"titulo":"Estudar C#","prioridade":1}\'');
+};
+
+FIXED['c-s24-1'] = ({ WriteLine }) => {
+  WriteLine('Por nome:    abacaxi, banana, kiwi, maçã, uva');
+  WriteLine('Por tamanho: uva, maçã, kiwi, banana, abacaxi');
+  for (const [id, v] of [[101, 350], [102, 1200]]) {
+    WriteLine(`\n[Pedido] Criado #${id} R$${N(v, 2)}`);
+    WriteLine(`  [Email]  Confirmação enviada para pedido #${id}`);
+    WriteLine(`  [Estoque] Reserva feita: R$${N(v, 2)}`);
+    WriteLine(`  [Log]    Auditoria: pedido #${id} registrado`);
+  }
+  WriteLine('\n[Console] [14:32:07] INFO: Sistema iniciado');
+  WriteLine('\n[Console] [14:32:07] INFO: Usuário logado');
+  WriteLine('\n[Factory] cachorro: Au au!');
+  WriteLine('\n[Factory] gato: Miau!');
+  WriteLine('\n[Factory] passaro: Piu piu!');
+};
+
+FIXED['c-s25-1'] = ({ WriteLine, fonte }) => {
+  WriteLine('── Testes: Calculadora ──');
+  for (const t of ['Somar(2,3) == 5', 'Somar(-1,1) == 0', 'Somar(0,0)  == 0', 'Subtrair(10,3) == 7', 'Dividir(10,2) == 5', 'Dividir(1,3) ≈ 0.333', 'Dividir por zero lança exceção'])
+    WriteLine(`  ✓ ${t}`);
+  WriteLine('\n── Testes: EhPrimo ──');
+  for (const p of [2, 3, 5, 7, 11, 13, 17, 19]) WriteLine(`  ✓ EhPrimo(${pad(p, 2)}) == true`);
+  for (const n of [0, 1, 4, 6, 8, 9, 10, 15]) WriteLine(`  ✓ EhPrimo(${pad(n, 2)}) == false`);
+  WriteLine('\n── Resultado: 23 ✓ | 0 ✗ ──');
+  WriteLine(fonte.rawBlock);
+};
+
+FIXED['c-s26-1'] = ({ WriteLine }) => {
+  WriteLine('Struct cópia — s1.X=1, s2.X=99');
+  WriteLine('Class ref — r1.X=99, r2.X=99');
+  WriteLine('\nBoxing: Int32, valor=42');
+  WriteLine('\n── IDisposable com using ──');
+  WriteLine('[Arquivo] Recurso ABERTO');
+  WriteLine('[Arquivo] Usando recurso');
+  WriteLine('[Arquivo] Recurso FECHADO');
+  WriteLine('[Conexão] Recurso ABERTO');
+  WriteLine('[Conexão] Usando recurso');
+  WriteLine('\n── WeakReference ──');
+  WriteLine('Vivo: [1,2,3,4,5]');
+  WriteLine('Foi coletado pelo GC');
+  WriteLine('\n── Span<T> (zero-alloc) ──');
+  WriteLine('Soma total: 55');
+  WriteLine('Soma [3..7]: 22');
+  WriteLine(`\nMemória usada: ${N(1172, 0)} KB`);
+  WriteLine('Gen 0: 1, Gen 1: 1, Gen 2: 1');
+  WriteLine('[Conexão] Recurso FECHADO');
+};
+
+FIXED['c-s27-1'] = ({ WriteLine }) => {
+  WriteLine('Constante interpolada: ID-0001');
+  WriteLine('Conexão: localhost:5432/app');
+  WriteLine('Raw string:\n{\n    "nome": "Ana",\n    "idade": 30,\n    "ativo": true\n}');
+  WriteLine(`\nPonto3D: (1, 2, 3), módulo=${F(Math.sqrt(14), 3)}`);
+  WriteLine('Array:    [1,2,3]');
+  WriteLine('Combinado:[1,2,3,4,5,6,7]');
+  WriteLine('Olá, Ana!');
+  WriteLine('Oi, Bob!');
+  WriteLine('\nGeneric Math: 7 | 4 | 30');
+  WriteLine('A, B, C');
+  WriteLine("\n#nullable: 'nulo' | 'obrigatório'");
+};
+
+/* ═════════ execução ═════════ */
+function rodarCS(id, extra) {
+  let out = '';
+  const rt = { WriteLine: (s = '') => { out += s + '\n'; }, Write: s => { out += s; }, ...extra };
+  (CS[id] || FIXED[id])(rt);
+  return out;
+}
+
+if (typeof module !== 'undefined') module.exports = { CS, FIXED, rodarCS, DotNetRandom, N, C, F, P };
+
+
+  const RAW25 = "  \n  // Como seria em um projeto xUnit real:\n  \n  public class CalculadoraTests\n  {\n      private readonly Calculadora _sut = new();   // SUT = System Under Test\n      \n      [Fact]\n      public void Somar_DeveRetornarSomaCorreta()\n      {\n          var resultado = _sut.Somar(2, 3);\n          Assert.Equal(5, resultado);\n      }\n      \n      [Theory]\n      [InlineData(2)]  [InlineData(3)]  [InlineData(5)]  [InlineData(7)]\n      public void EhPrimo_ComPrimosConhecidos_DeveRetornarTrue(int n)\n          => Assert.True(_sut.EhPrimo(n));\n      \n      [Fact]\n      public void Dividir_PorZero_DeveLancarExcecao()\n          => Assert.Throws<DivideByZeroException>(() => _sut.Dividir(1, 0));\n  }";
+  const escapeHtml = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  document.querySelectorAll('textarea.code-input').forEach(ta => {
+    ta.style.height = Math.min(ta.scrollHeight + 4, 560) + 'px';
+  });
+
+  function runCode(id) {
+    const outEl = document.getElementById('out-' + id);
+    let html = '<span class="cmd">$ dotnet run</span>';
+    try {
+      const out = rodarCS(id, { fonte: { rawBlock: RAW25 } });
+      html += `<span class="stdout">${escapeHtml(out)}</span>`;
+    } catch (e) {
+      html += `<span class="log-line err">⚠ ${escapeHtml(e.message)}</span>`;
+    }
+    outEl.innerHTML = html;
+  }
+
+  function copyCode(id, btn) {
+    const ta = document.querySelector(`.code-input[data-id="${id}"]`);
+    const done = () => { const t = btn.textContent; btn.textContent = '✓ Copiado'; setTimeout(() => btn.textContent = t, 1400); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(ta.value).then(done, () => { ta.select(); document.execCommand('copy'); done(); });
+    else { ta.select(); document.execCommand('copy'); done(); }
+  }
+
+
+  window.addEventListener('scroll', () => {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    document.getElementById('progressFill').style.width = pct + '%';
+  });
+
+  // ── Menu lateral retrátil ──
+  (function () {
+    const wrap = document.getElementById('sideWrap');
+    const trigger = document.getElementById('sideTrigger');
+    const links = [...wrap.querySelectorAll('.side-nav a')];
+    const sections = links.map(a => document.getElementById(a.dataset.target));
+
+    // clique/toque no ícone abre e fecha (útil no celular, onde não existe "passar o mouse")
+    trigger.addEventListener('click', e => { e.stopPropagation(); wrap.classList.toggle('open'); });
+    links.forEach(a => a.addEventListener('click', () => wrap.classList.remove('open')));
+    document.addEventListener('click', e => { if (!wrap.contains(e.target)) wrap.classList.remove('open'); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') wrap.classList.remove('open'); });
+
+    // destaca no menu a seção que está na tela
+    function markActive() {
+      let current = 0;
+      sections.forEach((s, i) => { if (s && s.getBoundingClientRect().top <= 140) current = i; });
+      links.forEach((a, i) => a.classList.toggle('active', i === current));
+    }
+    window.addEventListener('scroll', markActive, { passive: true });
+    markActive();
+  })();
+</script>
+
+</body>
+</html>
