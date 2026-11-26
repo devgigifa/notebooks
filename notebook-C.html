@@ -1,0 +1,2523 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guia de Programação em C — Notebook Interativo</title>
+<style>
+  :root {
+    --bg: #120d1a;
+    --bg-panel: #170f22;
+    --bg-code: #0d0916;
+    --border: #281c38;
+    --text: #e5ddf0;
+    --text-dim: #8778a0;
+    --accent: #c9a3ff;
+    --accent2: #f2c574;
+    --pink: #e394dc;
+    --err: #f47174;
+    --ok: #82e08c;
+    --c-blue: #6ab0f3;
+    --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    --serif: Georgia, 'Times New Roman', serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.65; }
+  .wrap { max-width: 840px; margin: 0 auto; padding: 0 24px 120px; }
+
+  header.hero {
+    padding: 72px 24px 48px; text-align: center; border-bottom: 1px solid var(--border); margin-bottom: 8px;
+    background: radial-gradient(ellipse at top, rgba(106,176,243,0.12), transparent 60%);
+  }
+  .hero-eyebrow { font-family: var(--mono); font-size: 13px; letter-spacing: 3px; color: var(--c-blue); text-transform: uppercase; }
+  .hero h1 { font-family: var(--serif); font-size: 46px; font-weight: 400; margin: 14px 0 10px; color: #fff; }
+  .hero h1 span { color: var(--accent); font-style: italic; }
+  .hero p { color: var(--text-dim); font-size: 16px; max-width: 500px; margin: 0 auto; }
+
+  .progress-bar { position: sticky; top: 0; z-index: 50; height: 3px; background: var(--border); }
+  .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--c-blue), var(--pink)); transition: width .15s ease; }
+
+  nav.toc { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; margin: 32px 0; }
+  nav.toc h3 { font-family: var(--mono); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); margin: 0 0 12px; }
+  nav.toc ol { margin: 0; padding-left: 20px; columns: 2; font-size: 13.5px; }
+  nav.toc a { color: var(--text); text-decoration: none; display: inline-block; padding: 3px 0; }
+  nav.toc a:hover { color: var(--accent); }
+
+  .module-divider { margin: 80px 0 40px; text-align: center; }
+  .module-divider .tag {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 3px; color: var(--c-blue);
+    text-transform: uppercase; background: rgba(106,176,243,0.1); padding: 6px 16px;
+    border-radius: 20px; border: 1px solid rgba(106,176,243,0.3);
+  }
+
+  section.lesson { margin: 56px 0; scroll-margin-top: 20px; }
+  .lesson-num { font-family: var(--mono); color: var(--accent); font-size: 14px; letter-spacing: 2px; }
+  .lesson h2 { font-family: var(--serif); font-size: 28px; font-weight: 400; color: #fff; margin: 6px 0 20px; }
+  .lesson p { font-size: 16px; color: #cdc2e0; }
+  .lesson ul, .lesson ol.explain { font-size: 16px; color: #cdc2e0; padding-left: 22px; }
+  .lesson li { margin-bottom: 6px; }
+
+  .callout { border-left: 3px solid var(--accent2); background: rgba(242,197,116,0.07); padding: 12px 18px; border-radius: 0 8px 8px 0; font-size: 14.5px; color: #e8dcc0; margin: 18px 0; }
+  .callout strong { color: var(--accent2); }
+  .analogy { border-left: 3px solid var(--pink); background: rgba(227,148,220,0.07); padding: 12px 18px; border-radius: 0 8px 8px 0; font-size: 14.5px; color: #ecd9ea; margin: 18px 0; }
+  .analogy strong { color: var(--pink); }
+  .tip { border-left: 3px solid var(--c-blue); background: rgba(106,176,243,0.08); padding: 12px 18px; border-radius: 0 8px 8px 0; font-size: 14.5px; color: #dbe9f8; margin: 18px 0; }
+  .tip strong { color: var(--c-blue); }
+
+  .playground { background: var(--bg-code); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin: 20px 0; }
+  .playground-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; background: #120c1c; border-bottom: 1px solid var(--border); }
+  .playground-header .dots { display: flex; gap: 6px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.r { background: #ff5f56; } .dot.y { background: #ffbd2e; } .dot.g { background: #27c93f; }
+  .playground-label { font-family: var(--mono); font-size: 12px; color: var(--text-dim); }
+
+  textarea.code-input {
+    width: 100%; background: transparent; color: #ede4fa;
+    font-family: var(--mono); font-size: 14px; line-height: 1.6;
+    border: none; padding: 16px; resize: vertical; min-height: 90px;
+    outline: none; white-space: pre; tab-size: 2;
+  }
+
+  .playground-actions { display: flex; gap: 10px; padding: 0 16px 14px; flex-wrap: wrap; }
+
+  button.run-btn {
+    background: var(--c-blue); color: #04121f; border: none;
+    font-family: var(--mono); font-weight: 700; font-size: 13px;
+    padding: 9px 18px; border-radius: 6px; cursor: pointer;
+    transition: transform .1s ease, background .15s ease;
+  }
+  button.run-btn:hover { background: #9cc9f7; transform: translateY(-1px); }
+  button.run-btn:active { transform: translateY(0); }
+
+  button.reset-btn {
+    background: transparent; color: var(--text-dim); border: 1px solid var(--border);
+    font-family: var(--mono); font-size: 13px; padding: 9px 14px; border-radius: 6px; cursor: pointer;
+  }
+  button.reset-btn:hover { color: var(--text); border-color: var(--text-dim); }
+
+  .output {
+    border-top: 1px solid var(--border); background: #0a0712;
+    font-family: var(--mono); font-size: 13.5px; padding: 14px 16px;
+    min-height: 20px; color: var(--ok); white-space: pre-wrap; word-break: break-word;
+  }
+  .output:empty::before { content: '// o resultado aparece aqui'; color: var(--text-dim); }
+  .output .err { color: var(--err); }
+  .output .log-line { display: block; }
+  .output .log-line + .log-line { margin-top: 2px; }
+
+  .inline-demo {
+    background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 22px; margin: 20px 0;
+  }
+  .inline-demo label { font-size: 13.5px; color: var(--text-dim); display: block; margin-bottom: 10px; font-family: var(--mono); }
+  .demo-input {
+    font-family: var(--mono); font-size: 14px; padding: 9px 12px; border-radius: 6px;
+    border: 1px solid var(--border); background: var(--bg-code); color: var(--text);
+    width: 100%; margin-bottom: 10px; outline: none;
+  }
+  .demo-input:focus { border-color: var(--accent); }
+  .demo-output {
+    font-size: 13.5px; color: var(--text); padding: 10px 12px; background: var(--bg-code);
+    border-radius: 6px; border: 1px solid var(--border); min-height: 20px; font-family: var(--mono);
+    white-space: pre-wrap;
+  }
+  input[type=range] { width: 100%; margin-bottom: 10px; accent-color: var(--c-blue); }
+  input[type=number].demo-input { width: 120px; }
+
+  code.inline { background: rgba(201,163,255,0.14); color: var(--accent); padding: 2px 6px; border-radius: 4px; font-family: var(--mono); font-size: 13.5px; }
+
+  hr.divider { border: none; border-top: 1px solid var(--border); margin: 56px 0 0; }
+  footer { text-align: center; padding: 60px 24px 20px; color: var(--text-dim); font-size: 14px; }
+  footer .accent { color: var(--accent); }
+
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 30px; }
+    nav.toc ol { columns: 1; }
+    .lesson h2 { font-size: 22px; }
+  }
+
+  /* ── Menu lateral retrátil ── */
+  html { scroll-behavior: smooth; }
+  .side-wrap { position: fixed; top: 0; left: 0; z-index: 60; }
+  .side-trigger {
+    position: fixed; top: 18px; left: 18px; z-index: 62;
+    width: 42px; height: 42px; border-radius: 10px;
+    background: var(--bg-panel); border: 1px solid var(--border);
+    color: var(--accent); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 18px rgba(0,0,0,.35);
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .side-trigger svg { width: 18px; height: 18px; }
+  .side-trigger:hover, .side-wrap.open .side-trigger { border-color: var(--accent); }
+  .side-nav {
+    position: fixed; top: 0; left: 0; z-index: 61;
+    width: 280px; max-width: 85vw; height: 100vh;
+    background: var(--bg-panel); border-right: 1px solid var(--border);
+    box-shadow: 8px 0 32px rgba(0,0,0,.45);
+    padding: 76px 0 28px; overflow-y: auto;
+    transform: translateX(-100%); visibility: hidden;
+    transition: transform .25s ease, visibility .25s;
+  }
+  @media (hover: hover) {
+    .side-wrap:hover .side-nav { transform: none; visibility: visible; }
+  }
+  .side-wrap.open .side-nav { transform: none; visibility: visible; }
+  .side-nav-title {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--text-dim); padding: 0 24px 10px;
+  }
+  .side-group {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--pink); padding: 16px 24px 6px;
+  }
+  .side-nav a {
+    display: flex; gap: 12px; align-items: baseline;
+    padding: 7px 24px; font-size: 14px; color: var(--text);
+    text-decoration: none; border-left: 2px solid transparent;
+    transition: color .15s ease, background .15s ease, border-color .15s ease;
+  }
+  .side-nav a .n { font-family: var(--mono); font-size: 12px; color: var(--text-dim); min-width: 18px; }
+  .side-nav a:hover { color: var(--accent); background: rgba(201,163,255,0.07); }
+  .side-nav a.active { color: var(--accent); border-left-color: var(--accent); background: rgba(201,163,255,0.10); }
+  .side-nav a.active .n { color: var(--accent); }
+  @media (max-width: 600px) {
+    .side-trigger { top: auto; bottom: 18px; }
+  }
+
+  /* ── extras do notebook C ── */
+  .lesson table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 14px; display: block; overflow-x: auto; }
+  .lesson th, .lesson td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; white-space: nowrap; }
+  .lesson th { background: var(--bg-panel); color: var(--accent); font-family: var(--mono); font-size: 12px; letter-spacing: 1px; text-transform: uppercase; }
+  .lesson td { color: #cdc2e0; }
+  pre.diagram { background: var(--bg-code); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; overflow-x: auto; font-family: var(--mono); font-size: 13px; line-height: 1.35; color: #cdc2e0; margin: 18px 0; }
+  .lesson a, footer a { color: var(--accent); }
+  textarea.code-input[readonly] { cursor: text; }
+  .playground-actions { align-items: center; }
+  .engine { margin-left: auto; font-family: var(--mono); font-size: 11.5px; color: var(--text-dim); }
+  .stdin-box { padding: 0 16px 14px; }
+  .stdin-box label { display: block; font-family: var(--mono); font-size: 12px; color: var(--text-dim); margin-bottom: 6px; }
+  .stdin-box textarea { width: 100%; background: var(--bg-panel); color: var(--text); border: 1px solid var(--border); border-radius: 6px; font-family: var(--mono); font-size: 13.5px; padding: 8px 12px; resize: vertical; outline: none; }
+  .stdin-box textarea:focus { border-color: var(--accent); }
+  .output .cmd { color: var(--text-dim); display: block; margin-bottom: 6px; }
+  .output .stdout { color: var(--ok); }
+  .notice { border: 1px solid var(--border); background: var(--bg-panel); border-radius: 10px; padding: 16px 20px; margin: 32px 0 0; font-size: 14.5px; color: #cdc2e0; }
+  .notice strong { color: var(--c-blue); }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
+  .row .demo-input { width: 120px; margin-bottom: 0; }
+  .row span.op { font-family: var(--mono); color: var(--text-dim); }
+  .chk { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 14px; color: var(--text); cursor: pointer; margin-right: 18px; }
+  .chk input { accent-color: var(--c-blue); width: 16px; height: 16px; }
+</style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<div class="side-wrap" id="sideWrap">
+  <button class="side-trigger" id="sideTrigger" aria-label="Abrir menu de navegação">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+  </button>
+  <nav class="side-nav" aria-label="Navegação">
+    <div class="side-nav-title">Neste notebook</div>
+    <div class="side-group">Módulo 1 · Fundamentos</div>
+    <a href="#s1" data-target="s1"><span class="n">01</span>Primeiro programa</a>
+    <a href="#s2" data-target="s2"><span class="n">02</span>Tipos de dados</a>
+    <a href="#s3" data-target="s3"><span class="n">03</span>Operadores</a>
+    <a href="#s4" data-target="s4"><span class="n">04</span>Entrada e saída</a>
+    <a href="#s5" data-target="s5"><span class="n">05</span>Estruturas de decisão</a>
+    <a href="#s6" data-target="s6"><span class="n">06</span>Estruturas de repetição</a>
+    <div class="side-group">Módulo 2 · Dados e memória</div>
+    <a href="#s7" data-target="s7"><span class="n">07</span>Funções</a>
+    <a href="#s8" data-target="s8"><span class="n">08</span>Vetores e matrizes</a>
+    <a href="#s9" data-target="s9"><span class="n">09</span>Ponteiros</a>
+    <a href="#s10" data-target="s10"><span class="n">10</span>Strings</a>
+    <a href="#s11" data-target="s11"><span class="n">11</span>Alocação dinâmica</a>
+    <a href="#s12" data-target="s12"><span class="n">12</span>Structs</a>
+    <div class="side-group">Módulo 3 · Arquivos e dados</div>
+    <a href="#s13" data-target="s13"><span class="n">13</span>Manipulação de arquivos</a>
+    <a href="#s14" data-target="s14"><span class="n">14</span>SQLite</a>
+    <div class="side-group">Módulo 4 · Prática</div>
+    <a href="#s15" data-target="s15"><span class="n">15</span>Boas práticas</a>
+    <a href="#sd" data-target="sd"><span class="n">★</span>Desafio final</a>
+    <a href="#sp" data-target="sp"><span class="n">★</span>Próximos passos</a>
+  </nav>
+</div>
+
+<header class="hero">
+  <div class="hero-eyebrow">Notebook Interativo · C</div>
+  <h1>Programação em <span>C</span>, do zero ao SQLite</h1>
+  <p>Leia o código de cada célula e clique em Executar para ver a saída. Algumas seções têm demos ao vivo — mexa nelas também.</p>
+</header>
+
+<div class="wrap">
+
+  <div class="notice">
+    <strong>Como as células rodam:</strong> um navegador não compila C. Cada botão Executar roda uma versão em
+    JavaScript do programa, escrita para imprimir exatamente o que o gcc imprime (conferimos as 16 saídas
+    caractere a caractere). O código mostrado é o C original — para compilar de verdade no seu computador,
+    use o comando que aparece no topo de cada saída. Por isso o código é somente leitura: editar o C aqui
+    não mudaria o resultado.
+  </div>
+
+  <nav class="toc">
+    <h3>Neste notebook</h3>
+    <ol>
+      <li><a href="#s1">Primeiro programa</a></li>
+      <li><a href="#s2">Tipos de dados</a></li>
+      <li><a href="#s3">Operadores</a></li>
+      <li><a href="#s4">Entrada e saída</a></li>
+      <li><a href="#s5">Estruturas de decisão</a></li>
+      <li><a href="#s6">Estruturas de repetição</a></li>
+      <li><a href="#s7">Funções</a></li>
+      <li><a href="#s8">Vetores e matrizes</a></li>
+      <li><a href="#s9">Ponteiros</a></li>
+      <li><a href="#s10">Strings</a></li>
+      <li><a href="#s11">Alocação dinâmica</a></li>
+      <li><a href="#s12">Structs</a></li>
+      <li><a href="#s13">Manipulação de arquivos</a></li>
+      <li><a href="#s14">SQLite</a></li>
+      <li><a href="#s15">Boas práticas</a></li>
+      <li><a href="#sd">Desafio final</a></li>
+      <li><a href="#sp">Próximos passos</a></li>
+    </ol>
+  </nav>
+
+  <div class="module-divider"><span class="tag">Módulo 1 · Fundamentos</span></div>
+
+  <!-- SEÇÃO 01 -->
+  <section class="lesson" id="s1">
+    <div class="lesson-num">01</div>
+    <h2>Pensamento computacional — primeiro programa</h2>
+    <p>
+      Todo programa C começa pela função <code class="inline">main()</code>. O compilador transforma o código-fonte
+      (<code class="inline">.c</code>) em um executável binário. Fluxo:
+      <strong>Escrever → Pré-processar → Compilar → Linkar → Executar</strong>.
+    </p>
+<pre class="diagram">┌──────────────┐    gcc     ┌──────────────┐    ./    ┌──────────┐
+│   hello.c    │ ─────────▶ │    hello     │ ───────▶ │  Saída   │
+│  (código C)  │            │  (binário)   │          │ terminal │
+└──────────────┘            └──────────────┘          └──────────┘</pre>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">hello.c — primeiro programa</span>
+      </div>
+      <textarea class="code-input" data-id="hello" rows="8" spellcheck="false" readonly>#include &lt;stdio.h&gt;
+
+/* main() é o ponto de entrada de todo programa C */
+int main(void) {
+    printf("Olá, Mundo!\n");
+    printf("Bem-vindo ao Guia de C!\n");
+    return 0;  /* 0 = execução bem-sucedida */
+}</textarea>
+      
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('hello')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('hello', this)">⧉ Copiar código</button>
+        <span class="engine">saída: emulação em JS</span>
+      </div>
+      <div class="output" id="out-hello" data-cmd="gcc hello.c -o hello &amp;&amp; ./hello"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 02 -->
+  <section class="lesson" id="s2">
+    <div class="lesson-num">02</div>
+    <h2>Tipos de dados</h2>
+    <p>
+      C é estaticamente tipada: o tipo define quantos bytes são reservados na memória.
+    </p>
+    <table>
+      <tr><th>Tipo</th><th>Bytes</th><th>Faixa típica</th><th>Uso</th></tr>
+      <tr><td><code class="inline">char</code></td><td>1</td><td>-128 a 127</td><td>Caracteres</td></tr>
+      <tr><td><code class="inline">int</code></td><td>4</td><td>-2.147.483.648 a 2.147.483.647</td><td>Inteiros</td></tr>
+      <tr><td><code class="inline">float</code></td><td>4</td><td>±3.4 × 10³⁸</td><td>Ponto flutuante simples</td></tr>
+      <tr><td><code class="inline">double</code></td><td>8</td><td>±1.8 × 10³⁰⁸</td><td>Ponto flutuante duplo</td></tr>
+    </table>
+    <div class="callout">
+      <strong>Divisão inteira:</strong> <code class="inline">7 / 2 = 3</code> (não 3.5). Use cast para <code class="inline">double</code> quando precisar de fração.
+    </div>
+
+    <div class="inline-demo">
+      <label>Divisão em C — digite dois inteiros:</label>
+      <div class="row">
+        <input type="number" class="demo-input" id="div-a" value="7" oninput="divDemo()">
+        <span class="op">÷</span>
+        <input type="number" class="demo-input" id="div-b" value="2" oninput="divDemo()">
+      </div>
+      <div class="demo-output" id="div-out"></div>
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">tipos.c — tipos, sizeof e casting</span>
+      </div>
+      <textarea class="code-input" data-id="tipos" rows="29" spellcheck="false" readonly>#include &lt;stdio.h&gt;
+
+int main(void) {
+    int    idade   = 25;
+    float  preco   = 19.90f;      /* sufixo 'f' para float literal */
+    double pi      = 3.14159265;
+    char   letra   = 'A';
+    const  int ANO = 2026;        /* constante — não pode ser alterada */
+
+    printf("Idade:  %d\n",   idade);
+    printf("Preco:  %.2f\n", preco);
+    printf("Pi:     %.8f\n", pi);
+    printf("Letra:  %c  (ASCII %d)\n", letra, letra);
+    printf("Ano:    %d\n",   ANO);
+
+    /* Tamanhos em bytes */
+    printf("\nTamanhos:\n");
+    printf("  char:   %zu bytes\n", sizeof(char));
+    printf("  int:    %zu bytes\n", sizeof(int));
+    printf("  float:  %zu bytes\n", sizeof(float));
+    printf("  double: %zu bytes\n", sizeof(double));
+
+    /* Casting explícito */
+    int a = 7, b = 2;
+    printf("\n7 / 2 (int)    = %d\n", a / b);              /* 3 */
+    printf("7 / 2 (double) = %.1f\n", (double)a / b);      /* 3.5 */
+
+    return 0;
+}</textarea>
+      
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('tipos')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('tipos', this)">⧉ Copiar código</button>
+        <span class="engine">saída: emulação em JS</span>
+      </div>
+      <div class="output" id="out-tipos" data-cmd="gcc tipos.c -o tipos &amp;&amp; ./tipos"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 03 -->
+  <section class="lesson" id="s3">
+    <div class="lesson-num">03</div>
+    <h2>Operadores</h2>
+    <ul>
+      <li><strong>Aritméticos:</strong> <code class="inline">+ - * / %</code> — <code class="inline">%</code> é o resto da divisão inteira</li>
+      <li><strong>Relacionais:</strong> <code class="inline">== != &lt; &gt; &lt;= &gt;=</code> — retornam <code class="inline">1</code> (verdadeiro) ou <code class="inline">0</code> (falso)</li>
+      <li><strong>Lógicos:</strong> <code class="inline">&amp;&amp;</code> (E), <code class="inline">||</code> (OU), <code class="inline">!</code> (NÃO)</li>
+      <li><strong>Atribuição composta:</strong> <code class="inline">+= -= *= /= %=</code></li>
+    </ul>
+
+    <div class="inline-demo">
+      <label>Tabela verdade ao vivo — marque A e B (marcado = 1):</label>
+      <div class="row">
+        <label class="chk"><input type="checkbox" id="lg-a" onchange="logicDemo()"> A</label>
+        <label class="chk"><input type="checkbox" id="lg-b" onchange="logicDemo()"> B</label>
+      </div>
+      <div class="demo-output" id="lg-out"></div>
+    </div>
+
+    <table>
+      <tr><th>A</th><th>B</th><th>A &amp;&amp; B</th><th>A || B</th><th>!A</th></tr>
+      <tr><td>0</td><td>0</td><td>0</td><td>0</td><td>1</td></tr>
+      <tr><td>0</td><td>1</td><td>0</td><td>1</td><td>1</td></tr>
+      <tr><td>1</td><td>0</td><td>0</td><td>1</td><td>0</td></tr>
+      <tr><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td></tr>
+    </table>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">operadores.c — aritméticos, relacionais, lógicos</span>
+      </div>
+      <textarea class="code-input" data-id="operadores" rows="30" spellcheck="false" readonly>#include &lt;stdio.h&gt;
+
+int main(void) {
+    int x = 10, y = 3;
+
+    printf("=== Aritméticos ===\n");
+    printf("%d + %d = %d\n", x, y, x + y);   /* 13 */
+    printf("%d - %d = %d\n", x, y, x - y);   /* 7  */
+    printf("%d * %d = %d\n", x, y, x * y);   /* 30 */
+    printf("%d / %d = %d\n", x, y, x / y);   /* 3  (inteiro!) */
+    printf("%d %% %d = %d\n", x, y, x % y);  /* 1  (resto) */
+
+    printf("\n=== Relacionais (1=true, 0=false) ===\n");
+    printf("10 == 3 : %d\n", x == y);   /* 0 */
+    printf("10 != 3 : %d\n", x != y);   /* 1 */
+    printf("10 &gt;  3 : %d\n", x &gt;  y);   /* 1 */
+
+    printf("\n=== Lógicos ===\n");
+    int chuva = 1, guarda_chuva = 0;
+    printf("chuva &amp;&amp; !guarda_chuva = %d\n", chuva &amp;&amp; !guarda_chuva); /* 1 */
+    printf("!chuva || guarda_chuva = %d\n", !chuva || guarda_chuva); /* 0 */
+
+    printf("\n=== Atribuição composta ===\n");
+    x += 5;  printf("x += 5  → x = %d\n", x); /* 15 */
+    x *= 2;  printf("x *= 2  → x = %d\n", x); /* 30 */
+    x %= 7;  printf("x %%= 7  → x = %d\n", x); /* 2  */
+
+    printf("\n=== Pré vs Pós-incremento ===\n");
+    int i = 5;
+    printf("i = %d\n", i);
+    printf("i++ usa %d, depois i = %d\n", i++, i);
+    printf("++i retorna %d\n", ++i);
+
+    return 0;
+}</textarea>
+      
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('operadores')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('operadores', this)">⧉ Copiar código</button>
+        <span class="engine">saída: emulação em JS</span>
+      </div>
+      <div class="output" id="out-operadores" data-cmd="gcc operadores.c -o operadores &amp;&amp; ./operadores"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 04 -->
+  <section class="lesson" id="s4">
+    <div class="lesson-num">04</div>
+    <h2>Entrada e saída</h2>
+    <p>
+      <code class="inline">printf(formato, ...)</code> exibe dados formatados. <code class="inline">scanf(formato, &amp;var)</code> lê dados do usuário
+      (<strong>sempre use <code class="inline">&amp;</code></strong> em variáveis simples, exceto strings).
+      <code class="inline">fgets(str, tam, stdin)</code> lê a linha inteira, com espaços.
+    </p>
+    <table>
+      <tr><th>Especificador</th><th>Tipo</th><th>Exemplo</th></tr>
+      <tr><td><code class="inline">%d</code></td><td>int</td><td>42</td></tr>
+      <tr><td><code class="inline">%.2f</code></td><td>float / double</td><td>3.14</td></tr>
+      <tr><td><code class="inline">%c</code></td><td>char</td><td>A</td></tr>
+      <tr><td><code class="inline">%s</code></td><td>string</td><td>hello</td></tr>
+      <tr><td><code class="inline">%zu</code></td><td>size_t</td><td>8</td></tr>
+    </table>
+    <div class="tip">
+      <strong>Dica:</strong> aqui não existe um terminal interativo, então o campo “Entrada do teclado”
+      abaixo faz o papel do <code class="inline">stdin</code> — mude os valores e execute de novo.
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">io.c — printf, scanf e formatação</span>
+      </div>
+      <textarea class="code-input" data-id="io" rows="30" spellcheck="false" readonly>#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+
+int main(void) {
+    int   idade;
+    float altura;
+    char  nome[50];
+
+    /* No Colab a entrada vem do pipe abaixo */
+    printf("Digite seu nome: ");
+    scanf("%49s", nome);
+
+    printf("Digite sua idade: ");
+    scanf("%d", &amp;idade);
+
+    printf("Digite sua altura (m): ");
+    scanf("%f", &amp;altura);
+
+    printf("\n--- Resultado ---\n");
+    printf("Nome:   %s\n",   nome);
+    printf("Idade:  %d anos\n", idade);
+    printf("Altura: %.2f m\n",  altura);
+
+    /* Formatação avançada */
+    printf("\n--- Formatação ---\n");
+    printf("|%-20s|%6.2f|\n", "Item A",  12.5);   /* alinhado à esquerda */
+    printf("|%-20s|%6.2f|\n", "Item B", 999.99);   /* alinhado à direita  */
+    printf("|%020d|\n", 42);                        /* zeros à esquerda    */
+
+    return 0;
+}</textarea>
+      <div class="stdin-box"><label for="stdin-io">Entrada do teclado (stdin) — um valor por linha: nome, idade, altura</label><textarea id="stdin-io" rows="3" spellcheck="false">Maria
+22
+1.68</textarea></div>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('io')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('io', this)">⧉ Copiar código</button>
+        <span class="engine">saída: emulação em JS</span>
+      </div>
+      <div class="output" id="out-io" data-cmd="gcc io.c -o io &amp;&amp; ./io"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 05 -->
+  <section class="lesson" id="s5">
+    <div class="lesson-num">05</div>
+    <h2>Estruturas de decisão</h2>
+    <p>
+      <code class="inline">if / else if / else</code> testa condições booleanas (qualquer valor diferente de 0 é verdadeiro).
+      <code class="inline">switch / case</code> compara um valor inteiro com várias alternativas fixas.
+    </p>
+    <div class="callout">
+      <strong>Atenção:</strong> sempre use <code class="inline">break</code> no <code class="inline">switch</code>, ou o código cai no próximo
+      <code class="inline">case</code> (<em>fall-through</em>).
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">decisao.c — if/else, switch e ternário</span>
+      </div>
+      <textarea class="code-input" data-id="decisao" rows="30" spellcheck="false" readonly>#include &lt;stdio.h&gt;
+
+int main(void) {
+    /* ── if-else encadeado: classificação de notas ── */
+    int notas[] = {95, 82, 68, 51, 30};
+    int n = 5;
+
+    printf("=== Classificação de Notas ===\n");
+    for (int i = 0; i &lt; n; i++) {
+        int nota = notas[i];
+        char *conceito;
+
+        if      (nota &gt;= 90) conceito = "A — Excelente";
+        else if (nota &gt;= 70) conceito = "B — Bom";
+        else if (nota &gt;= 50) conceito = "C — Regular";
+        else                 conceito = "D — Reprovado";
+
+        printf("Nota %3d → %s\n", nota, conceito);
+    }
+
+    /* ── switch-case: dias da semana ── */
+    printf("\n=== Dias da Semana ===\n");
+    for (int dia = 1; dia &lt;= 7; dia++) {
+        switch (dia) {
+            case 1: printf("Dia %d: Segunda-feira\n", dia); break;
+            case 2: printf("Dia %d: Terça-feira\n",   dia); break;
+            case 3: printf("Dia %d: Quarta-feira\n",  dia); break;
+            case 4: printf("Dia %d: Quinta-feira\n",  dia); break;
+            case 5: printf("Dia %d: Sexta-feira\n",   dia); break;
+            case 6: /* fall-through intencional */
+            case 7: printf("Dia %d: Fim de semana!\n", dia); break;
+            default: printf("Dia inválido\n");
+        }
+    }
+
+    /* ── Operador ternário ── */
+    int x = 42;
+    printf("\n%d é %s\n", x, (x % 2 == 0) ? "par" : "ímpar");
+
+    return 0;
+}</textarea>
+      
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('decisao')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('decisao', this)">⧉ Copiar código</button>
+        <span class="engine">saída: emulação em JS</span>
+      </div>
+      <div class="output" id="out-decisao" data-cmd="gcc decisao.c -o decisao &amp;&amp; ./decisao"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 06 -->
+  <section class="lesson" id="s6">
+    <div class="lesson-num">06</div>
+    <h2>Estruturas de repetição</h2>
+    <table>
+      <tr><th>Estrutura</th><th>Quando usar</th><th>Testa condição</th></tr>
+      <tr><td><code class="inline">for</code></td><td>Nº de iterações conhecido</td><td>Antes</td></tr>
+      <tr><td><code class="inline">while</code></td><td>Nº desconhecido, pode não executar</td><td>Antes</td></tr>
+      <tr><td><code class="inline">do-while</code></td><td>Deve executar pelo menos 1 vez</td><td>Depois</td></tr>
+    </table>
+    <ul>
+      <li><code class="inline">break</code> — sai imediatamente do laço</li>
+      <li><code class="inline">continue</code> — pula para a próxima iteração</li>
+    </ul>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">loops.c — for, while, do-while</span>
+      </div>
+      <textarea class="code-input" data-id="loops" rows="30" spellcheck="false" readonly>#include &lt;stdio.h&gt;
+
+int main(void) {
+    /* ── for: tabuada do 7 ── */
+    printf("=== Tabuada do 7 ===\n");
+    for (int i = 1; i &lt;= 10; i++)
+        printf("7 x %2d = %2d\n", i, 7 * i);
+
+    /* ── for: triângulo de asteriscos ── */
+    printf("\n=== Triângulo ===\n");
+    for (int i = 1; i &lt;= 5; i++) {
+        for (int j = 0; j &lt; i; j++) printf("* ");
+        printf("\n");
+    }
+
+    /* ── while: sequência de Fibonacci ── */
+    printf("\n=== Fibonacci (até 100) ===\n");
+    int a = 0, b = 1;
+    while (a &lt;= 100) {
+        printf("%d ", a);
+        int t = a + b;
+        a = b;
+        b = t;
+    }
+    printf("\n");
+
+    /* ── for + continue: números ímpares ── */
+    printf("\n=== Ímpares de 1 a 20 ===\n");
+    for (int i = 1; i &lt;= 20; i++) {
+        if (i % 2 == 0) continue;  /* pula pares */
+        printf("%d ", i);
+    }
+    printf("\n");
+
+    /* ── for + break: primeiro múltiplo de 7 acima de 50 ── */
+    printf("\n=== Primeiro múltiplo de 7 &gt; 50 ===\n");
+    for (int i = 51; i &lt; 200; i++) {
+        if (i % 7 == 0) {
+            printf("%d\n", i);
+            break;
+        }
+    }
+
+    /* ── do-while: menu simulado ── */
+    printf("\n=== Validação do-while ===\n");
+    int tentativas[] = {5, 0, -1, 2};  /* simula entradas inválidas depois válida */
+    int idx = 0, opcao;
+    do {
+        opcao = tentativas[idx++];
+        printf("Tentativa: %d %s\n", opcao, (opcao == 1 || opcao == 2) ? "✓" : "✗");
+    } while (opcao != 1 &amp;&amp; opcao != 2 &amp;&amp; idx &lt; 4);
+
+    return 0;
+}</textarea>
+      
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('loops')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('loops', this)">⧉ Copiar código</button>
+        <span class="engine">saída: emulação em JS</span>
+      </div>
+      <div class="output" id="out-loops" data-cmd="gcc loops.c -o loops &amp;&amp; ./loops"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <div class="module-divider"><span class="tag">Módulo 2 · Dados e memória</span></div>
+
+  <!-- SEÇÃO 07 -->
+  <section class="lesson" id="s7">
+    <div class="lesson-num">07</div>
+    <h2>Funções</h2>
+    <ul>
+      <li><strong>Protótipo:</strong> declaração antecipada que informa ao compilador o tipo de retorno e os parâmetros</li>
+      <li><strong>Passagem por valor:</strong> a função recebe uma <em>cópia</em> — alterar dentro não altera o original</li>
+      <li><strong>Passagem por ponteiro:</strong> a função recebe o endereço — altera o original</li>
+      <li><strong>Escopo local:</strong> variáveis declaradas dentro de uma função existem somente ali</li>
+      <li><strong>Escopo global:</strong> variáveis declaradas fora de qualquer função são visíveis em todo o arquivo</li>
+    </ul>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">funcoes.c — protótipos, ponteiros, recursão</span>
+      </div>
+      <textarea class="code-input" data-id="funcoes" rows="30" spellcheck="false" readonly>#include &lt;stdio.h&gt;
+
+/* ── Protótipos ── */
+int    fatorial(int n);
+double media(double v[], int tam);
+void   trocar(int *a, int *b);    /* passagem por ponteiro */
+int    eh_primo(int n);
+
+/* variável global */
+int chamadas = 0;
+
+int main(void) {
+    /* Fatorial */
+    printf("=== Fatorial ===\n");
+    for (int i = 0; i &lt;= 10; i++)
+        printf("%2d! = %d\n", i, fatorial(i));
+
+    /* Média */
+    double notas[] = {7.5, 8.0, 9.5, 6.0, 8.5};
+    printf("\nMédia: %.2f\n", media(notas, 5));
+
+    /* Trocar — passagem por referência */
+    int x = 10, y = 20;
+    printf("\nAntes: x=%d y=%d\n", x, y);
+    trocar(&amp;x, &amp;y);
+    printf("Depois: x=%d y=%d\n", x, y);
+
+    /* Primos */
+    printf("\nPrimos de 2 a 50: ");
+    for (int i = 2; i &lt;= 50; i++)
+        if (eh_primo(i)) printf("%d ", i);
+    printf("\n");
+
+    printf("\nFunções chamadas: %d\n", chamadas);
+    return 0;
+}
+
+/* ── Definições ── */
+int fatorial(int n) {
+    chamadas++;
+    if (n &lt;= 1) return 1;
+    return n * fatorial(n - 1);  /* recursão */
+}
+
+double media(double v[], int tam) {
+    chamadas++;
+    double s = 0;
+    for (int i = 0; i &lt; tam; i++) s += v[i];
+    return s / tam;
+}
+
+void trocar(int *a, int *b) {
+    chamadas++;
+    int tmp = *a;
+    *a = *b;
+    *b = tmp;
+}
+
+int eh_primo(int n) {
+    chamadas++;
+    if (n &lt; 2) return 0;
+    for (int i = 2; i * i &lt;= n; i++)
+        if (n % i == 0) return 0;
+    return 1;
+}</textarea>
+      
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('funcoes')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('funcoes', this)">⧉ Copiar código</button>
+        <span class="engine">saída: emulação em JS</span>
+      </div>
+      <div class="output" id="out-funcoes" data-cmd="gcc funcoes.c -o funcoes &amp;&amp; ./funcoes"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 08 -->
+  <section class="lesson" id="s8">
+    <div class="lesson-num">08</div>
+    <h2>Vetores e matrizes</h2>
+    <ul>
+      <li><strong>Vetor</strong> (array 1D): posições contíguas de memória, indexadas a partir de <code class="inline">0</code></li>
+      <li><strong>Matriz</strong> (array 2D): vetor de vetores — <code class="inline">mat[linha][coluna]</code></li>
+      <li>Tamanho do array: <code class="inline">sizeof(arr) / sizeof(arr[0])</code></li>
+    </ul>
+    <div class="callout">
+      <strong>Atenção:</strong> C não verifica limites — acessar <code class="inline">v[n]</code> em um array de <code class="inline">n</code> posições é
+      <em>comportamento indefinido</em>.
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">arrays.c — vetores, matrizes e bubble sort</span>
+      </div>
+      <textarea class="code-input" data-id="arrays" rows="30" spellcheck="false" readonly>#include &lt;stdio.h&gt;
+
+/* Ordena com Bubble Sort (didático) */
+void bubble_sort(int v[], int n) {
+    for (int i = 0; i &lt; n - 1; i++)
+        for (int j = 0; j &lt; n - 1 - i; j++)
+            if (v[j] &gt; v[j+1]) {
+                int t = v[j]; v[j] = v[j+1]; v[j+1] = t;
+            }
+}
+
+int main(void) {
+    /* ── Vetor ── */
+    int notas[] = {85, 42, 97, 61, 73, 55, 88};
+    int n = sizeof(notas) / sizeof(notas[0]);
+
+    printf("=== Vetor original ===\n");
+    for (int i = 0; i &lt; n; i++) printf("%d ", notas[i]);
+    printf("\n");
+
+    bubble_sort(notas, n);
+    printf("=== Após Bubble Sort ===\n");
+    for (int i = 0; i &lt; n; i++) printf("%d ", notas[i]);
+    printf("\n");
+
+    /* ── Matriz identidade 4x4 ── */
+    printf("\n=== Matriz Identidade 4x4 ===\n");
+    int mat[4][4];
+    for (int i = 0; i &lt; 4; i++)
+        for (int j = 0; j &lt; 4; j++)
+            mat[i][j] = (i == j) ? 1 : 0;
+
+    for (int i = 0; i &lt; 4; i++) {
+        for (int j = 0; j &lt; 4; j++) printf("%2d", mat[i][j]);
+        printf("\n");
+    }
+
+    /* ── Soma de duas matrizes 2x2 ── */
+    printf("\n=== Soma de Matrizes ===\n");
+    int A[2][2] = {{1,2},{3,4}};
+    int B[2][2] = {{5,6},{7,8}};
+    int C[2][2];
+    for (int i = 0; i &lt; 2; i++)
+        for (int j = 0; j &lt; 2; j++)
+            C[i][j] = A[i][j] + B[i][j];
+
+    for (int i = 0; i &lt; 2; i++) {
+        printf("|%2d %2d|  +  |%2d %2d|  =  |%2d %2d|\n",
+               A[i][0],A[i][1], B[i][0],B[i][1], C[i][0],C[i][1]);
+    }
+
+    return 0;
+}</textarea>
+      
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('arrays')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('arrays', this)">⧉ Copiar código</button>
+        <span class="engine">saída: emulação em JS</span>
+      </div>
+      <div class="output" id="out-arrays" data-cmd="gcc arrays.c -o arrays &amp;&amp; ./arrays"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 09 -->
+  <section class="lesson" id="s9">
+    <div class="lesson-num">09</div>
+    <h2>Ponteiros</h2>
+    <ul>
+      <li><code class="inline">&amp;x</code> → endereço de memória de <code class="inline">x</code></li>
+      <li><code class="inline">int *p = &amp;x</code> → <code class="inline">p</code> armazena o endereço de <code class="inline">x</code></li>
+      <li><code class="inline">*p</code> → acessa/modifica o valor no endereço (desreferência)</li>
+      <li>O nome de um array já é um ponteiro para o primeiro elemento: <code class="inline">v == &amp;v[0]</code></li>
+    </ul>
+<pre class="diagram">   x = 42          p
+ ┌────────┐      ┌────────┐
+ │   42   │◀──── │ 0x1004 │
+ └────────┘      └────────┘
+  endereço        p guarda
+  0x1004          o endereço</pre>
+    <div class="tip">
+      <strong>Dica:</strong> os endereços impressos são simulados e mudam a cada execução — no C real
+      também mudam, porque o sistema operacional escolhe onde a pilha fica.
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">ponteiros.c — &amp;, * e aritmética de ponteiros</span>
+      </div>
+      <textarea class="code-input" data-id="ponteiros" rows="30" spellcheck="false" readonly>#include &lt;stdio.h&gt;
+
+void dobrar(int *p)   { *p *= 2; }
+void zerar(int *v, int n) {
+    for (int i = 0; i &lt; n; i++) v[i] = 0;
+}
+
+int main(void) {
+    /* Fundamentos */
+    int x = 42;
+    int *p = &amp;x;
+
+    printf("=== Fundamentos ===\n");
+    printf("x     = %d\n", x);
+    printf("&amp;x    = %p\n", (void*)&amp;x);
+    printf("p     = %p  (mesmo endereço)\n", (void*)p);
+    printf("*p    = %d  (valor via ponteiro)\n", *p);
+
+    *p = 99;
+    printf("\nApós *p = 99:\n");
+    printf("x = %d  (alterado via ponteiro!)\n", x);
+
+    dobrar(&amp;x);
+    printf("Após dobrar(&amp;x): x = %d\n", x);
+
+    /* Aritmética de ponteiros */
+    int v[] = {10, 20, 30, 40, 50};
+    int *pv = v;   /* aponta para v[0] */
+
+    printf("\n=== Aritmética de Ponteiros ===\n");
+    for (int i = 0; i &lt; 5; i++)
+        printf("pv+%d → endereço %p → valor %d\n",
+               i, (void*)(pv+i), *(pv+i));
+
+    /* Ponteiro para ponteiro */
+    int **pp = &amp;p;
+    printf("\n=== Ponteiro para Ponteiro ===\n");
+    printf("**pp = %d\n", **pp);
+
+    /* Zerar array via ponteiro */
+    zerar(v, 5);
+    printf("\n=== Após zerar(v, 5) ===\n");
+    for (int i = 0; i &lt; 5; i++) printf("%d ", v[i]);
+    printf("\n");
+
+    return 0;
+}</textarea>
+      
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('ponteiros')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('ponteiros', this)">⧉ Copiar código</button>
+        <span class="engine">saída: emulação em JS</span>
+      </div>
+      <div class="output" id="out-ponteiros" data-cmd="gcc ponteiros.c -o ponteiros &amp;&amp; ./ponteiros"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 10 -->
+  <section class="lesson" id="s10">
+    <div class="lesson-num">10</div>
+    <h2>Strings</h2>
+    <p>
+      Strings em C são <code class="inline">char[]</code> terminados com <code class="inline">'\0'</code>. A biblioteca <code class="inline">string.h</code> oferece:
+    </p>
+    <table>
+      <tr><th>Função</th><th>O que faz</th></tr>
+      <tr><td><code class="inline">strlen(s)</code></td><td>Comprimento (sem <code class="inline">'\0'</code>)</td></tr>
+      <tr><td><code class="inline">strcpy(dst, src)</code></td><td>Copia <code class="inline">src</code> em <code class="inline">dst</code></td></tr>
+      <tr><td><code class="inline">strncpy(dst, src, n)</code></td><td>Copia no máximo <code class="inline">n</code> bytes (mais seguro)</td></tr>
+      <tr><td><code class="inline">strcat(dst, src)</code></td><td>Concatena <code class="inline">src</code> ao final de <code class="inline">dst</code></td></tr>
+      <tr><td><code class="inline">strcmp(a, b)</code></td><td>Compara: 0 = iguais, &lt;0 = a&lt;b, &gt;0 = a&gt;b</td></tr>
+      <tr><td><code class="inline">strchr(s, c)</code></td><td>Ponteiro para a primeira ocorrência de <code class="inline">c</code> em <code class="inline">s</code></td></tr>
+      <tr><td><code class="inline">strstr(s, sub)</code></td><td>Ponteiro para a primeira ocorrência de <code class="inline">sub</code> em <code class="inline">s</code></td></tr>
+    </table>
+    <div class="tip">
+      <strong>Repare:</strong> <code class="inline">strlen("Programação")</code> dá 13, não 11 — o <code class="inline">strlen</code> conta
+      <em>bytes</em>, e “ç” e “ã” ocupam 2 bytes cada em UTF-8.
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">strings.c — string.h e ctype.h</span>
+      </div>
+      <textarea class="code-input" data-id="strings" rows="30" spellcheck="false" readonly>#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;ctype.h&gt;   /* toupper, tolower, isdigit... */
+
+/* Converte string para maiúsculas (in-place) */
+void para_maiuscula(char *s) {
+    for (int i = 0; s[i]; i++) s[i] = toupper(s[i]);
+}
+
+/* Conta vogais */
+int contar_vogais(const char *s) {
+    int count = 0;
+    for (int i = 0; s[i]; i++)
+        if (strchr("aeiouAEIOU", s[i])) count++;
+    return count;
+}
+
+int main(void) {
+    char s1[80] = "Programação";
+    char s2[80] = " em C";
+    char s3[80];
+
+    printf("=== Funções Básicas ===\n");
+    printf("strlen(\"%s\") = %zu\n", s1, strlen(s1));
+
+    strcpy(s3, s1);
+    strcat(s3, s2);
+    printf("strcpy + strcat: \"%s\"\n", s3);
+
+    printf("\n=== strcmp ===\n");
+    char *palavras[] = {"banana", "abacaxi", "banana", "cereja"};
+    for (int i = 0; i &lt; 3; i++) {
+        int cmp = strcmp(palavras[i], palavras[i+1]);
+        printf("\"%s\" vs \"%s\": %d → %s\n",
+               palavras[i], palavras[i+1], cmp,
+               cmp &lt; 0 ? "menor" : cmp &gt; 0 ? "maior" : "igual");
+    }
+
+    printf("\n=== Manipulação ===\n");
+    char frase[] = "hello world";
+    printf("Original: %s\n", frase);
+    para_maiuscula(frase);
+    printf("Maiúscula: %s\n", frase);
+    printf("Vogais em 'Programacao': %d\n", contar_vogais("Programacao"));
+
+    /* strstr */
+    char texto[] = "O rato roeu a roupa do rei";
+    char *pos = strstr(texto, "roupa");
+    if (pos) printf("\n'roupa' encontrada na posição %ld\n", pos - texto);
+
+    return 0;
+}</textarea>
+      
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('strings')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('strings', this)">⧉ Copiar código</button>
+        <span class="engine">saída: emulação em JS</span>
+      </div>
+      <div class="output" id="out-strings" data-cmd="gcc strings.c -o strings &amp;&amp; ./strings"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 11 -->
+  <section class="lesson" id="s11">
+    <div class="lesson-num">11</div>
+    <h2>Alocação dinâmica de memória</h2>
+    <table>
+      <tr><th>Área</th><th>Característica</th></tr>
+      <tr><td><strong>Stack</strong> (pilha)</td><td>Variáveis locais, tamanho fixo em compilação, liberada ao sair da função</td></tr>
+      <tr><td><strong>Heap</strong></td><td><code class="inline">malloc</code>/<code class="inline">calloc</code>, tamanho definido em execução, deve ser liberada com <code class="inline">free</code></td></tr>
+    </table>
+    <ul>
+      <li><code class="inline">malloc(n)</code> → aloca <code class="inline">n</code> bytes, conteúdo indefinido</li>
+      <li><code class="inline">calloc(qtd, size)</code> → aloca e <strong>zera</strong> a memória</li>
+      <li><code class="inline">realloc(p, novo_n)</code> → redimensiona um bloco existente</li>
+      <li><code class="inline">free(p)</code> → libera o bloco</li>
+    </ul>
+    <div class="callout">
+      <strong>Atenção:</strong> sempre verifique se <code class="inline">malloc</code> retornou <code class="inline">NULL</code> e sempre faça <code class="inline">free</code>.
+      Use o Valgrind para detectar vazamentos.
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">dinamico.c — malloc, realloc, calloc, qsort</span>
+      </div>
+      <textarea class="code-input" data-id="dinamico" rows="30" spellcheck="false" readonly>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+
+int comparar(const void *a, const void *b) {
+    return (*(int*)a - *(int*)b);
+}
+
+int main(void) {
+    int n = 8;
+
+    /* ── malloc ── */
+    int *v = (int*) malloc(n * sizeof(int));
+    if (!v) { fprintf(stderr, "Sem memória\n"); return 1; }
+
+    /* Preenche com valores */
+    int valores[] = {64, 25, 12, 22, 11, 90, 45, 3};
+    memcpy(v, valores, n * sizeof(int));
+
+    printf("=== malloc: array alocado no heap ===\n");
+    for (int i = 0; i &lt; n; i++) printf("%d ", v[i]);
+    printf("\n");
+
+    /* Ordena com qsort (stdlib) */
+    qsort(v, n, sizeof(int), comparar);
+    printf("=== Após qsort ===\n");
+    for (int i = 0; i &lt; n; i++) printf("%d ", v[i]);
+    printf("\n");
+
+    /* ── realloc: dobra o tamanho ── */
+    int novo_n = n * 2;
+    v = (int*) realloc(v, novo_n * sizeof(int));
+    if (!v) { fprintf(stderr, "Sem memória no realloc\n"); return 1; }
+    for (int i = n; i &lt; novo_n; i++) v[i] = i * 10;
+
+    printf("\n=== Após realloc (tamanho dobrado) ===\n");
+    for (int i = 0; i &lt; novo_n; i++) printf("%d ", v[i]);
+    printf("\n");
+
+    free(v);
+    v = NULL;   /* evita dangling pointer */
+
+    /* ── calloc: inicializa com zeros ── */
+    printf("\n=== calloc: 5 doubles zerados ===\n");
+    double *notas = (double*) calloc(5, sizeof(double));
+    for (int i = 0; i &lt; 5; i++) printf("%.1f ", notas[i]);  /* todos 0.0 */
+    printf("\n");
+    free(notas);
+
+    printf("\nMemória liberada com sucesso!\n");
+    return 0;
+}</textarea>
+      
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('dinamico')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('dinamico', this)">⧉ Copiar código</button>
+        <span class="engine">saída: emulação em JS</span>
+      </div>
+      <div class="output" id="out-dinamico" data-cmd="gcc dinamico.c -o dinamico &amp;&amp; ./dinamico"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 12 -->
+  <section class="lesson" id="s12">
+    <div class="lesson-num">12</div>
+    <h2>Structs</h2>
+    <ul>
+      <li><code class="inline">struct</code> agrupa variáveis de tipos diferentes em um tipo composto</li>
+      <li><code class="inline">typedef struct { ... } Nome;</code> cria um alias conveniente</li>
+      <li>Membro de variável: <code class="inline">aluno.nome</code> (operador ponto)</li>
+      <li>Membro via ponteiro: <code class="inline">p-&gt;nome</code> (operador seta) equivale a <code class="inline">(*p).nome</code></li>
+    </ul>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">structs.c — struct, typedef e lista ligada</span>
+      </div>
+      <textarea class="code-input" data-id="structs" rows="30" spellcheck="false" readonly>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+
+typedef struct {
+    int    matricula;
+    char   nome[60];
+    double notas[3];
+    double media;  /* calculada */
+} Aluno;
+
+/* Lista ligada simples */
+typedef struct No {
+    int        valor;
+    struct No *prox;
+} No;
+
+Aluno criar_aluno(int mat, const char *nome, double n1, double n2, double n3) {
+    Aluno a;
+    a.matricula = mat;
+    strncpy(a.nome, nome, 59);
+    a.notas[0] = n1; a.notas[1] = n2; a.notas[2] = n3;
+    a.media = (n1 + n2 + n3) / 3.0;
+    return a;
+}
+
+void exibir(const Aluno *a) {
+    printf("  [%04d] %-20s  notas: %.1f %.1f %.1f  média: %.2f  %s\n",
+           a-&gt;matricula, a-&gt;nome,
+           a-&gt;notas[0], a-&gt;notas[1], a-&gt;notas[2],
+           a-&gt;media,
+           a-&gt;media &gt;= 7.0 ? "✓ Aprovado" : "✗ Reprovado");
+}
+
+int main(void) {
+    Aluno turma[] = {
+        criar_aluno(1001, "Ana Souza",    8.0, 9.0, 8.5),
+        criar_aluno(1002, "Bruno Lima",   6.0, 7.0, 5.5),
+        criar_aluno(1003, "Carla Neves",  9.5, 9.0, 10.0),
+        criar_aluno(1004, "Diego Melo",   4.0, 5.0, 6.0),
+    };
+    int n = 4;
+
+    printf("=== Boletim da Turma ===\n");
+    for (int i = 0; i &lt; n; i++) exibir(&amp;turma[i]);
+
+    /* Melhor aluno */
+    Aluno *melhor = &amp;turma[0];
+    for (int i = 1; i &lt; n; i++)
+        if (turma[i].media &gt; melhor-&gt;media) melhor = &amp;turma[i];
+    printf("\nMelhor aluno: %s (%.2f)\n", melhor-&gt;nome, melhor-&gt;media);
+
+    /* Lista ligada simples */
+    printf("\n=== Lista Ligada ===\n");
+    No *head = NULL;
+    for (int v = 1; v &lt;= 5; v++) {
+        No *novo = (No*) malloc(sizeof(No));
+        novo-&gt;valor = v * 10;
+        novo-&gt;prox  = head;
+        head = novo;
+    }
+    for (No *cur = head; cur; cur = cur-&gt;prox)
+        printf("%d → ", cur-&gt;valor);
+    printf("NULL\n");
+
+    /* Libera lista */
+    while (head) { No *t = head-&gt;prox; free(head); head = t; }
+
+    return 0;
+}</textarea>
+      
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('structs')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('structs', this)">⧉ Copiar código</button>
+        <span class="engine">saída: emulação em JS</span>
+      </div>
+      <div class="output" id="out-structs" data-cmd="gcc structs.c -o structs &amp;&amp; ./structs"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <div class="module-divider"><span class="tag">Módulo 3 · Arquivos e dados</span></div>
+
+  <!-- SEÇÃO 13 -->
+  <section class="lesson" id="s13">
+    <div class="lesson-num">13</div>
+    <h2>Manipulação de arquivos</h2>
+    <table>
+      <tr><th>Modo</th><th>Significado</th></tr>
+      <tr><td><code class="inline">"r"</code></td><td>Leitura; falha se não existir</td></tr>
+      <tr><td><code class="inline">"w"</code></td><td>Escrita; cria ou trunca</td></tr>
+      <tr><td><code class="inline">"a"</code></td><td>Append; adiciona ao final</td></tr>
+      <tr><td><code class="inline">"r+"</code></td><td>Leitura e escrita</td></tr>
+      <tr><td><code class="inline">"rb"</code> / <code class="inline">"wb"</code></td><td>Binário</td></tr>
+    </table>
+    <p>
+      Fluxo: <code class="inline">fopen</code> → operações → <code class="inline">fclose</code>. Sempre verifique se <code class="inline">fopen</code> retornou <code class="inline">NULL</code>.
+    </p>
+    <div class="tip">
+      <strong>Dica:</strong> o navegador não deixa um programa criar arquivos no seu disco. Nesta célula os
+      arquivos (<code class="inline">alunos.csv</code>, <code class="inline">alunos.bin</code>, <code class="inline">log.txt</code>) vivem só na memória durante a execução;
+      o código C acima, compilado no seu computador, grava de verdade.
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">arquivos.c — texto, binário e append</span>
+      </div>
+      <textarea class="code-input" data-id="arquivos" rows="30" spellcheck="false" readonly>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+
+typedef struct { char nome[50]; double media; } Aluno;
+
+void salvar_csv(const char *path, Aluno *v, int n) {
+    FILE *f = fopen(path, "w");
+    if (!f) { perror("fopen"); exit(1); }
+    fprintf(f, "nome,media\n");
+    for (int i = 0; i &lt; n; i++)
+        fprintf(f, "%s,%.2f\n", v[i].nome, v[i].media);
+    fclose(f);
+    printf("Salvo: %s\n", path);
+}
+
+void ler_csv(const char *path) {
+    FILE *f = fopen(path, "r");
+    if (!f) { perror("fopen"); exit(1); }
+    char linha[100];
+    printf("\nConteúdo de %s:\n", path);
+    while (fgets(linha, sizeof(linha), f))
+        fputs(linha, stdout);
+    fclose(f);
+}
+
+void append_log(const char *path, const char *msg) {
+    FILE *f = fopen(path, "a");
+    if (!f) return;
+    fprintf(f, "%s\n", msg);
+    fclose(f);
+}
+
+int main(void) {
+    Aluno turma[] = {
+        {"Ana Souza", 8.7}, {"Bruno Lima", 7.4},
+        {"Carla Neves", 9.2}, {"Diego Melo", 6.5}
+    };
+
+    salvar_csv("alunos.csv", turma, 4);
+    ler_csv("alunos.csv");
+
+    /* Arquivo binário */
+    printf("\n=== Arquivo Binário ===\n");
+    FILE *fb = fopen("alunos.bin", "wb");
+    fwrite(turma, sizeof(Aluno), 4, fb);
+    fclose(fb);
+
+    Aluno lidos[4];
+    fb = fopen("alunos.bin", "rb");
+    int lidos_n = fread(lidos, sizeof(Aluno), 4, fb);
+    fclose(fb);
+    printf("Lidos do binário: %d registros\n", lidos_n);
+    for (int i = 0; i &lt; lidos_n; i++)
+        printf("  %s: %.2f\n", lidos[i].nome, lidos[i].media);
+
+    /* Log com append */
+    append_log("log.txt", "[INFO] Sistema iniciado");
+    append_log("log.txt", "[INFO] Dados carregados");
+    ler_csv("log.txt");
+
+    return 0;
+}</textarea>
+      
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('arquivos')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('arquivos', this)">⧉ Copiar código</button>
+        <span class="engine">saída: emulação em JS</span>
+      </div>
+      <div class="output" id="out-arquivos" data-cmd="gcc arquivos.c -o arquivos &amp;&amp; ./arquivos"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO 14 -->
+  <section class="lesson" id="s14">
+    <div class="lesson-num">14</div>
+    <h2>Conexão com banco de dados (SQLite)</h2>
+    <p>
+      SQLite é um banco de dados embutido — armazena tudo em um único arquivo <code class="inline">.db</code>, sem necessidade de
+      servidor. É ideal para aplicativos desktop, mobile e embarcados.
+    </p>
+    <ul>
+      <li><code class="inline">sqlite3_open(path, &amp;db)</code> — abre/cria o banco</li>
+      <li><code class="inline">sqlite3_exec(db, sql, callback, 0, &amp;err)</code> — executa SQL simples</li>
+      <li><code class="inline">sqlite3_prepare_v2</code> + <code class="inline">sqlite3_bind_*</code> — <strong>Prepared Statements</strong> (evitam SQL Injection)</li>
+      <li><code class="inline">sqlite3_step</code> — executa e avança pelo resultado</li>
+      <li><code class="inline">sqlite3_column_*</code> — lê valores da linha atual</li>
+      <li><code class="inline">sqlite3_finalize</code> — libera o statement</li>
+      <li><code class="inline">sqlite3_close(db)</code> — fecha o banco</li>
+    </ul>
+    <div class="callout">
+      <strong>Atenção:</strong> <strong>nunca</strong> concatene strings do usuário diretamente no SQL.
+      Use Prepared Statements.
+    </div>
+    <div class="tip">
+      <strong>Dica:</strong> a biblioteca SQLite não roda aqui; a saída vem de um banco em memória simulado em JS
+      (inserir, filtrar, ordenar, atualizar, apagar e agrupar). Para usar o SQLite de verdade, compile no seu
+      computador com <code class="inline">-lsqlite3</code>.
+    </div>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">db_sqlite.c — CRUD com prepared statements</span>
+      </div>
+      <textarea class="code-input" data-id="db_sqlite" rows="30" spellcheck="false" readonly>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;sqlite3.h&gt;
+
+/* ─── Helpers ─────────────────────────────────────────── */
+static void check(int rc, sqlite3 *db, const char *msg) {
+    if (rc != SQLITE_OK &amp;&amp; rc != SQLITE_DONE &amp;&amp; rc != SQLITE_ROW) {
+        fprintf(stderr, "Erro %s: %s\n", msg, sqlite3_errmsg(db));
+        sqlite3_close(db);
+        exit(1);
+    }
+}
+
+/* ─── CREATE ───────────────────────────────────────────── */
+void criar_tabela(sqlite3 *db) {
+    const char *sql =
+        "CREATE TABLE IF NOT EXISTS alunos ("
+        "  id    INTEGER PRIMARY KEY AUTOINCREMENT,"
+        "  nome  TEXT NOT NULL,"
+        "  curso TEXT,"
+        "  media REAL CHECK(media &gt;= 0 AND media &lt;= 10)"
+        ");";
+    char *err = NULL;
+    check(sqlite3_exec(db, sql, NULL, 0, &amp;err), db, "criar_tabela");
+    printf("Tabela 'alunos' pronta.\n");
+}
+
+/* ─── INSERT com Prepared Statement ───────────────────── */
+void inserir(sqlite3 *db, const char *nome, const char *curso, double media) {
+    const char *sql = "INSERT INTO alunos(nome, curso, media) VALUES(?, ?, ?);";
+    sqlite3_stmt *stmt;
+
+    check(sqlite3_prepare_v2(db, sql, -1, &amp;stmt, NULL), db, "prepare INSERT");
+    sqlite3_bind_text(stmt, 1, nome,  -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, curso, -1, SQLITE_STATIC);
+    sqlite3_bind_double(stmt, 3, media);
+
+    check(sqlite3_step(stmt), db, "step INSERT");
+    sqlite3_finalize(stmt);
+}
+
+/* ─── SELECT ───────────────────────────────────────────── */
+void listar(sqlite3 *db, const char *filtro_curso) {
+    const char *sql = filtro_curso
+        ? "SELECT id, nome, curso, media FROM alunos WHERE curso = ? ORDER BY media DESC;"
+        : "SELECT id, nome, curso, media FROM alunos ORDER BY media DESC;";
+
+    sqlite3_stmt *stmt;
+    check(sqlite3_prepare_v2(db, sql, -1, &amp;stmt, NULL), db, "prepare SELECT");
+    if (filtro_curso) sqlite3_bind_text(stmt, 1, filtro_curso, -1, SQLITE_STATIC);
+
+    printf("\n%-4s %-22s %-18s %s\n", "ID", "Nome", "Curso", "Média");
+    printf("%-4s %-22s %-18s %s\n", "----", "----------------------", "------------------", "-----");
+
+    int rows = 0;
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        printf("%-4d %-22s %-18s %.2f\n",
+               sqlite3_column_int(stmt, 0),
+               sqlite3_column_text(stmt, 1),
+               sqlite3_column_text(stmt, 2),
+               sqlite3_column_double(stmt, 3));
+        rows++;
+    }
+    printf("%d registro(s) encontrado(s).\n", rows);
+    sqlite3_finalize(stmt);
+}
+
+/* ─── UPDATE ───────────────────────────────────────────── */
+void atualizar_media(sqlite3 *db, int id, double nova_media) {
+    const char *sql = "UPDATE alunos SET media = ? WHERE id = ?;";
+    sqlite3_stmt *stmt;
+    check(sqlite3_prepare_v2(db, sql, -1, &amp;stmt, NULL), db, "prepare UPDATE");
+    sqlite3_bind_double(stmt, 1, nova_media);
+    sqlite3_bind_int(stmt, 2, id);
+    check(sqlite3_step(stmt), db, "step UPDATE");
+    sqlite3_finalize(stmt);
+    printf("\nAluno id=%d atualizado: média = %.2f\n", id, nova_media);
+}
+
+/* ─── DELETE ───────────────────────────────────────────── */
+void deletar(sqlite3 *db, int id) {
+    const char *sql = "DELETE FROM alunos WHERE id = ?;";
+    sqlite3_stmt *stmt;
+    check(sqlite3_prepare_v2(db, sql, -1, &amp;stmt, NULL), db, "prepare DELETE");
+    sqlite3_bind_int(stmt, 1, id);
+    check(sqlite3_step(stmt), db, "step DELETE");
+    sqlite3_finalize(stmt);
+    printf("Aluno id=%d removido. Linhas afetadas: %d\n",
+           id, (int)sqlite3_changes(db));
+}
+
+/* ─── AGREGAÇÃO ────────────────────────────────────────── */
+void estatisticas(sqlite3 *db) {
+    const char *sql =
+        "SELECT curso,"
+        "       COUNT(*) as qtd,"
+        "       AVG(media) as media_turma,"
+        "       MAX(media) as maior,"
+        "       MIN(media) as menor"
+        " FROM alunos GROUP BY curso;";
+    sqlite3_stmt *stmt;
+    check(sqlite3_prepare_v2(db, sql, -1, &amp;stmt, NULL), db, "prepare GROUP");
+
+    printf("\n=== Estatísticas por Curso ===\n");
+    printf("%-18s %4s %8s %6s %6s\n", "Curso", "Qtd", "Média", "Max", "Min");
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        printf("%-18s %4d %8.2f %6.2f %6.2f\n",
+               sqlite3_column_text(stmt, 0),
+               sqlite3_column_int(stmt, 1),
+               sqlite3_column_double(stmt, 2),
+               sqlite3_column_double(stmt, 3),
+               sqlite3_column_double(stmt, 4));
+    }
+    sqlite3_finalize(stmt);
+}
+
+/* ─── MAIN ─────────────────────────────────────────────── */
+int main(void) {
+    sqlite3 *db;
+    check(sqlite3_open(":memory:", &amp;db), db, "open");  /* :memory: = banco na RAM */
+    printf("=== Banco SQLite (in-memory) aberto ===\n\n");
+
+    criar_tabela(db);
+
+    /* INSERTs */
+    printf("\n=== Inserindo registros ===\n");
+    inserir(db, "Ana Souza",    "Ciência da Computação", 8.7);
+    inserir(db, "Bruno Lima",   "Engenharia de Software", 7.4);
+    inserir(db, "Carla Neves",  "Ciência da Computação", 9.2);
+    inserir(db, "Diego Melo",   "Sistemas de Informação", 6.5);
+    inserir(db, "Elisa Prado",  "Engenharia de Software", 8.1);
+    inserir(db, "Fábio Costa",  "Ciência da Computação", 5.9);
+    printf("6 alunos inseridos.\n");
+
+    /* SELECT todos */
+    printf("\n=== Todos os alunos (ordem por média) ===");
+    listar(db, NULL);
+
+    /* SELECT filtrado */
+    printf("\n=== Filtrado: Ciência da Computação ===");
+    listar(db, "Ciência da Computação");
+
+    /* UPDATE */
+    atualizar_media(db, 2, 8.0);
+
+    /* DELETE */
+    deletar(db, 6);
+
+    /* Resultado final */
+    printf("\n=== Estado final ===");
+    listar(db, NULL);
+
+    /* Estatísticas */
+    estatisticas(db);
+
+    sqlite3_close(db);
+    printf("\nBanco fechado. Fim!\n");
+    return 0;
+}</textarea>
+      
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('db_sqlite')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('db_sqlite', this)">⧉ Copiar código</button>
+        <span class="engine">saída: emulação em JS</span>
+      </div>
+      <div class="output" id="out-db_sqlite" data-cmd="gcc db_sqlite.c -lsqlite3 -o db_sqlite &amp;&amp; ./db_sqlite"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <div class="module-divider"><span class="tag">Módulo 4 · Prática</span></div>
+
+  <!-- SEÇÃO 15 -->
+  <section class="lesson" id="s15">
+    <div class="lesson-num">15</div>
+    <h2>Boas práticas e compilação</h2>
+    <table>
+      <tr><th>Flag</th><th>O que faz</th></tr>
+      <tr><td><code class="inline">-Wall</code></td><td>Ativa a maioria dos avisos</td></tr>
+      <tr><td><code class="inline">-Wextra</code></td><td>Avisos adicionais</td></tr>
+      <tr><td><code class="inline">-std=c17</code></td><td>Padrão C17</td></tr>
+      <tr><td><code class="inline">-g</code></td><td>Símbolos de debug (gdb)</td></tr>
+      <tr><td><code class="inline">-O2</code></td><td>Otimização para produção</td></tr>
+      <tr><td><code class="inline">-lm</code></td><td>Linka a libm (<code class="inline">math.h</code>)</td></tr>
+      <tr><td><code class="inline">-fsanitize=address</code></td><td>Detecta acesso inválido à memória</td></tr>
+      <tr><td><code class="inline">-Werror</code></td><td>Trata avisos como erros</td></tr>
+    </table>
+    <p><strong>Convenções de nomenclatura:</strong></p>
+    <ul>
+      <li>Variáveis e funções: <code class="inline">snake_case</code> → <code class="inline">calcular_media</code></li>
+      <li>Constantes: <code class="inline">MAIUSCULAS</code> → <code class="inline">MAX_ALUNOS</code></li>
+      <li>Tipos (<code class="inline">typedef struct</code>): <code class="inline">PascalCase</code> → <code class="inline">Aluno</code></li>
+    </ul>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">boas_praticas.c — macros, math.h, enum</span>
+      </div>
+      <textarea class="code-input" data-id="boas_praticas" rows="30" spellcheck="false" readonly>/*
+ * boas_praticas.c
+ * Demonstra: comentários, #define, guard include,
+ * assert, math.h, macros seguras e compilação robusta.
+ *
+ * Compile: gcc -Wall -Wextra -std=c17 boas_praticas.c -lm -o app
+ */
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;math.h&gt;
+#include &lt;assert.h&gt;
+
+/* Constantes em MAIÚSCULAS via #define */
+#define PI           3.14159265358979
+#define MAX_ALUNOS   100
+#define VERSAO       "1.0.0"
+
+/* Macro com parênteses — evita surpresas na precedência */
+#define QUADRADO(x)  ((x) * (x))
+#define MAX(a, b)    ((a) &gt; (b) ? (a) : (b))
+#define CLAMP(v,lo,hi) ((v)&lt;(lo)?(lo):(v)&gt;(hi)?(hi):(v))
+
+/* Função com nome descritivo em snake_case */
+double area_circulo(double raio) {
+    assert(raio &gt;= 0 &amp;&amp; "raio não pode ser negativo");
+    return PI * QUADRADO(raio);
+}
+
+double hipotenusa(double a, double b) {
+    return sqrt(QUADRADO(a) + QUADRADO(b));
+}
+
+/* Enum para legibilidade */
+typedef enum { REPROVADO, APROVADO } Situacao;
+
+Situacao classificar(double media) {
+    return (media &gt;= 7.0) ? APROVADO : REPROVADO;
+}
+
+int main(void) {
+    printf("Versão: %s\n\n", VERSAO);
+
+    /* Macros */
+    printf("=== Macros ===\n");
+    printf("QUADRADO(7)     = %d\n", QUADRADO(7));
+    printf("MAX(3, 8)       = %d\n", MAX(3, 8));
+    printf("CLAMP(150,0,100)= %d\n", CLAMP(150, 0, 100));
+
+    /* math.h */
+    printf("\n=== math.h ===\n");
+    printf("PI              = %.10f\n", PI);
+    printf("área círculo r=5= %.4f\n",  area_circulo(5.0));
+    printf("hipotenusa(3,4) = %.1f\n",  hipotenusa(3.0, 4.0));
+    printf("sqrt(2)         = %.6f\n",  sqrt(2.0));
+    printf("pow(2,10)       = %.0f\n",  pow(2.0, 10.0));
+    printf("log2(1024)      = %.1f\n",  log2(1024.0));
+    printf("ceil(3.2)       = %.0f\n",  ceil(3.2));
+    printf("floor(3.9)      = %.0f\n",  floor(3.9));
+    printf("fabs(-7.5)      = %.1f\n",  fabs(-7.5));
+
+    /* Enum */
+    printf("\n=== Enum ===\n");
+    double medias[] = {9.0, 6.5, 7.0, 4.9};
+    for (int i = 0; i &lt; 4; i++)
+        printf("média %.1f → %s\n", medias[i],
+               classificar(medias[i]) == APROVADO ? "Aprovado" : "Reprovado");
+
+    return 0;
+}</textarea>
+      
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('boas_praticas')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('boas_praticas', this)">⧉ Copiar código</button>
+        <span class="engine">saída: emulação em JS</span>
+      </div>
+      <div class="output" id="out-boas_praticas" data-cmd="gcc -Wall -Wextra -std=c17 boas_praticas.c -lm -o boas_praticas &amp;&amp; ./boas_praticas"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO Desafio -->
+  <section class="lesson" id="sd">
+    <div class="lesson-num">Desafio</div>
+    <h2>Desafio final — mini sistema de cadastro</h2>
+    <p>
+      Integra tudo: structs, alocação dinâmica e SQLite. Leia com calma o que cada função faz
+      (<code class="inline">abrir_banco</code>, <code class="inline">inserir_aluno</code>, <code class="inline">buscar_todos</code>, <code class="inline">imprimir_relatorio</code>) e tente
+      prever a saída antes de executar.
+    </p>
+
+    <div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">sistema.c — mini sistema de cadastro</span>
+      </div>
+      <textarea class="code-input" data-id="sistema" rows="30" spellcheck="false" readonly>/*
+ * Mini Sistema de Cadastro de Alunos
+ * Integra: structs, alocação dinâmica, SQLite.
+ * Compile: gcc sistema.c -lsqlite3 -o sistema
+ */
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;sqlite3.h&gt;
+
+#define DB_PATH  ":memory:"
+#define MAX_NOME 80
+
+typedef struct {
+    int    id;
+    char   nome[MAX_NOME];
+    double media;
+} Aluno;
+
+/* ─── CRUD ─────────────────────────────────────────────── */
+sqlite3 *abrir_banco(void) {
+    sqlite3 *db;
+    if (sqlite3_open(DB_PATH, &amp;db) != SQLITE_OK) {
+        fprintf(stderr, "Erro ao abrir banco: %s\n", sqlite3_errmsg(db));
+        exit(1);
+    }
+    sqlite3_exec(db,
+        "CREATE TABLE IF NOT EXISTS alunos("
+        "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+        "nome TEXT NOT NULL, media REAL);",
+        NULL, 0, NULL);
+    return db;
+}
+
+long inserir_aluno(sqlite3 *db, const char *nome, double media) {
+    sqlite3_stmt *s;
+    sqlite3_prepare_v2(db,
+        "INSERT INTO alunos(nome,media) VALUES(?,?);", -1, &amp;s, NULL);
+    sqlite3_bind_text(s, 1, nome, -1, SQLITE_STATIC);
+    sqlite3_bind_double(s, 2, media);
+    sqlite3_step(s);
+    sqlite3_finalize(s);
+    return (long)sqlite3_last_insert_rowid(db);
+}
+
+/* Retorna array alocado dinamicamente; *out_n recebe o tamanho */
+Aluno *buscar_todos(sqlite3 *db, int *out_n) {
+    sqlite3_stmt *s;
+    sqlite3_prepare_v2(db,
+        "SELECT id,nome,media FROM alunos ORDER BY media DESC;",
+        -1, &amp;s, NULL);
+
+    int cap = 8, n = 0;
+    Aluno *v = malloc(cap * sizeof(Aluno));
+
+    while (sqlite3_step(s) == SQLITE_ROW) {
+        if (n == cap) { cap *= 2; v = realloc(v, cap * sizeof(Aluno)); }
+        v[n].id = sqlite3_column_int(s, 0);
+        strncpy(v[n].nome, (const char*)sqlite3_column_text(s, 1), MAX_NOME-1);
+        v[n].media = sqlite3_column_double(s, 2);
+        n++;
+    }
+    sqlite3_finalize(s);
+    *out_n = n;
+    return v;
+}
+
+void imprimir_relatorio(Aluno *v, int n) {
+    int aprov = 0;
+    double soma = 0;
+    printf("\n%s\n", "══════════════════════════════════════════");
+    printf(" %-4s %-24s %6s  %s\n", "ID", "Nome", "Média", "Sit.");
+    printf("%s\n", "──────────────────────────────────────────");
+    for (int i = 0; i &lt; n; i++) {
+        int ok = v[i].media &gt;= 7.0;
+        printf(" %-4d %-24s %6.2f  %s\n",
+               v[i].id, v[i].nome, v[i].media,
+               ok ? "✓ Aprovado" : "✗ Reprovado");
+        aprov += ok;
+        soma  += v[i].media;
+    }
+    printf("%s\n", "──────────────────────────────────────────");
+    printf(" Total: %d  |  Aprovados: %d  |  Média geral: %.2f\n",
+           n, aprov, n ? soma/n : 0.0);
+    printf("%s\n", "══════════════════════════════════════════");
+}
+
+int main(void) {
+    sqlite3 *db = abrir_banco();
+
+    /* Dados de exemplo */
+    const char *nomes[] = {
+        "Ana Souza","Bruno Lima","Carla Neves",
+        "Diego Melo","Elisa Prado","Fábio Costa",
+        "Gabriela Ramos","Henrique Torres"
+    };
+    double medias[] = {8.7, 7.4, 9.2, 6.5, 8.1, 5.9, 7.8, 9.5};
+    int qtd = 8;
+
+    printf("Inserindo %d alunos...\n", qtd);
+    for (int i = 0; i &lt; qtd; i++) {
+        long id = inserir_aluno(db, nomes[i], medias[i]);
+        printf("  id=%ld  %s\n", id, nomes[i]);
+    }
+
+    /* Busca e relatório */
+    int n;
+    Aluno *turma = buscar_todos(db, &amp;n);
+    imprimir_relatorio(turma, n);
+    free(turma);
+
+    sqlite3_close(db);
+    return 0;
+}</textarea>
+      
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCode('sistema')">▶ Executar</button>
+        <button class="reset-btn" onclick="copyCode('sistema', this)">⧉ Copiar código</button>
+        <span class="engine">saída: emulação em JS</span>
+      </div>
+      <div class="output" id="out-sistema" data-cmd="gcc sistema.c -lsqlite3 -o sistema &amp;&amp; ./sistema"></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEÇÃO Próximos passos -->
+  <section class="lesson" id="sp">
+    <div class="lesson-num">Próximos passos</div>
+    <h2>Próximos passos</h2>
+    <p>Parabéns por concluir o guia! Para continuar evoluindo em C:</p>
+    <table>
+      <tr><th>Tópico</th><th>O que estudar</th></tr>
+      <tr><td><strong>Estruturas de dados</strong></td><td>Listas ligadas, pilhas, filas, árvores binárias</td></tr>
+      <tr><td><strong>Algoritmos</strong></td><td>Quicksort, busca binária, grafos (BFS/DFS)</td></tr>
+      <tr><td><strong>Sockets</strong></td><td><code class="inline">socket.h</code> para programação de rede</td></tr>
+      <tr><td><strong>Threads</strong></td><td><code class="inline">pthreads</code> para programação concorrente</td></tr>
+      <tr><td><strong>MySQL via C</strong></td><td><code class="inline">libmysqlclient</code> para bancos remotos</td></tr>
+      <tr><td><strong>PostgreSQL via C</strong></td><td><code class="inline">libpq</code></td></tr>
+      <tr><td><strong>Makefile</strong></td><td>Automatização de compilação</td></tr>
+      <tr><td><strong>Valgrind</strong></td><td>Detecção de vazamentos de memória</td></tr>
+      <tr><td><strong>GDB</strong></td><td>Debugger para C/C++</td></tr>
+    </table>
+    <p><strong>Recursos recomendados</strong></p>
+    <ul>
+      <li><em>The C Programming Language</em> — Kernighan &amp; Ritchie (K&amp;R)</li>
+      <li><em>C Programming: A Modern Approach</em> — K.N. King</li>
+      <li><a href="https://en.cppreference.com/w/c" target="_blank" rel="noopener">cppreference.com</a> — referência completa</li>
+      <li><a href="https://www.sqlite.org/cintro.html" target="_blank" rel="noopener">Documentação do SQLite</a> — API C do SQLite</li>
+    </ul>
+  </section>
+
+  <hr class="divider">
+
+  <footer>
+    Você passou pelo básico de C, de <code class="inline">printf</code> a ponteiros, arquivos e SQLite.
+    <span class="accent">Continue praticando</span> — compile os programas no seu computador e altere-os para ver o que acontece.
+  </footer>
+
+</div>
+
+<script>
+/* ───────────────────────────────────────────────────────────────
+   Emulação em JS dos programas C do notebook.
+   Cada função reproduz o programa C original (mesma lógica, mesmos
+   printf) e devolve exatamente a saída que o gcc produz.
+   ─────────────────────────────────────────────────────────────── */
+
+/* ── mini libc: printf fiel ao C (largura contada em BYTES UTF-8, como o gcc) ── */
+const _enc = new TextEncoder();
+const byteLen = s => _enc.encode(s).length;
+
+/* %.Nf com arredondamento do C (valor exato do double; empate → par) */
+function cFixed(x, p) {
+  if (!isFinite(x)) return isNaN(x) ? 'nan' : (x < 0 ? '-inf' : 'inf');
+  const neg = x < 0 || Object.is(x, -0);
+  const ax = Math.abs(x);
+  const ext = Math.min(100, p + 40);
+  const s = ax.toFixed(ext);                    // expansão decimal (praticamente exata)
+  const dot = s.indexOf('.');
+  const keep = s.slice(0, dot + 1 + p);          // inclui o ponto se p>0
+  const rest = s.slice(dot + 1 + p);
+  let digits = keep.replace('.', '');
+  const first = rest.charCodeAt(0) - 48;
+  const tail = /[1-9]/.test(rest.slice(1));
+  let up = first > 5 || (first === 5 && tail);
+  if (first === 5 && !tail) up = (digits.charCodeAt(digits.length - 1) - 48) % 2 === 1;
+  if (up) {
+    let a = digits.split(''), i = a.length - 1;
+    while (i >= 0) { if (a[i] === '9') { a[i] = '0'; i--; } else { a[i] = String(+a[i] + 1); break; } }
+    if (i < 0) a.unshift('1');
+    digits = a.join('');
+  }
+  let out = p > 0 ? digits.slice(0, digits.length - p) + '.' + digits.slice(digits.length - p) : digits;
+  return (neg ? '-' : '') + out;
+}
+
+function cFormat(fmt, args) {
+  let ai = 0;
+  return fmt.replace(/%([-+ 0#]*)(\d+)?(?:\.(\d+))?(hh|h|ll|l|z|j|t)?([diuxXcsfpeEgG%])/g,
+    (m, flags, width, prec, len, conv) => {
+      if (conv === '%') return '%';
+      const arg = args[ai++];
+      let s;
+      switch (conv) {
+        case 'd': case 'i': s = String(Math.trunc(Number(arg))); break;
+        case 'u': s = String(Math.trunc(Number(arg)) >>> 0); break;
+        case 'x': s = (Math.trunc(Number(arg)) >>> 0).toString(16); break;
+        case 'X': s = (Math.trunc(Number(arg)) >>> 0).toString(16).toUpperCase(); break;
+        case 'c': s = typeof arg === 'number' ? String.fromCharCode(arg) : String(arg); break;
+        case 's': s = String(arg); break;
+        case 'p': s = '0x' + Number(arg).toString(16); break;
+        case 'f': s = cFixed(Number(arg), prec === undefined ? 6 : +prec); break;
+        default:  s = String(arg);
+      }
+      if ('di'.includes(conv) && prec !== undefined) {
+        const neg = s[0] === '-', d = neg ? s.slice(1) : s;
+        s = (neg ? '-' : '') + d.padStart(+prec, '0');
+      }
+      if ('dif'.includes(conv) && !s.startsWith('-')) {
+        if (flags.includes('+')) s = '+' + s; else if (flags.includes(' ')) s = ' ' + s;
+      }
+      const w = width ? +width : 0, n = byteLen(s);
+      if (n < w) {
+        if (flags.includes('-')) s = s + ' '.repeat(w - n);
+        else if (flags.includes('0') && conv !== 's' && conv !== 'c') {
+          const sign = /^[-+ ]/.test(s) ? s[0] : '';
+          s = sign + '0'.repeat(w - n) + s.slice(sign.length);
+        } else s = ' '.repeat(w - n) + s;
+      }
+      return s;
+    });
+}
+
+/* strcmp como a glibc: diferença entre os primeiros bytes distintos */
+function strcmp(a, b) {
+  const x = _enc.encode(a), y = _enc.encode(b);
+  const n = Math.max(x.length, y.length);
+  for (let i = 0; i < n; i++) {
+    const d = (x[i] || 0) - (y[i] || 0);
+    if (d) return d;
+  }
+  return 0;
+}
+
+/* ── os programas ── */
+const EMUL = {};
+
+EMUL.hello = ({ printf }) => {
+  printf("Olá, Mundo!\n");
+  printf("Bem-vindo ao Guia de C!\n");
+};
+
+EMUL.tipos = ({ printf }) => {
+  const idade = 25;
+  const preco = Math.fround(19.90);
+  const pi = 3.14159265;
+  const letra = 'A'.charCodeAt(0);
+  const ANO = 2026;
+  printf("Idade:  %d\n", idade);
+  printf("Preco:  %.2f\n", preco);
+  printf("Pi:     %.8f\n", pi);
+  printf("Letra:  %c  (ASCII %d)\n", letra, letra);
+  printf("Ano:    %d\n", ANO);
+  printf("\nTamanhos:\n");
+  printf("  char:   %zu bytes\n", 1);
+  printf("  int:    %zu bytes\n", 4);
+  printf("  float:  %zu bytes\n", 4);
+  printf("  double: %zu bytes\n", 8);
+  const a = 7, b = 2;
+  printf("\n7 / 2 (int)    = %d\n", Math.trunc(a / b));
+  printf("7 / 2 (double) = %.1f\n", a / b);
+};
+
+EMUL.operadores = ({ printf }) => {
+  let x = 10, y = 3;
+  printf("=== Aritméticos ===\n");
+  printf("%d + %d = %d\n", x, y, x + y);
+  printf("%d - %d = %d\n", x, y, x - y);
+  printf("%d * %d = %d\n", x, y, x * y);
+  printf("%d / %d = %d\n", x, y, Math.trunc(x / y));
+  printf("%d %% %d = %d\n", x, y, x % y);
+
+  printf("\n=== Relacionais (1=true, 0=false) ===\n");
+  printf("10 == 3 : %d\n", +(x == y));
+  printf("10 != 3 : %d\n", +(x != y));
+  printf("10 >  3 : %d\n", +(x > y));
+
+  printf("\n=== Lógicos ===\n");
+  const chuva = 1, guarda_chuva = 0;
+  printf("chuva && !guarda_chuva = %d\n", +(chuva && !guarda_chuva));
+  printf("!chuva || guarda_chuva = %d\n", +(!chuva || guarda_chuva));
+
+  printf("\n=== Atribuição composta ===\n");
+  x += 5; printf("x += 5  → x = %d\n", x);
+  x *= 2; printf("x *= 2  → x = %d\n", x);
+  x %= 7; printf("x %%= 7  → x = %d\n", x);
+
+  printf("\n=== Pré vs Pós-incremento ===\n");
+  let i = 5;
+  printf("i = %d\n", i);
+  const usado = i++;                       // i++ devolve o valor antigo
+  printf("i++ usa %d, depois i = %d\n", usado, i);
+  printf("++i retorna %d\n", ++i);
+};
+
+/* Entrada: texto do stdin (cada token separado por espaço/linha) */
+EMUL.io = ({ printf, stdin }) => {
+  const tok = (stdin || '').split(/\s+/).filter(Boolean);
+  let t = 0;
+  const nome = (tok[t++] || '').slice(0, 49);          // scanf("%49s")
+  const idade = parseInt(tok[t++], 10) | 0;            // scanf("%d")
+  const altura = Math.fround(parseFloat(tok[t++]) || 0); // scanf("%f")
+
+  printf("Digite seu nome: ");
+  printf("Digite sua idade: ");
+  printf("Digite sua altura (m): ");
+  printf("\n--- Resultado ---\n");
+  printf("Nome:   %s\n", nome);
+  printf("Idade:  %d anos\n", idade);
+  printf("Altura: %.2f m\n", altura);
+
+  printf("\n--- Formatação ---\n");
+  printf("|%-20s|%6.2f|\n", "Item A", 12.5);
+  printf("|%-20s|%6.2f|\n", "Item B", 999.99);
+  printf("|%020d|\n", 42);
+};
+
+EMUL.decisao = ({ printf }) => {
+  const notas = [95, 82, 68, 51, 30];
+  printf("=== Classificação de Notas ===\n");
+  for (const nota of notas) {
+    let conceito;
+    if (nota >= 90) conceito = "A — Excelente";
+    else if (nota >= 70) conceito = "B — Bom";
+    else if (nota >= 50) conceito = "C — Regular";
+    else conceito = "D — Reprovado";
+    printf("Nota %3d → %s\n", nota, conceito);
+  }
+  printf("\n=== Dias da Semana ===\n");
+  for (let dia = 1; dia <= 7; dia++) {
+    switch (dia) {
+      case 1: printf("Dia %d: Segunda-feira\n", dia); break;
+      case 2: printf("Dia %d: Terça-feira\n", dia); break;
+      case 3: printf("Dia %d: Quarta-feira\n", dia); break;
+      case 4: printf("Dia %d: Quinta-feira\n", dia); break;
+      case 5: printf("Dia %d: Sexta-feira\n", dia); break;
+      case 6:
+      case 7: printf("Dia %d: Fim de semana!\n", dia); break;
+      default: printf("Dia inválido\n");
+    }
+  }
+  const x = 42;
+  printf("\n%d é %s\n", x, (x % 2 == 0) ? "par" : "ímpar");
+};
+
+EMUL.loops = ({ printf }) => {
+  printf("=== Tabuada do 7 ===\n");
+  for (let i = 1; i <= 10; i++) printf("7 x %2d = %2d\n", i, 7 * i);
+
+  printf("\n=== Triângulo ===\n");
+  for (let i = 1; i <= 5; i++) {
+    for (let j = 0; j < i; j++) printf("* ");
+    printf("\n");
+  }
+
+  printf("\n=== Fibonacci (até 100) ===\n");
+  let a = 0, b = 1;
+  while (a <= 100) {
+    printf("%d ", a);
+    const t = a + b; a = b; b = t;
+  }
+  printf("\n");
+
+  printf("\n=== Ímpares de 1 a 20 ===\n");
+  for (let i = 1; i <= 20; i++) {
+    if (i % 2 == 0) continue;
+    printf("%d ", i);
+  }
+  printf("\n");
+
+  printf("\n=== Primeiro múltiplo de 7 > 50 ===\n");
+  for (let i = 51; i < 200; i++) {
+    if (i % 7 == 0) { printf("%d\n", i); break; }
+  }
+
+  printf("\n=== Validação do-while ===\n");
+  const tentativas = [5, 0, -1, 2];
+  let idx = 0, opcao;
+  do {
+    opcao = tentativas[idx++];
+    printf("Tentativa: %d %s\n", opcao, (opcao == 1 || opcao == 2) ? "✓" : "✗");
+  } while (opcao != 1 && opcao != 2 && idx < 4);
+};
+
+EMUL.funcoes = ({ printf }) => {
+  let chamadas = 0;                                   // variável global
+  function fatorial(n) { chamadas++; if (n <= 1) return 1; return n * fatorial(n - 1); }
+  function media(v, tam) { chamadas++; let s = 0; for (let i = 0; i < tam; i++) s += v[i]; return s / tam; }
+  const ref = { x: 0, y: 0 };                         // "ponteiros" simulados
+  function trocar(pa, pb) { chamadas++; const tmp = ref[pa]; ref[pa] = ref[pb]; ref[pb] = tmp; }
+  function eh_primo(n) {
+    chamadas++;
+    if (n < 2) return 0;
+    for (let i = 2; i * i <= n; i++) if (n % i == 0) return 0;
+    return 1;
+  }
+
+  printf("=== Fatorial ===\n");
+  for (let i = 0; i <= 10; i++) printf("%2d! = %d\n", i, fatorial(i));
+
+  const notas = [7.5, 8.0, 9.5, 6.0, 8.5];
+  printf("\nMédia: %.2f\n", media(notas, 5));
+
+  ref.x = 10; ref.y = 20;
+  printf("\nAntes: x=%d y=%d\n", ref.x, ref.y);
+  trocar('x', 'y');
+  printf("Depois: x=%d y=%d\n", ref.x, ref.y);
+
+  printf("\nPrimos de 2 a 50: ");
+  for (let i = 2; i <= 50; i++) if (eh_primo(i)) printf("%d ", i);
+  printf("\n");
+
+  printf("\nFunções chamadas: %d\n", chamadas);
+};
+
+EMUL.arrays = ({ printf }) => {
+  function bubble_sort(v, n) {
+    for (let i = 0; i < n - 1; i++)
+      for (let j = 0; j < n - 1 - i; j++)
+        if (v[j] > v[j + 1]) { const t = v[j]; v[j] = v[j + 1]; v[j + 1] = t; }
+  }
+  const notas = [85, 42, 97, 61, 73, 55, 88];
+  const n = notas.length;
+
+  printf("=== Vetor original ===\n");
+  for (let i = 0; i < n; i++) printf("%d ", notas[i]);
+  printf("\n");
+
+  bubble_sort(notas, n);
+  printf("=== Após Bubble Sort ===\n");
+  for (let i = 0; i < n; i++) printf("%d ", notas[i]);
+  printf("\n");
+
+  printf("\n=== Matriz Identidade 4x4 ===\n");
+  const mat = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
+  for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) mat[i][j] = (i == j) ? 1 : 0;
+  for (let i = 0; i < 4; i++) {
+    for (let j = 0; j < 4; j++) printf("%2d", mat[i][j]);
+    printf("\n");
+  }
+
+  printf("\n=== Soma de Matrizes ===\n");
+  const A = [[1,2],[3,4]], B = [[5,6],[7,8]], C = [[0,0],[0,0]];
+  for (let i = 0; i < 2; i++) for (let j = 0; j < 2; j++) C[i][j] = A[i][j] + B[i][j];
+  for (let i = 0; i < 2; i++)
+    printf("|%2d %2d|  +  |%2d %2d|  =  |%2d %2d|\n",
+           A[i][0], A[i][1], B[i][0], B[i][1], C[i][0], C[i][1]);
+};
+
+/* Endereços de pilha simulados (no C real mudam a cada execução) */
+EMUL.ponteiros = ({ printf }) => {
+  const base = 0x7ffc00000000 + Math.floor(Math.random() * 0x0fffffff) * 16;
+  const addrX = base + 0x2c, addrV = base + 0x50;
+  const mem = { x: 42, v: [10, 20, 30, 40, 50] };
+
+  printf("=== Fundamentos ===\n");
+  printf("x     = %d\n", mem.x);
+  printf("&x    = %p\n", addrX);
+  printf("p     = %p  (mesmo endereço)\n", addrX);
+  printf("*p    = %d  (valor via ponteiro)\n", mem.x);
+
+  mem.x = 99;                                  // *p = 99
+  printf("\nApós *p = 99:\n");
+  printf("x = %d  (alterado via ponteiro!)\n", mem.x);
+
+  mem.x *= 2;                                  // dobrar(&x)
+  printf("Após dobrar(&x): x = %d\n", mem.x);
+
+  printf("\n=== Aritmética de Ponteiros ===\n");
+  for (let i = 0; i < 5; i++)
+    printf("pv+%d → endereço %p → valor %d\n", i, addrV + 4 * i, mem.v[i]);
+
+  printf("\n=== Ponteiro para Ponteiro ===\n");
+  printf("**pp = %d\n", mem.x);
+
+  for (let i = 0; i < 5; i++) mem.v[i] = 0;    // zerar(v, 5)
+  printf("\n=== Após zerar(v, 5) ===\n");
+  for (let i = 0; i < 5; i++) printf("%d ", mem.v[i]);
+  printf("\n");
+};
+
+EMUL.strings = ({ printf }) => {
+  const toUpper = s => s.replace(/[a-z]/g, c => c.toUpperCase());     // toupper (locale "C")
+  const contar_vogais = s => [...s].filter(c => "aeiouAEIOU".includes(c)).length;
+
+  const s1 = "Programação", s2 = " em C";
+  printf("=== Funções Básicas ===\n");
+  printf("strlen(\"%s\") = %zu\n", s1, byteLen(s1));       // bytes, não letras!
+  const s3 = s1 + s2;
+  printf("strcpy + strcat: \"%s\"\n", s3);
+
+  printf("\n=== strcmp ===\n");
+  const palavras = ["banana", "abacaxi", "banana", "cereja"];
+  for (let i = 0; i < 3; i++) {
+    const cmp = strcmp(palavras[i], palavras[i + 1]);
+    printf("\"%s\" vs \"%s\": %d → %s\n", palavras[i], palavras[i + 1], cmp,
+           cmp < 0 ? "menor" : cmp > 0 ? "maior" : "igual");
+  }
+
+  printf("\n=== Manipulação ===\n");
+  let frase = "hello world";
+  printf("Original: %s\n", frase);
+  frase = toUpper(frase);
+  printf("Maiúscula: %s\n", frase);
+  printf("Vogais em 'Programacao': %d\n", contar_vogais("Programacao"));
+
+  const texto = "O rato roeu a roupa do rei";
+  const pos = texto.indexOf("roupa");
+  if (pos >= 0) printf("\n'roupa' encontrada na posição %ld\n", pos);
+};
+
+EMUL.dinamico = ({ printf }) => {
+  const n = 8;
+  let v = new Array(n).fill(0);                      // malloc
+  const valores = [64, 25, 12, 22, 11, 90, 45, 3];
+  for (let i = 0; i < n; i++) v[i] = valores[i];     // memcpy
+
+  printf("=== malloc: array alocado no heap ===\n");
+  for (let i = 0; i < n; i++) printf("%d ", v[i]);
+  printf("\n");
+
+  v.sort((a, b) => a - b);                           // qsort
+  printf("=== Após qsort ===\n");
+  for (let i = 0; i < n; i++) printf("%d ", v[i]);
+  printf("\n");
+
+  const novo_n = n * 2;                              // realloc
+  v.length = novo_n;
+  for (let i = n; i < novo_n; i++) v[i] = i * 10;
+
+  printf("\n=== Após realloc (tamanho dobrado) ===\n");
+  for (let i = 0; i < novo_n; i++) printf("%d ", v[i]);
+  printf("\n");
+  v = null;                                          // free
+
+  printf("\n=== calloc: 5 doubles zerados ===\n");
+  const notas = new Array(5).fill(0);                // calloc
+  for (let i = 0; i < 5; i++) printf("%.1f ", notas[i]);
+  printf("\n");
+
+  printf("\nMemória liberada com sucesso!\n");
+};
+
+EMUL.structs = ({ printf }) => {
+  function criar_aluno(mat, nome, n1, n2, n3) {
+    return { matricula: mat, nome: nome.slice(0, 59), notas: [n1, n2, n3], media: (n1 + n2 + n3) / 3.0 };
+  }
+  function exibir(a) {
+    printf("  [%04d] %-20s  notas: %.1f %.1f %.1f  média: %.2f  %s\n",
+           a.matricula, a.nome, a.notas[0], a.notas[1], a.notas[2], a.media,
+           a.media >= 7.0 ? "✓ Aprovado" : "✗ Reprovado");
+  }
+  const turma = [
+    criar_aluno(1001, "Ana Souza", 8.0, 9.0, 8.5),
+    criar_aluno(1002, "Bruno Lima", 6.0, 7.0, 5.5),
+    criar_aluno(1003, "Carla Neves", 9.5, 9.0, 10.0),
+    criar_aluno(1004, "Diego Melo", 4.0, 5.0, 6.0),
+  ];
+  const n = 4;
+
+  printf("=== Boletim da Turma ===\n");
+  for (let i = 0; i < n; i++) exibir(turma[i]);
+
+  let melhor = turma[0];
+  for (let i = 1; i < n; i++) if (turma[i].media > melhor.media) melhor = turma[i];
+  printf("\nMelhor aluno: %s (%.2f)\n", melhor.nome, melhor.media);
+
+  printf("\n=== Lista Ligada ===\n");
+  let head = null;
+  for (let v = 1; v <= 5; v++) head = { valor: v * 10, prox: head };   // insere no início
+  for (let cur = head; cur; cur = cur.prox) printf("%d → ", cur.valor);
+  printf("NULL\n");
+};
+
+EMUL.arquivos = ({ printf }) => {
+  const disco = {};                                  // "sistema de arquivos" simulado
+  function salvar_csv(path, v, n) {
+    let txt = "nome,media\n";
+    for (let i = 0; i < n; i++) txt += cFormat("%s,%.2f\n", [v[i].nome, v[i].media]);
+    disco[path] = txt;
+    printf("Salvo: %s\n", path);
+  }
+  function ler_csv(path) {
+    printf("\nConteúdo de %s:\n", path);
+    printf("%s", disco[path]);
+  }
+  function append_log(path, msg) { disco[path] = (disco[path] || "") + msg + "\n"; }
+
+  const turma = [
+    { nome: "Ana Souza", media: 8.7 }, { nome: "Bruno Lima", media: 7.4 },
+    { nome: "Carla Neves", media: 9.2 }, { nome: "Diego Melo", media: 6.5 },
+  ];
+  salvar_csv("alunos.csv", turma, 4);
+  ler_csv("alunos.csv");
+
+  printf("\n=== Arquivo Binário ===\n");
+  disco["alunos.bin"] = JSON.parse(JSON.stringify(turma));   // fwrite
+  const lidos = disco["alunos.bin"];                          // fread
+  printf("Lidos do binário: %d registros\n", lidos.length);
+  for (const a of lidos) printf("  %s: %.2f\n", a.nome, a.media);
+
+  append_log("log.txt", "[INFO] Sistema iniciado");
+  append_log("log.txt", "[INFO] Dados carregados");
+  ler_csv("log.txt");
+};
+
+/* Mini-SQLite em memória: só o necessário para as duas aulas */
+function criarBanco() {
+  const db = { rows: [], seq: 0 };
+  db.insert = (nome, curso, media) => {
+    if (!(media >= 0 && media <= 10)) throw new Error("CHECK constraint failed: media >= 0 AND media <= 10");
+    db.rows.push({ id: ++db.seq, nome, curso, media });
+    return db.seq;
+  };
+  db.select = (curso) => db.rows
+    .filter(r => curso == null || r.curso === curso)
+    .slice().sort((a, b) => b.media - a.media);              // ORDER BY media DESC
+  db.update = (id, media) => { const r = db.rows.find(r => r.id === id); if (r) r.media = media; };
+  db.delete = (id) => { const k = db.rows.length; db.rows = db.rows.filter(r => r.id !== id); return k - db.rows.length; };
+  db.groupByCurso = () => {
+    const g = {};
+    for (const r of db.rows) (g[r.curso] ||= []).push(r.media);
+    return Object.keys(g).sort(strcmp).map(c => ({
+      curso: c, qtd: g[c].length,
+      avg: g[c].reduce((a, b) => a + b, 0) / g[c].length,
+      max: Math.max(...g[c]), min: Math.min(...g[c]),
+    }));
+  };
+  return db;
+}
+
+EMUL.db_sqlite = ({ printf }) => {
+  const db = criarBanco();
+  function listar(filtro) {
+    printf("\n%-4s %-22s %-18s %s\n", "ID", "Nome", "Curso", "Média");
+    printf("%-4s %-22s %-18s %s\n", "----", "----------------------", "------------------", "-----");
+    const rows = db.select(filtro);
+    for (const r of rows) printf("%-4d %-22s %-18s %.2f\n", r.id, r.nome, r.curso, r.media);
+    printf("%d registro(s) encontrado(s).\n", rows.length);
+  }
+  printf("=== Banco SQLite (in-memory) aberto ===\n\n");
+  printf("Tabela 'alunos' pronta.\n");
+
+  printf("\n=== Inserindo registros ===\n");
+  db.insert("Ana Souza", "Ciência da Computação", 8.7);
+  db.insert("Bruno Lima", "Engenharia de Software", 7.4);
+  db.insert("Carla Neves", "Ciência da Computação", 9.2);
+  db.insert("Diego Melo", "Sistemas de Informação", 6.5);
+  db.insert("Elisa Prado", "Engenharia de Software", 8.1);
+  db.insert("Fábio Costa", "Ciência da Computação", 5.9);
+  printf("6 alunos inseridos.\n");
+
+  printf("\n=== Todos os alunos (ordem por média) ===");
+  listar(null);
+  printf("\n=== Filtrado: Ciência da Computação ===");
+  listar("Ciência da Computação");
+
+  db.update(2, 8.0);
+  printf("\nAluno id=%d atualizado: média = %.2f\n", 2, 8.0);
+  const afetadas = db.delete(6);
+  printf("Aluno id=%d removido. Linhas afetadas: %d\n", 6, afetadas);
+
+  printf("\n=== Estado final ===");
+  listar(null);
+
+  printf("\n=== Estatísticas por Curso ===\n");
+  printf("%-18s %4s %8s %6s %6s\n", "Curso", "Qtd", "Média", "Max", "Min");
+  for (const g of db.groupByCurso())
+    printf("%-18s %4d %8.2f %6.2f %6.2f\n", g.curso, g.qtd, g.avg, g.max, g.min);
+
+  printf("\nBanco fechado. Fim!\n");
+};
+
+EMUL.boas_praticas = ({ printf }) => {
+  const PI = 3.14159265358979, VERSAO = "1.0.0";
+  const QUADRADO = x => x * x;
+  const MAX = (a, b) => a > b ? a : b;
+  const CLAMP = (v, lo, hi) => v < lo ? lo : v > hi ? hi : v;
+  const area_circulo = raio => { if (!(raio >= 0)) throw new Error("assert: raio não pode ser negativo"); return PI * QUADRADO(raio); };
+  const hipotenusa = (a, b) => Math.sqrt(QUADRADO(a) + QUADRADO(b));
+  const APROVADO = 1;
+  const classificar = media => media >= 7.0 ? APROVADO : 0;
+
+  printf("Versão: %s\n\n", VERSAO);
+  printf("=== Macros ===\n");
+  printf("QUADRADO(7)     = %d\n", QUADRADO(7));
+  printf("MAX(3, 8)       = %d\n", MAX(3, 8));
+  printf("CLAMP(150,0,100)= %d\n", CLAMP(150, 0, 100));
+
+  printf("\n=== math.h ===\n");
+  printf("PI              = %.10f\n", PI);
+  printf("área círculo r=5= %.4f\n", area_circulo(5.0));
+  printf("hipotenusa(3,4) = %.1f\n", hipotenusa(3.0, 4.0));
+  printf("sqrt(2)         = %.6f\n", Math.sqrt(2.0));
+  printf("pow(2,10)       = %.0f\n", Math.pow(2.0, 10.0));
+  printf("log2(1024)      = %.1f\n", Math.log2(1024.0));
+  printf("ceil(3.2)       = %.0f\n", Math.ceil(3.2));
+  printf("floor(3.9)      = %.0f\n", Math.floor(3.9));
+  printf("fabs(-7.5)      = %.1f\n", Math.abs(-7.5));
+
+  printf("\n=== Enum ===\n");
+  for (const m of [9.0, 6.5, 7.0, 4.9])
+    printf("média %.1f → %s\n", m, classificar(m) == APROVADO ? "Aprovado" : "Reprovado");
+};
+
+EMUL.sistema = ({ printf }) => {
+  const db = criarBanco();
+  const nomes = ["Ana Souza","Bruno Lima","Carla Neves","Diego Melo","Elisa Prado","Fábio Costa","Gabriela Ramos","Henrique Torres"];
+  const medias = [8.7, 7.4, 9.2, 6.5, 8.1, 5.9, 7.8, 9.5];
+  const qtd = 8;
+
+  printf("Inserindo %d alunos...\n", qtd);
+  for (let i = 0; i < qtd; i++) {
+    const id = db.insert(nomes[i], null, medias[i]);
+    printf("  id=%ld  %s\n", id, nomes[i]);
+  }
+
+  const v = db.select(null);                         // buscar_todos (array dinâmico)
+  const n = v.length;
+  let aprov = 0, soma = 0;
+  printf("\n%s\n", "══════════════════════════════════════════");
+  printf(" %-4s %-24s %6s  %s\n", "ID", "Nome", "Média", "Sit.");
+  printf("%s\n", "──────────────────────────────────────────");
+  for (let i = 0; i < n; i++) {
+    const ok = v[i].media >= 7.0 ? 1 : 0;
+    printf(" %-4d %-24s %6.2f  %s\n", v[i].id, v[i].nome, v[i].media, ok ? "✓ Aprovado" : "✗ Reprovado");
+    aprov += ok;
+    soma += v[i].media;
+  }
+  printf("%s\n", "──────────────────────────────────────────");
+  printf(" Total: %d  |  Aprovados: %d  |  Média geral: %.2f\n", n, aprov, n ? soma / n : 0.0);
+  printf("%s\n", "══════════════════════════════════════════");
+};
+
+/* executa uma emulação e devolve a saída completa */
+function rodarEmulacao(id, stdin) {
+  let out = '';
+  const rt = { stdin, printf: (f, ...a) => { out += cFormat(f, a); } };
+  EMUL[id](rt);
+  return out;
+}
+
+if (typeof module !== 'undefined') module.exports = { EMUL, rodarEmulacao, cFormat, cFixed };
+
+
+  const escapeHtml = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  /* auto-altura das células de código */
+  document.querySelectorAll('textarea.code-input').forEach(ta => {
+    ta.style.height = Math.min(ta.scrollHeight + 4, 560) + 'px';
+  });
+
+  function runCode(id) {
+    const outEl = document.getElementById('out-' + id);
+    const stdinEl = document.getElementById('stdin-' + id);
+    const cmd = outEl.dataset.cmd;
+    let html = `<span class="cmd">$ ${escapeHtml(cmd)}</span>`;
+    try {
+      const out = rodarEmulacao(id, stdinEl ? stdinEl.value : '');
+      html += `<span class="stdout">${escapeHtml(out)}</span>`;
+    } catch (e) {
+      html += `<span class="log-line err">⚠ ${escapeHtml(e.message)}</span>`;
+    }
+    outEl.innerHTML = html;
+  }
+
+  function copyCode(id, btn) {
+    const ta = document.querySelector(`.code-input[data-id="${id}"]`);
+    const done = () => { const t = btn.textContent; btn.textContent = '✓ Copiado'; setTimeout(() => btn.textContent = t, 1400); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(ta.value).then(done, () => { ta.select(); document.execCommand('copy'); done(); });
+    else { ta.select(); document.execCommand('copy'); done(); }
+  }
+
+  /* demo: divisão em C */
+  function divDemo() {
+    const a = parseInt(document.getElementById('div-a').value, 10);
+    const b = parseInt(document.getElementById('div-b').value, 10);
+    const o = document.getElementById('div-out');
+    if (isNaN(a) || isNaN(b)) { o.textContent = 'aguardando...'; return; }
+    if (b === 0) { o.textContent = `${a} / 0 → comportamento indefinido em C (o programa quebra com SIGFPE)`; return; }
+    o.textContent =
+      `${a} / ${b}          = ${Math.trunc(a / b)}   (int)\n` +
+      `${a} % ${b}          = ${a % b}   (resto)\n` +
+      `(double)${a} / ${b}  = ${cFixed(a / b, 2)}`;
+  }
+
+  /* demo: tabela verdade */
+  function logicDemo() {
+    const A = +document.getElementById('lg-a').checked, B = +document.getElementById('lg-b').checked;
+    document.getElementById('lg-out').textContent =
+      `A && B = ${A && B ? 1 : 0}     A || B = ${A || B ? 1 : 0}     !A = ${A ? 0 : 1}     !B = ${B ? 0 : 1}`;
+  }
+  divDemo(); logicDemo();
+
+
+  window.addEventListener('scroll', () => {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    document.getElementById('progressFill').style.width = pct + '%';
+  });
+
+  // ── Menu lateral retrátil ──
+  (function () {
+    const wrap = document.getElementById('sideWrap');
+    const trigger = document.getElementById('sideTrigger');
+    const links = [...wrap.querySelectorAll('.side-nav a')];
+    const sections = links.map(a => document.getElementById(a.dataset.target));
+
+    // clique/toque no ícone abre e fecha (útil no celular, onde não existe "passar o mouse")
+    trigger.addEventListener('click', e => { e.stopPropagation(); wrap.classList.toggle('open'); });
+    links.forEach(a => a.addEventListener('click', () => wrap.classList.remove('open')));
+    document.addEventListener('click', e => { if (!wrap.contains(e.target)) wrap.classList.remove('open'); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') wrap.classList.remove('open'); });
+
+    // destaca no menu a seção que está na tela
+    function markActive() {
+      let current = 0;
+      sections.forEach((s, i) => { if (s && s.getBoundingClientRect().top <= 140) current = i; });
+      links.forEach((a, i) => a.classList.toggle('active', i === current));
+    }
+    window.addEventListener('scroll', markActive, { passive: true });
+    markActive();
+  })();
+</script>
+
+</body>
+</html>

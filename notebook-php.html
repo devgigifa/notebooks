@@ -1,0 +1,1676 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PHP — Notebook Interativo Completo</title>
+<style>
+  :root {
+    --bg: #0e0d17;
+    --bg-panel: #13121f;
+    --bg-code: #0b0a13;
+    --border: #24223a;
+    --text: #dddcf0;
+    --text-dim: #8583a3;
+    --accent: #a5a8ec;
+    --accent2: #f2c574;
+    --pink: #e394dc;
+    --err: #f47174;
+    --ok: #82e08c;
+    --php: #777bb4;
+    --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    --serif: Georgia, 'Times New Roman', serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.65; }
+  .wrap { max-width: 840px; margin: 0 auto; padding: 0 24px 120px; }
+
+  header.hero {
+    padding: 72px 24px 48px; text-align: center; border-bottom: 1px solid var(--border); margin-bottom: 8px;
+    background: radial-gradient(ellipse at top, rgba(119,123,180,0.18), transparent 60%);
+  }
+  .hero-eyebrow { font-family: var(--mono); font-size: 13px; letter-spacing: 3px; color: var(--php); text-transform: uppercase; }
+  .hero h1 { font-family: var(--serif); font-size: 46px; font-weight: 400; margin: 14px 0 10px; color: #fff; }
+  .hero h1 span { color: var(--accent); font-style: italic; }
+  .hero p { color: var(--text-dim); font-size: 16px; max-width: 520px; margin: 0 auto; }
+
+  .progress-bar { position: sticky; top: 0; z-index: 50; height: 3px; background: var(--border); }
+  .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--php), var(--pink)); transition: width .15s ease; }
+
+  nav.toc { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; margin: 32px 0; }
+  nav.toc h3 { font-family: var(--mono); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); margin: 0 0 12px; }
+  nav.toc ol { margin: 0; padding-left: 20px; columns: 2; font-size: 13.5px; }
+  nav.toc a { color: var(--text); text-decoration: none; display: inline-block; padding: 3px 0; }
+  nav.toc a:hover { color: var(--accent); }
+
+  .info-box { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; margin: 32px 0; }
+  .info-box h3 { font-family: var(--mono); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--php); margin: 0 0 12px; }
+  .info-box p, .info-box li { font-size: 14.5px; color: #cbcae2; }
+  .info-box ul { padding-left: 20px; margin: 8px 0; }
+  .info-box p:last-child { margin-bottom: 0; }
+
+  .module-divider { margin: 80px 0 40px; text-align: center; }
+  .module-divider .tag {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 3px; color: var(--php);
+    text-transform: uppercase; background: rgba(119,123,180,0.12); padding: 6px 16px;
+    border-radius: 20px; border: 1px solid rgba(119,123,180,0.35); display: inline-block;
+  }
+
+  section.lesson { margin: 56px 0; scroll-margin-top: 20px; }
+  .lesson-num { font-family: var(--mono); color: var(--accent); font-size: 14px; letter-spacing: 2px; }
+  .lesson h2 { font-family: var(--serif); font-size: 28px; font-weight: 400; color: #fff; margin: 6px 0 20px; }
+  .lesson h3 { font-family: var(--serif); font-weight: 400; font-size: 21px; color: #fff; margin: 36px 0 8px; }
+  .lesson p { font-size: 16px; color: #cbcae2; }
+  .lesson ul, .lesson ol { font-size: 16px; color: #cbcae2; padding-left: 22px; }
+  .lesson li { margin-bottom: 6px; }
+  .lesson a, .info-box a { color: var(--accent); }
+  .lesson strong { color: #fff; font-weight: 600; }
+
+  .callout { border-left: 3px solid var(--accent2); background: rgba(242,197,116,0.07); padding: 12px 18px; border-radius: 0 8px 8px 0; font-size: 14.5px; color: #e8dcc0; margin: 18px 0; }
+  .callout strong { color: var(--accent2); }
+
+  .playground { background: var(--bg-code); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin: 20px 0; }
+  .playground-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; background: #100f1a; border-bottom: 1px solid var(--border); }
+  .playground-header .dots { display: flex; gap: 6px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.r { background: #ff5f56; } .dot.y { background: #ffbd2e; } .dot.g { background: #27c93f; }
+  .playground-label { font-family: var(--mono); font-size: 12px; color: var(--text-dim); }
+
+  pre.code-view {
+    margin: 0; padding: 16px; font-family: var(--mono); font-size: 14px; line-height: 1.6;
+    color: #ebeafa; white-space: pre; overflow-x: auto; tab-size: 4;
+  }
+  .kw { color: var(--pink); }
+  .vr { color: #9fb4ff; }
+  .fn { color: #7dd3c0; }
+  .tp { color: var(--accent2); }
+  .st { color: var(--ok); }
+  .nm { color: #f78c6c; }
+  .cm { color: var(--text-dim); font-style: italic; }
+
+  .playground-actions { display: flex; gap: 10px; padding: 0 16px 14px; flex-wrap: wrap; }
+  button.run-btn {
+    background: var(--php); color: #fff; border: none;
+    font-family: var(--mono); font-weight: 700; font-size: 13px;
+    padding: 9px 18px; border-radius: 6px; cursor: pointer;
+    transition: transform .1s ease, background .15s ease;
+  }
+  button.run-btn:hover { background: #8a8ec6; transform: translateY(-1px); }
+  button.run-btn:active { transform: translateY(0); }
+  button.run-btn:disabled { opacity: .6; cursor: wait; transform: none; }
+  button.reset-btn {
+    background: transparent; color: var(--text-dim); border: 1px solid var(--border);
+    font-family: var(--mono); font-size: 13px; padding: 9px 14px; border-radius: 6px; cursor: pointer;
+  }
+  button.reset-btn:hover { color: var(--text); border-color: var(--text-dim); }
+
+  .output {
+    border-top: 1px solid var(--border); background: #08070e;
+    font-family: var(--mono); font-size: 13.5px; padding: 14px 16px;
+    min-height: 20px; color: var(--ok); white-space: pre-wrap; word-break: break-word;
+  }
+  .output:empty::before { content: '// o resultado aparece aqui'; color: var(--text-dim); }
+  .output.thinking { color: var(--text-dim); font-style: italic; }
+  .output .log-line { display: block; }
+  .readonly-note {
+    border-top: 1px solid var(--border); background: #08070e;
+    font-family: var(--mono); font-size: 12.5px; color: var(--text-dim); padding: 10px 16px;
+  }
+
+  .quiz { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px; padding: 22px 24px; margin: 22px 0; }
+  .quiz-q { font-size: 15.5px; color: #fff; margin-bottom: 14px; }
+  .quiz-q .qtag { font-family: var(--mono); color: var(--pink); font-size: 12px; letter-spacing: 1px; display: block; margin-bottom: 6px; }
+  .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+  .quiz-opt { text-align: left; background: #100f1a; border: 1px solid var(--border); color: var(--text); padding: 11px 14px; border-radius: 7px; font-size: 14.5px; cursor: pointer; font-family: inherit; transition: border-color .15s ease, background .15s ease; }
+  .quiz-opt:hover { border-color: var(--accent); }
+  .quiz-opt.correct { border-color: var(--ok); background: rgba(130,224,140,0.08); color: var(--ok); }
+  .quiz-opt.wrong { border-color: var(--err); background: rgba(244,113,116,0.08); color: var(--err); }
+  .quiz-feedback { margin-top: 12px; font-size: 14px; color: var(--text-dim); display: none; }
+  .quiz-feedback.show { display: block; }
+
+  code.inline { background: rgba(165,168,236,0.13); color: var(--accent); padding: 2px 6px; border-radius: 4px; font-family: var(--mono); font-size: 13.5px; }
+
+  table.compare { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 14px; }
+  table.compare th, table.compare td { border: 1px solid var(--border); padding: 10px 14px; text-align: left; }
+  table.compare th { background: var(--bg-panel); color: var(--accent); font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+  table.compare td { color: #cbcae2; }
+  table.compare code.inline { font-size: 12.5px; }
+
+  hr.divider { border: none; border-top: 1px solid var(--border); margin: 56px 0 0; }
+  footer { text-align: center; padding: 60px 24px 20px; color: var(--text-dim); font-size: 14px; }
+  footer .accent { color: var(--accent); }
+
+  /* ── Barras de rolagem ── */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: #2e2b4a; border-radius: 10px; border: 2px solid var(--bg); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--php); }
+  ::-webkit-scrollbar-corner { background: transparent; }
+  .side-nav::-webkit-scrollbar { width: 8px; }
+  .side-nav::-webkit-scrollbar-track, pre.code-view::-webkit-scrollbar-track { background: transparent; }
+  .side-nav::-webkit-scrollbar-thumb { border-color: var(--bg-panel); }
+  pre.code-view::-webkit-scrollbar-thumb { border-color: var(--bg-code); }
+  @supports (-moz-appearance: none) {
+    * { scrollbar-width: thin; scrollbar-color: #2e2b4a transparent; }
+  }
+
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 30px; }
+    nav.toc ol { columns: 1; }
+    .lesson h2 { font-size: 22px; }
+    table.compare { font-size: 12.5px; }
+  }
+
+  /* ── Menu lateral retrátil ── */
+  html { scroll-behavior: smooth; }
+  .side-wrap { position: fixed; top: 0; left: 0; z-index: 60; }
+  .side-trigger {
+    position: fixed; top: 18px; left: 18px; z-index: 62;
+    width: 42px; height: 42px; border-radius: 10px;
+    background: var(--bg-panel); border: 1px solid var(--border);
+    color: var(--accent); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 18px rgba(0,0,0,.35);
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .side-trigger svg { width: 18px; height: 18px; }
+  .side-trigger:hover, .side-wrap.open .side-trigger { border-color: var(--accent); }
+  .side-nav {
+    position: fixed; top: 0; left: 0; z-index: 61;
+    width: 280px; max-width: 85vw; height: 100vh;
+    background: var(--bg-panel); border-right: 1px solid var(--border);
+    box-shadow: 8px 0 32px rgba(0,0,0,.45);
+    padding: 76px 0 28px; overflow-y: auto;
+    transform: translateX(-100%); visibility: hidden;
+    transition: transform .25s ease, visibility .25s;
+  }
+  @media (hover: hover) {
+    .side-wrap:hover .side-nav { transform: none; visibility: visible; }
+  }
+  .side-wrap.open .side-nav { transform: none; visibility: visible; }
+  .side-nav-title {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--text-dim); padding: 0 24px 10px;
+  }
+  .side-group {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--pink); padding: 16px 24px 6px;
+  }
+  .side-nav a {
+    display: flex; gap: 12px; align-items: baseline;
+    padding: 7px 24px; font-size: 14px; color: var(--text);
+    text-decoration: none; border-left: 2px solid transparent;
+    transition: color .15s ease, background .15s ease, border-color .15s ease;
+  }
+  .side-nav a .n { font-family: var(--mono); font-size: 12px; color: var(--text-dim); min-width: 18px; }
+  .side-nav a:hover { color: var(--accent); background: rgba(165,168,236,0.07); }
+  .side-nav a.active { color: var(--accent); border-left-color: var(--accent); background: rgba(165,168,236,0.10); }
+  .side-nav a.active .n { color: var(--accent); }
+  @media (max-width: 600px) {
+    .side-trigger { top: auto; bottom: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<div class="side-wrap" id="sideWrap">
+  <button class="side-trigger" id="sideTrigger" aria-label="Abrir menu de navegação">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+  </button>
+  <nav class="side-nav" aria-label="Navegação">
+    <div class="side-nav-title">Neste notebook</div>
+    <div class="side-group">Módulo 1 · Fundamentos</div>
+    <a href="#l1" data-target="l1"><span class="n">01</span>Fundamentos</a>
+    <a href="#l2" data-target="l2"><span class="n">02</span>Controle de fluxo</a>
+    <a href="#l3" data-target="l3"><span class="n">03</span>Strings e arrays</a>
+    <a href="#l4" data-target="l4"><span class="n">04</span>Funções e escopo</a>
+    <div class="side-group">Módulo 2 · Orientação a objetos</div>
+    <a href="#l5" data-target="l5"><span class="n">05</span>Orientação a objetos</a>
+    <a href="#l6" data-target="l6"><span class="n">06</span>Erros e exceções</a>
+    <div class="side-group">Módulo 3 · PHP na prática</div>
+    <a href="#l7" data-target="l7"><span class="n">07</span>Arquivos e JSON</a>
+    <a href="#l8" data-target="l8"><span class="n">08</span>PHP na web</a>
+    <div class="side-group">Módulo 4 · Banco de dados</div>
+    <a href="#l9" data-target="l9"><span class="n">09</span>Banco de dados com PDO</a>
+    <div class="side-group">Módulo 5 · Projetos profissionais</div>
+    <a href="#l10" data-target="l10"><span class="n">10</span>Segurança</a>
+    <a href="#l11" data-target="l11"><span class="n">11</span>Namespaces e Composer</a>
+    <a href="#l12" data-target="l12"><span class="n">12</span>Recursos modernos</a>
+    <div class="side-group">Próximos passos</div>
+    <a href="#l13" data-target="l13"><span class="n">13</span>Próximos passos</a>
+  </nav>
+</div>
+
+<header class="hero">
+  <div class="hero-eyebrow">Notebook Interativo · PHP</div>
+  <h1>Guia de <span>PHP</span></h1>
+  <p>Do básico ao avançado: sintaxe, orientação a objetos, web e banco de dados com PDO. Cada seção traz o conceito e um código para rodar.</p>
+</header>
+
+<div class="wrap">
+
+  <nav class="toc">
+    <h3>Neste notebook</h3>
+    <ol>
+      <li><a href="#l1">Fundamentos</a></li>
+      <li><a href="#l2">Controle de fluxo</a></li>
+      <li><a href="#l3">Strings e arrays</a></li>
+      <li><a href="#l4">Funções e escopo</a></li>
+      <li><a href="#l5">Orientação a objetos</a></li>
+      <li><a href="#l6">Erros e exceções</a></li>
+      <li><a href="#l7">Arquivos e JSON</a></li>
+      <li><a href="#l8">PHP na web</a></li>
+      <li><a href="#l9">Banco de dados com PDO</a></li>
+      <li><a href="#l10">Segurança</a></li>
+      <li><a href="#l11">Namespaces e Composer</a></li>
+      <li><a href="#l12">Recursos modernos</a></li>
+      <li><a href="#l13">Próximos passos</a></li>
+    </ol>
+  </nav>
+
+  <div class="info-box">
+    <h3>Como rodar</h3>
+    <p>O botão <strong>▶ Rodar</strong> mostra a saída real de cada exemplo, gerada com PHP 8.3. Como PHP roda no
+    <strong>servidor</strong> e não no navegador, para editar e executar você mesmo:</p>
+    <ul>
+      <li>Copie o código de um exemplo para um arquivo <code class="inline">teste.php</code>, adicione <code class="inline">&lt;?php</code> na primeira linha e rode <code class="inline">php teste.php</code> no terminal.</li>
+      <li>Requisito: PHP 8.1+ (as extensões <code class="inline">pdo_sqlite</code> e <code class="inline">pdo_mysql</code> ajudam nas seções de banco).</li>
+    </ul>
+    <p>Nos exemplos abaixo a tag <code class="inline">&lt;?php</code> foi omitida para deixar o código mais limpo.</p>
+  </div>
+
+  <div class="module-divider"><span class="tag">Módulo 1 · Fundamentos</span></div>
+  <section class="lesson" id="l1">
+    <div class="lesson-num">01</div>
+    <h2>Fundamentos</h2>
+<p>PHP é uma linguagem de script executada no <strong>servidor</strong>. O código fica entre <code class="inline">&lt;?php ... ?&gt;</code>, instruções terminam com <code class="inline">;</code> e variáveis começam com <code class="inline">$</code>.
+<code class="inline">echo</code> imprime texto; <code class="inline">.</code> concatena strings; comentários: <code class="inline">//</code>, <code class="inline">#</code> e <code class="inline">/* */</code>.</p>
+<div class="playground" id="cell-2">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">fundamentos.php</span>
+      </div>
+      <pre class="code-view"><span class="kw">echo</span> <span class="st">"Olá, mundo!\n"</span>;
+
+<span class="cm">// Comentário de linha</span>
+<span class="cm"># Outro estilo de comentário</span>
+<span class="cm">/* Comentário
+   de bloco */</span>
+
+<span class="vr">$nome</span> = <span class="st">"Ana"</span>;
+<span class="kw">echo</span> <span class="st">"Olá, $nome! Bem-vinda ao PHP.\n"</span>;      <span class="cm">// aspas duplas interpolam variáveis</span>
+<span class="kw">echo</span> <span class="st">'Aspas simples não interpolam: $nome'</span> . <span class="st">"\n"</span>;</pre>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCell('cell-2')">▶ Rodar</button>
+        <button class="reset-btn" onclick="clearCell('cell-2')">↺ Limpar</button>
+      </div>
+      <div class="output" id="out-cell-2"></div>
+    </div>
+<h3>Variáveis e tipos</h3>
+<p>PHP é <strong>dinamicamente tipado</strong>, mas aceita tipagem explícita em funções e propriedades.</p>
+<p>Tipos escalares: <code class="inline">int</code>, <code class="inline">float</code>, <code class="inline">string</code>, <code class="inline">bool</code>. Compostos: <code class="inline">array</code>, <code class="inline">object</code>. Especiais: <code class="inline">null</code>.
+<code class="inline">var_dump()</code> mostra tipo e valor; <code class="inline">gettype()</code> retorna o nome do tipo.</p>
+<div class="playground" id="cell-4">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">variaveis-e-tipos.php</span>
+      </div>
+      <pre class="code-view"><span class="vr">$idade</span> = <span class="nm">20</span>;            <span class="cm">// int</span>
+<span class="vr">$altura</span> = <span class="nm">1.68</span>;         <span class="cm">// float</span>
+<span class="vr">$curso</span> = <span class="st">"Eng. Software"</span>; <span class="cm">// string</span>
+<span class="vr">$ativa</span> = <span class="kw">true</span>;          <span class="cm">// bool</span>
+<span class="vr">$nada</span> = <span class="kw">null</span>;           <span class="cm">// null</span>
+
+<span class="fn">var_dump</span>(<span class="vr">$idade</span>, <span class="vr">$altura</span>, <span class="vr">$curso</span>, <span class="vr">$ativa</span>, <span class="vr">$nada</span>);
+
+<span class="cm">// Constantes</span>
+<span class="kw">const</span> <span class="tp">PI_APROX</span> = <span class="nm">3.14</span>;
+<span class="fn">define</span>(<span class="st">'ANO'</span>, <span class="nm">2026</span>);
+<span class="kw">echo</span> <span class="tp">PI_APROX</span> . <span class="st">" "</span> . <span class="tp">ANO</span> . <span class="st">"\n"</span>;
+
+<span class="cm">// Conversão de tipos (casting)</span>
+<span class="vr">$texto</span> = <span class="st">"42"</span>;
+<span class="fn">var_dump</span>((<span class="kw">int</span>)<span class="vr">$texto</span> + <span class="nm">8</span>);   <span class="cm">// 50</span>
+<span class="fn">var_dump</span>((<span class="kw">string</span>)<span class="nm">3.5</span>);       <span class="cm">// "3.5"</span>
+<span class="fn">var_dump</span>((<span class="kw">bool</span>)<span class="st">""</span>);          <span class="cm">// false</span></pre>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCell('cell-4')">▶ Rodar</button>
+        <button class="reset-btn" onclick="clearCell('cell-4')">↺ Limpar</button>
+      </div>
+      <div class="output" id="out-cell-4"></div>
+    </div>
+<h3>Operadores</h3>
+<p>Aritméticos (<code class="inline">+ - * / % **</code>), comparação (<code class="inline">== === != !== &lt; &gt; &lt;=&gt;</code>), lógicos (<code class="inline">&amp;&amp; || !</code>) e <strong>null coalescing</strong> (<code class="inline">??</code>).</p>
+<div class="callout"><strong>Atenção:</strong> Prefira <code class="inline">===</code> (compara valor <strong>e</strong> tipo) em vez de <code class="inline">==</code>.</div>
+<div class="playground" id="cell-6">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">operadores.php</span>
+      </div>
+      <pre class="code-view"><span class="kw">echo</span> <span class="nm">7</span> + <span class="nm">3</span>, <span class="st">" "</span>, <span class="nm">7</span> % <span class="nm">3</span>, <span class="st">" "</span>, <span class="nm">2</span> ** <span class="nm">10</span>, <span class="st">" "</span>, <span class="fn">intdiv</span>(<span class="nm">7</span>, <span class="nm">2</span>), <span class="st">"\n"</span>;
+
+<span class="fn">var_dump</span>(<span class="nm">0</span> == <span class="st">"a"</span>);      <span class="cm">// false no PHP 8</span>
+<span class="fn">var_dump</span>(<span class="st">"1"</span> == <span class="st">"01"</span>);   <span class="cm">// true  (comparação frouxa)</span>
+<span class="fn">var_dump</span>(<span class="st">"1"</span> === <span class="st">"01"</span>);  <span class="cm">// false (estrita)</span>
+<span class="fn">var_dump</span>(<span class="nm">1</span> &lt;=&gt; <span class="nm">2</span>);       <span class="cm">// -1 (operador "spaceship")</span>
+
+<span class="vr">$apelido</span> = <span class="vr">$_GET</span>[<span class="st">'apelido'</span>] ?? <span class="st">'visitante'</span>;   <span class="cm">// valor padrão se não existir</span>
+<span class="kw">echo</span> <span class="st">"Olá, $apelido\n"</span>;
+
+<span class="vr">$x</span> = <span class="nm">5</span>;
+<span class="vr">$x</span> += <span class="nm">3</span>;  <span class="vr">$x</span> *= <span class="nm">2</span>;   <span class="cm">// atribuição composta</span>
+<span class="kw">echo</span> <span class="vr">$x</span>, <span class="st">"\n"</span>;       <span class="cm">// 16</span></pre>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCell('cell-6')">▶ Rodar</button>
+        <button class="reset-btn" onclick="clearCell('cell-6')">↺ Limpar</button>
+      </div>
+      <div class="output" id="out-cell-6"></div>
+    </div>
+<div class="quiz">
+      <div class="quiz-q">
+        <span class="qtag">TESTE RÁPIDO</span>
+        Qual operador compara <strong>valor e tipo</strong> ao mesmo tempo?
+      </div>
+      <div class="quiz-options" data-answer="1">
+        <button class="quiz-opt"><code class="inline">==</code></button>
+        <button class="quiz-opt"><code class="inline">===</code></button>
+        <button class="quiz-opt"><code class="inline">=</code></button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+  </section>
+  <hr class="divider">
+  <section class="lesson" id="l2">
+    <div class="lesson-num">02</div>
+    <h2>Controle de fluxo</h2>
+<h3>Condicionais</h3>
+<p><code class="inline">if / elseif / else</code>, <code class="inline">switch</code> e a expressão <strong><code class="inline">match</code></strong> (PHP 8), que é estrita e retorna valor.</p>
+<div class="playground" id="cell-8">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">condicionais.php</span>
+      </div>
+      <pre class="code-view"><span class="vr">$nota</span> = <span class="nm">7.5</span>;
+
+<span class="kw">if</span> (<span class="vr">$nota</span> &gt;= <span class="nm">7</span>) {
+    <span class="kw">echo</span> <span class="st">"Aprovada\n"</span>;
+} <span class="kw">elseif</span> (<span class="vr">$nota</span> &gt;= <span class="nm">5</span>) {
+    <span class="kw">echo</span> <span class="st">"Recuperação\n"</span>;
+} <span class="kw">else</span> {
+    <span class="kw">echo</span> <span class="st">"Reprovada\n"</span>;
+}
+
+<span class="cm">// Operador ternário</span>
+<span class="kw">echo</span> <span class="vr">$nota</span> &gt;= <span class="nm">7</span> ? <span class="st">"OK\n"</span> : <span class="st">"Revisar\n"</span>;
+
+<span class="cm">// match: sem "fallthrough", usa comparação estrita</span>
+<span class="vr">$dia</span> = <span class="nm">3</span>;
+<span class="vr">$nomeDia</span> = <span class="kw">match</span> (<span class="vr">$dia</span>) {
+    <span class="nm">1</span> =&gt; <span class="st">'Domingo'</span>,
+    <span class="nm">2</span> =&gt; <span class="st">'Segunda'</span>,
+    <span class="nm">3</span> =&gt; <span class="st">'Terça'</span>,
+    <span class="nm">4</span>, <span class="nm">5</span>, <span class="nm">6</span> =&gt; <span class="st">'Meio da semana'</span>,
+    <span class="kw">default</span> =&gt; <span class="st">'Desconhecido'</span>,
+};
+<span class="kw">echo</span> <span class="vr">$nomeDia</span>, <span class="st">"\n"</span>;</pre>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCell('cell-8')">▶ Rodar</button>
+        <button class="reset-btn" onclick="clearCell('cell-8')">↺ Limpar</button>
+      </div>
+      <div class="output" id="out-cell-8"></div>
+    </div>
+<h3>Laços de repetição</h3>
+<p><code class="inline">for</code>, <code class="inline">while</code>, <code class="inline">do...while</code> e <code class="inline">foreach</code> (o mais usado, para arrays). <code class="inline">break</code> sai do laço e <code class="inline">continue</code> pula para a próxima iteração.</p>
+<div class="playground" id="cell-10">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">lacos-de-repeticao.php</span>
+      </div>
+      <pre class="code-view"><span class="kw">for</span> (<span class="vr">$i</span> = <span class="nm">1</span>; <span class="vr">$i</span> &lt;= <span class="nm">5</span>; <span class="vr">$i</span>++) {
+    <span class="kw">echo</span> <span class="vr">$i</span>, <span class="st">" "</span>;
+}
+<span class="kw">echo</span> <span class="st">"\n"</span>;
+
+<span class="vr">$n</span> = <span class="nm">3</span>;
+<span class="kw">while</span> (<span class="vr">$n</span> &gt; <span class="nm">0</span>) {
+    <span class="kw">echo</span> <span class="st">"Contagem: $n\n"</span>;
+    <span class="vr">$n</span>--;
+}
+
+<span class="vr">$planetas</span> = [<span class="st">'Mercúrio'</span>, <span class="st">'Vênus'</span>, <span class="st">'Terra'</span>, <span class="st">'Marte'</span>];
+<span class="kw">foreach</span> (<span class="vr">$planetas</span> <span class="kw">as</span> <span class="vr">$indice</span> =&gt; <span class="vr">$planeta</span>) {
+    <span class="kw">if</span> (<span class="vr">$planeta</span> === <span class="st">'Vênus'</span>) <span class="kw">continue</span>;
+    <span class="kw">echo</span> <span class="st">"$indice: $planeta\n"</span>;
+}</pre>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCell('cell-10')">▶ Rodar</button>
+        <button class="reset-btn" onclick="clearCell('cell-10')">↺ Limpar</button>
+      </div>
+      <div class="output" id="out-cell-10"></div>
+    </div>
+  </section>
+  <hr class="divider">
+  <section class="lesson" id="l3">
+    <div class="lesson-num">03</div>
+    <h2>Strings e Arrays</h2>
+<h3>Strings</h3>
+<p>Funções muito usadas: <code class="inline">strlen</code>, <code class="inline">strtoupper</code>, <code class="inline">str_replace</code>, <code class="inline">substr</code>, <code class="inline">strpos</code>, <code class="inline">trim</code>, <code class="inline">explode</code>, <code class="inline">implode</code>, <code class="inline">sprintf</code>.
+Para texto UTF-8 (acentos), prefira as versões <code class="inline">mb_*</code> (<code class="inline">mb_strlen</code>, <code class="inline">mb_strtoupper</code>...).</p>
+<div class="playground" id="cell-12">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">strings.php</span>
+      </div>
+      <pre class="code-view"><span class="vr">$frase</span> = <span class="st">"  Programar em PHP é divertido!  "</span>;
+
+<span class="kw">echo</span> <span class="fn">strlen</span>(<span class="vr">$frase</span>), <span class="st">" bytes | "</span>, <span class="fn">mb_strlen</span>(<span class="vr">$frase</span>), <span class="st">" caracteres\n"</span>;
+<span class="kw">echo</span> <span class="fn">trim</span>(<span class="vr">$frase</span>), <span class="st">"\n"</span>;
+<span class="kw">echo</span> <span class="fn">mb_strtoupper</span>(<span class="fn">trim</span>(<span class="vr">$frase</span>)), <span class="st">"\n"</span>;
+<span class="kw">echo</span> <span class="fn">str_replace</span>(<span class="st">"PHP"</span>, <span class="st">"PHP 8"</span>, <span class="vr">$frase</span>), <span class="st">"\n"</span>;
+<span class="kw">echo</span> <span class="fn">str_contains</span>(<span class="vr">$frase</span>, <span class="st">"PHP"</span>) ? <span class="st">"contém PHP\n"</span> : <span class="st">"não contém\n"</span>;
+
+<span class="vr">$partes</span> = <span class="fn">explode</span>(<span class="st">" "</span>, <span class="fn">trim</span>(<span class="vr">$frase</span>));
+<span class="kw">echo</span> <span class="fn">implode</span>(<span class="st">"-"</span>, <span class="vr">$partes</span>), <span class="st">"\n"</span>;
+
+<span class="fn">printf</span>(<span class="st">"Pi com 2 casas: %.2f | Inteiro com zeros: %05d\n"</span>, <span class="nm">3.14159</span>, <span class="nm">42</span>);
+<span class="kw">echo</span> <span class="fn">sprintf</span>(<span class="st">"Nome: %s, idade: %d"</span>, <span class="st">"Ana"</span>, <span class="nm">20</span>), <span class="st">"\n"</span>;</pre>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCell('cell-12')">▶ Rodar</button>
+        <button class="reset-btn" onclick="clearCell('cell-12')">↺ Limpar</button>
+      </div>
+      <div class="output" id="out-cell-12"></div>
+    </div>
+<h3>Arrays</h3>
+<p>O array do PHP serve como lista, dicionário e pilha ao mesmo tempo.</p>
+<ul>
+<li><strong>Indexado</strong>: <code class="inline">[10, 20, 30]</code></li>
+<li><strong>Associativo</strong>: <code class="inline">['chave' =&gt; 'valor']</code></li>
+<li><strong>Multidimensional</strong>: arrays dentro de arrays</li>
+</ul>
+<p>Funções de ordem superior: <code class="inline">array_map</code>, <code class="inline">array_filter</code>, <code class="inline">array_reduce</code>, além de <code class="inline">usort</code> para ordenar com regra própria.</p>
+<div class="playground" id="cell-14">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">arrays.php</span>
+      </div>
+      <pre class="code-view"><span class="vr">$frutas</span> = [<span class="st">'maçã'</span>, <span class="st">'banana'</span>];
+<span class="vr">$frutas</span>[] = <span class="st">'uva'</span>;                 <span class="cm">// adiciona ao final</span>
+<span class="fn">array_unshift</span>(<span class="vr">$frutas</span>, <span class="st">'pera'</span>);    <span class="cm">// adiciona no início</span>
+<span class="kw">echo</span> <span class="fn">count</span>(<span class="vr">$frutas</span>), <span class="st">" frutas: "</span>, <span class="fn">implode</span>(<span class="st">", "</span>, <span class="vr">$frutas</span>), <span class="st">"\n"</span>;
+
+<span class="vr">$aluno</span> = [<span class="st">'nome'</span> =&gt; <span class="st">'Ana'</span>, <span class="st">'curso'</span> =&gt; <span class="st">'ES'</span>, <span class="st">'notas'</span> =&gt; [<span class="nm">8</span>, <span class="nm">7.5</span>, <span class="nm">9</span>]];
+<span class="kw">echo</span> <span class="vr">$aluno</span>[<span class="st">'nome'</span>], <span class="st">" tem média "</span>, <span class="fn">array_sum</span>(<span class="vr">$aluno</span>[<span class="st">'notas'</span>]) / <span class="fn">count</span>(<span class="vr">$aluno</span>[<span class="st">'notas'</span>]), <span class="st">"\n"</span>;
+
+<span class="vr">$numeros</span> = [<span class="nm">1</span>, <span class="nm">2</span>, <span class="nm">3</span>, <span class="nm">4</span>, <span class="nm">5</span>, <span class="nm">6</span>];
+<span class="vr">$quadrados</span> = <span class="fn">array_map</span>(<span class="kw">fn</span>(<span class="vr">$n</span>) =&gt; <span class="vr">$n</span> ** <span class="nm">2</span>, <span class="vr">$numeros</span>);
+<span class="vr">$pares</span>     = <span class="fn">array_filter</span>(<span class="vr">$numeros</span>, <span class="kw">fn</span>(<span class="vr">$n</span>) =&gt; <span class="vr">$n</span> % <span class="nm">2</span> === <span class="nm">0</span>);
+<span class="vr">$soma</span>      = <span class="fn">array_reduce</span>(<span class="vr">$numeros</span>, <span class="kw">fn</span>(<span class="vr">$acc</span>, <span class="vr">$n</span>) =&gt; <span class="vr">$acc</span> + <span class="vr">$n</span>, <span class="nm">0</span>);
+<span class="fn">print_r</span>(<span class="vr">$quadrados</span>);
+<span class="fn">print_r</span>(<span class="vr">$pares</span>);
+<span class="kw">echo</span> <span class="st">"Soma: $soma\n"</span>;
+
+<span class="cm">// Ordenar lista de arrays por campo</span>
+<span class="vr">$pessoas</span> = [[<span class="st">'n'</span> =&gt; <span class="st">'Bia'</span>, <span class="st">'i'</span> =&gt; <span class="nm">30</span>], [<span class="st">'n'</span> =&gt; <span class="st">'Caio'</span>, <span class="st">'i'</span> =&gt; <span class="nm">22</span>]];
+<span class="fn">usort</span>(<span class="vr">$pessoas</span>, <span class="kw">fn</span>(<span class="vr">$a</span>, <span class="vr">$b</span>) =&gt; <span class="vr">$a</span>[<span class="st">'i'</span>] &lt;=&gt; <span class="vr">$b</span>[<span class="st">'i'</span>]);
+<span class="kw">echo</span> <span class="vr">$pessoas</span>[<span class="nm">0</span>][<span class="st">'n'</span>], <span class="st">"\n"</span>;   <span class="cm">// Caio</span>
+
+<span class="cm">// Spread e desestruturação</span>
+[<span class="vr">$primeiro</span>, , <span class="vr">$terceiro</span>] = [<span class="nm">10</span>, <span class="nm">20</span>, <span class="nm">30</span>];
+<span class="vr">$todos</span> = [...<span class="vr">$numeros</span>, <span class="nm">7</span>, <span class="nm">8</span>];
+<span class="kw">echo</span> <span class="st">"$primeiro $terceiro "</span>, <span class="fn">count</span>(<span class="vr">$todos</span>), <span class="st">"\n"</span>;
+[<span class="st">'nome'</span> =&gt; <span class="vr">$n</span>, <span class="st">'curso'</span> =&gt; <span class="vr">$c</span>] = <span class="vr">$aluno</span>;
+<span class="kw">echo</span> <span class="st">"$n - $c\n"</span>;</pre>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCell('cell-14')">▶ Rodar</button>
+        <button class="reset-btn" onclick="clearCell('cell-14')">↺ Limpar</button>
+      </div>
+      <div class="output" id="out-cell-14"></div>
+    </div>
+  </section>
+  <hr class="divider">
+  <section class="lesson" id="l4">
+    <div class="lesson-num">04</div>
+    <h2>Funções e escopo</h2>
+<p>Funções reutilizam código. No PHP moderno use <strong>tipagem</strong> de parâmetros e retorno, <strong>valores padrão</strong>, <strong>argumentos nomeados</strong>, <strong>variádicas</strong> (<code class="inline">...$args</code>) e <strong>arrow functions</strong> (<code class="inline">fn</code>).</p>
+<p><code class="inline">declare(strict_types=1);</code> (no topo de um arquivo) faz o PHP recusar conversões silenciosas de tipo.</p>
+<div class="playground" id="cell-16">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">funcoes-e-escopo.php</span>
+      </div>
+      <pre class="code-view"><span class="kw">function</span> <span class="fn">somar</span>(<span class="kw">int</span> <span class="vr">$a</span>, <span class="kw">int</span> <span class="vr">$b</span> = <span class="nm">0</span>): <span class="kw">int</span> {
+    <span class="kw">return</span> <span class="vr">$a</span> + <span class="vr">$b</span>;
+}
+<span class="kw">echo</span> <span class="fn">somar</span>(<span class="nm">2</span>, <span class="nm">3</span>), <span class="st">" "</span>, <span class="fn">somar</span>(<span class="nm">5</span>), <span class="st">"\n"</span>;
+
+<span class="cm">// Argumentos nomeados</span>
+<span class="kw">function</span> <span class="fn">criarUsuario</span>(<span class="kw">string</span> <span class="vr">$nome</span>, <span class="kw">int</span> <span class="vr">$idade</span> = <span class="nm">18</span>, <span class="kw">bool</span> <span class="vr">$ativo</span> = <span class="kw">true</span>): <span class="kw">string</span> {
+    <span class="kw">return</span> <span class="st">"$nome ($idade) "</span> . (<span class="vr">$ativo</span> ? <span class="st">'ativo'</span> : <span class="st">'inativo'</span>);
+}
+<span class="kw">echo</span> <span class="fn">criarUsuario</span>(nome: <span class="st">"Léo"</span>, ativo: <span class="kw">false</span>), <span class="st">"\n"</span>;
+
+<span class="cm">// Variádica</span>
+<span class="kw">function</span> <span class="fn">media</span>(<span class="kw">float</span> ...<span class="vr">$valores</span>): <span class="kw">float</span> {
+    <span class="kw">return</span> <span class="fn">array_sum</span>(<span class="vr">$valores</span>) / <span class="fn">count</span>(<span class="vr">$valores</span>);
+}
+<span class="kw">echo</span> <span class="fn">media</span>(<span class="nm">7</span>, <span class="nm">8</span>, <span class="nm">9.5</span>), <span class="st">"\n"</span>;
+
+<span class="cm">// Tipo anulável e union types</span>
+<span class="kw">function</span> <span class="fn">dobrar</span>(<span class="kw">int</span>|<span class="kw">float</span>|<span class="kw">null</span> <span class="vr">$n</span>): <span class="kw">int</span>|<span class="kw">float</span> {
+    <span class="kw">return</span> (<span class="vr">$n</span> ?? <span class="nm">0</span>) * <span class="nm">2</span>;
+}
+<span class="kw">echo</span> <span class="fn">dobrar</span>(<span class="kw">null</span>), <span class="st">" "</span>, <span class="fn">dobrar</span>(<span class="nm">2.5</span>), <span class="st">"\n"</span>;
+
+<span class="cm">// Funções anônimas e closures</span>
+<span class="vr">$taxa</span> = <span class="nm">0.1</span>;
+<span class="vr">$comImposto</span> = <span class="kw">fn</span>(<span class="kw">float</span> <span class="vr">$v</span>) =&gt; <span class="vr">$v</span> * (<span class="nm">1</span> + <span class="vr">$taxa</span>);   <span class="cm">// fn captura variáveis externas por valor</span>
+<span class="kw">echo</span> <span class="vr">$comImposto</span>(<span class="nm">100</span>), <span class="st">"\n"</span>;
+
+<span class="vr">$contador</span> = <span class="kw">function</span> () {
+    <span class="kw">static</span> <span class="vr">$c</span> = <span class="nm">0</span>;      <span class="cm">// variável estática mantém valor entre chamadas</span>
+    <span class="kw">return</span> ++<span class="vr">$c</span>;
+};
+<span class="kw">echo</span> <span class="vr">$contador</span>(), <span class="vr">$contador</span>(), <span class="vr">$contador</span>(), <span class="st">"\n"</span>;   <span class="cm">// 123</span></pre>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCell('cell-16')">▶ Rodar</button>
+        <button class="reset-btn" onclick="clearCell('cell-16')">↺ Limpar</button>
+      </div>
+      <div class="output" id="out-cell-16"></div>
+    </div>
+<h3>Escopo</h3>
+<p>Variáveis criadas fora de uma função <strong>não</strong> existem dentro dela (a menos que usadas com <code class="inline">global</code>, o que deve ser evitado). Passe dados por parâmetro.
+Para modificar o original use <strong>referência</strong> (<code class="inline">&amp;</code>).</p>
+<div class="playground" id="cell-18">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">escopo.php</span>
+      </div>
+      <pre class="code-view"><span class="vr">$total</span> = <span class="nm">10</span>;
+
+<span class="kw">function</span> <span class="fn">semAcesso</span>() {
+    <span class="kw">return</span> <span class="fn">isset</span>(<span class="vr">$total</span>) ? <span class="st">"vê"</span> : <span class="st">"não vê"</span>;   <span class="cm">// $total não existe aqui</span>
+}
+<span class="kw">echo</span> <span class="fn">semAcesso</span>(), <span class="st">"\n"</span>;
+
+<span class="kw">function</span> <span class="fn">incrementar</span>(<span class="kw">int</span> &amp;<span class="vr">$valor</span>): <span class="kw">void</span> {     <span class="cm">// por referência</span>
+    <span class="vr">$valor</span>++;
+}
+<span class="fn">incrementar</span>(<span class="vr">$total</span>);
+<span class="kw">echo</span> <span class="vr">$total</span>, <span class="st">"\n"</span>;   <span class="cm">// 11</span></pre>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCell('cell-18')">▶ Rodar</button>
+        <button class="reset-btn" onclick="clearCell('cell-18')">↺ Limpar</button>
+      </div>
+      <div class="output" id="out-cell-18"></div>
+    </div>
+  </section>
+  <div class="module-divider"><span class="tag">Módulo 2 · Orientação a objetos</span></div>
+  <section class="lesson" id="l5">
+    <div class="lesson-num">05</div>
+    <h2>Orientação a Objetos (POO)</h2>
+<p>Conceitos-chave:</p>
+<ul>
+<li><strong>Classe</strong>: molde; <strong>objeto</strong>: instância.</li>
+<li><strong>Encapsulamento</strong>: visibilidade <code class="inline">public</code>, <code class="inline">protected</code>, <code class="inline">private</code>.</li>
+<li><strong>Construtor promovido</strong> (PHP 8): declara propriedades direto na assinatura.</li>
+<li><strong><code class="inline">readonly</code></strong>: propriedade imutável após a criação.</li>
+<li><strong>Herança</strong> (<code class="inline">extends</code>), <strong>interfaces</strong> (contrato), <strong>classes abstratas</strong>, <strong>traits</strong> (reuso horizontal), <strong>enums</strong>.</li>
+</ul>
+<div class="playground" id="cell-20">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">classes.php</span>
+      </div>
+      <pre class="code-view"><span class="kw">class</span> <span class="tp">Produto</span> {
+    <span class="kw">public</span> <span class="kw">function</span> <span class="fn">__construct</span>(
+        <span class="kw">public</span> <span class="kw">readonly</span> <span class="kw">string</span> <span class="vr">$nome</span>,
+        <span class="kw">private</span> <span class="kw">float</span> <span class="vr">$preco</span>,
+        <span class="kw">protected</span> <span class="kw">int</span> <span class="vr">$estoque</span> = <span class="nm">0</span>,
+    ) {}
+
+    <span class="kw">public</span> <span class="kw">function</span> <span class="fn">getPreco</span>(): <span class="kw">float</span> { <span class="kw">return</span> <span class="vr">$this</span>-&gt;preco; }
+
+    <span class="kw">public</span> <span class="kw">function</span> <span class="fn">aplicarDesconto</span>(<span class="kw">float</span> <span class="vr">$percentual</span>): <span class="kw">void</span> {
+        <span class="vr">$this</span>-&gt;preco -= <span class="vr">$this</span>-&gt;preco * (<span class="vr">$percentual</span> / <span class="nm">100</span>);
+    }
+
+    <span class="kw">public</span> <span class="kw">function</span> <span class="fn">__toString</span>(): <span class="kw">string</span> {
+        <span class="kw">return</span> <span class="fn">sprintf</span>(<span class="st">"%s - R$ %.2f"</span>, <span class="vr">$this</span>-&gt;nome, <span class="vr">$this</span>-&gt;preco);
+    }
+}
+
+<span class="vr">$p</span> = <span class="kw">new</span> <span class="fn">Produto</span>(<span class="st">"Teclado"</span>, <span class="nm">200.0</span>, <span class="nm">5</span>);
+<span class="vr">$p</span>-&gt;<span class="fn">aplicarDesconto</span>(<span class="nm">10</span>);
+<span class="kw">echo</span> <span class="vr">$p</span>, <span class="st">"\n"</span>;          <span class="cm">// Teclado - R$ 180.00</span>
+<span class="cm">// $p-&gt;nome = "x";      // Erro: propriedade readonly</span></pre>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCell('cell-20')">▶ Rodar</button>
+        <button class="reset-btn" onclick="clearCell('cell-20')">↺ Limpar</button>
+      </div>
+      <div class="output" id="out-cell-20"></div>
+    </div>
+<h3>Herança, interfaces, abstração e traits</h3>
+<div class="playground" id="cell-22">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">heranca-interfaces-traits.php</span>
+      </div>
+      <pre class="code-view"><span class="kw">interface</span> <span class="tp">Descontavel</span> {
+    <span class="kw">public</span> <span class="kw">function</span> <span class="fn">desconto</span>(): <span class="kw">float</span>;
+}
+
+<span class="kw">trait</span> <span class="tp">Loggable</span> {
+    <span class="kw">public</span> <span class="kw">function</span> <span class="fn">log</span>(<span class="kw">string</span> <span class="vr">$msg</span>): <span class="kw">void</span> {
+        <span class="kw">echo</span> <span class="st">"[LOG] "</span> . <span class="kw">static</span>::<span class="kw">class</span> . <span class="st">": $msg\n"</span>;
+    }
+}
+
+<span class="kw">abstract</span> <span class="kw">class</span> <span class="tp">Funcionario</span> <span class="kw">implements</span> <span class="tp">Descontavel</span> {
+    <span class="kw">use</span> <span class="tp">Loggable</span>;
+
+    <span class="kw">public</span> <span class="kw">function</span> <span class="fn">__construct</span>(<span class="kw">protected</span> <span class="kw">string</span> <span class="vr">$nome</span>, <span class="kw">protected</span> <span class="kw">float</span> <span class="vr">$salario</span>) {}
+
+    <span class="kw">abstract</span> <span class="kw">public</span> <span class="kw">function</span> <span class="fn">bonus</span>(): <span class="kw">float</span>;          <span class="cm">// cada filho implementa</span>
+
+    <span class="kw">public</span> <span class="kw">function</span> <span class="fn">total</span>(): <span class="kw">float</span> {
+        <span class="kw">return</span> <span class="vr">$this</span>-&gt;salario + <span class="vr">$this</span>-&gt;<span class="fn">bonus</span>();
+    }
+}
+
+<span class="kw">class</span> <span class="tp">Dev</span> <span class="kw">extends</span> <span class="tp">Funcionario</span> {
+    <span class="kw">public</span> <span class="kw">function</span> <span class="fn">bonus</span>(): <span class="kw">float</span> { <span class="kw">return</span> <span class="vr">$this</span>-&gt;salario * <span class="nm">0.2</span>; }
+    <span class="kw">public</span> <span class="kw">function</span> <span class="fn">desconto</span>(): <span class="kw">float</span> { <span class="kw">return</span> <span class="vr">$this</span>-&gt;salario * <span class="nm">0.11</span>; }
+}
+
+<span class="kw">class</span> <span class="tp">Gerente</span> <span class="kw">extends</span> <span class="tp">Funcionario</span> {
+    <span class="kw">public</span> <span class="kw">function</span> <span class="fn">bonus</span>(): <span class="kw">float</span> { <span class="kw">return</span> <span class="vr">$this</span>-&gt;salario * <span class="nm">0.4</span>; }
+    <span class="kw">public</span> <span class="kw">function</span> <span class="fn">desconto</span>(): <span class="kw">float</span> { <span class="kw">return</span> <span class="vr">$this</span>-&gt;salario * <span class="nm">0.15</span>; }
+}
+
+<span class="vr">$equipe</span> = [<span class="kw">new</span> <span class="fn">Dev</span>(<span class="st">"Ana"</span>, <span class="nm">5000</span>), <span class="kw">new</span> <span class="fn">Gerente</span>(<span class="st">"Bruno"</span>, <span class="nm">8000</span>)];
+<span class="kw">foreach</span> (<span class="vr">$equipe</span> <span class="kw">as</span> <span class="vr">$f</span>) {
+    <span class="vr">$f</span>-&gt;<span class="fn">log</span>(<span class="st">"total = "</span> . <span class="vr">$f</span>-&gt;<span class="fn">total</span>());          <span class="cm">// polimorfismo</span>
+}
+<span class="fn">var_dump</span>(<span class="vr">$equipe</span>[<span class="nm">0</span>] <span class="kw">instanceof</span> <span class="tp">Descontavel</span>);    <span class="cm">// true</span></pre>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCell('cell-22')">▶ Rodar</button>
+        <button class="reset-btn" onclick="clearCell('cell-22')">↺ Limpar</button>
+      </div>
+      <div class="output" id="out-cell-22"></div>
+    </div>
+<h3>Membros estáticos, constantes de classe e enums</h3>
+<p><code class="inline">static</code> pertence à classe (não ao objeto). <strong>Enums</strong> (PHP 8.1) representam um conjunto fixo de valores.</p>
+<div class="playground" id="cell-24">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">static-e-enums.php</span>
+      </div>
+      <pre class="code-view"><span class="kw">class</span> <span class="tp">Contador</span> {
+    <span class="kw">public</span> <span class="kw">const</span> <span class="tp">PASSO</span> = <span class="nm">1</span>;
+    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">int</span> <span class="vr">$total</span> = <span class="nm">0</span>;
+
+    <span class="kw">public</span> <span class="kw">static</span> <span class="kw">function</span> <span class="fn">incrementar</span>(): <span class="kw">int</span> {
+        <span class="kw">return</span> <span class="kw">self</span>::<span class="vr">$total</span> += <span class="kw">self</span>::<span class="tp">PASSO</span>;
+    }
+}
+<span class="tp">Contador</span>::<span class="fn">incrementar</span>();
+<span class="kw">echo</span> <span class="tp">Contador</span>::<span class="fn">incrementar</span>(), <span class="st">"\n"</span>;   <span class="cm">// 2</span>
+
+<span class="kw">enum</span> <span class="tp">Status</span>: <span class="kw">string</span> {
+    <span class="kw">case</span> <span class="tp">Pendente</span> = <span class="st">'pendente'</span>;
+    <span class="kw">case</span> <span class="tp">Pago</span> = <span class="st">'pago'</span>;
+    <span class="kw">case</span> <span class="tp">Cancelado</span> = <span class="st">'cancelado'</span>;
+
+    <span class="kw">public</span> <span class="kw">function</span> <span class="fn">rotulo</span>(): <span class="kw">string</span> {
+        <span class="kw">return</span> <span class="kw">match</span> (<span class="vr">$this</span>) {
+            <span class="kw">self</span>::<span class="tp">Pendente</span>  =&gt; <span class="st">'⏳ Aguardando'</span>,
+            <span class="kw">self</span>::<span class="tp">Pago</span>      =&gt; <span class="st">'✅ Pago'</span>,
+            <span class="kw">self</span>::<span class="tp">Cancelado</span> =&gt; <span class="st">'❌ Cancelado'</span>,
+        };
+    }
+}
+
+<span class="vr">$s</span> = <span class="tp">Status</span>::<span class="fn">from</span>(<span class="st">'pago'</span>);           <span class="cm">// cria a partir do valor</span>
+<span class="kw">echo</span> <span class="vr">$s</span>-&gt;<span class="fn">rotulo</span>(), <span class="st">" | valor: "</span>, <span class="vr">$s</span>-&gt;value, <span class="st">"\n"</span>;
+<span class="kw">echo</span> <span class="tp">Status</span>::<span class="fn">tryFrom</span>(<span class="st">'xyz'</span>)?-&gt;<span class="fn">rotulo</span>() ?? <span class="st">'status inválido'</span>, <span class="st">"\n"</span>;</pre>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCell('cell-24')">▶ Rodar</button>
+        <button class="reset-btn" onclick="clearCell('cell-24')">↺ Limpar</button>
+      </div>
+      <div class="output" id="out-cell-24"></div>
+    </div>
+  </section>
+  <hr class="divider">
+  <section class="lesson" id="l6">
+    <div class="lesson-num">06</div>
+    <h2>Erros e exceções</h2>
+<p>Use <code class="inline">try / catch / finally</code> e lance erros com <code class="inline">throw</code>. Crie exceções próprias estendendo <code class="inline">Exception</code>.
+<code class="inline">Throwable</code> é a base de tudo (<code class="inline">Exception</code> e <code class="inline">Error</code>).</p>
+<div class="playground" id="cell-26">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">erros-e-excecoes.php</span>
+      </div>
+      <pre class="code-view"><span class="kw">class</span> <span class="tp">SaldoInsuficienteException</span> <span class="kw">extends</span> <span class="tp">Exception</span> {}
+
+<span class="kw">class</span> <span class="tp">Conta</span> {
+    <span class="kw">public</span> <span class="kw">function</span> <span class="fn">__construct</span>(<span class="kw">private</span> <span class="kw">float</span> <span class="vr">$saldo</span>) {}
+
+    <span class="kw">public</span> <span class="kw">function</span> <span class="fn">sacar</span>(<span class="kw">float</span> <span class="vr">$valor</span>): <span class="kw">void</span> {
+        <span class="kw">if</span> (<span class="vr">$valor</span> &lt;= <span class="nm">0</span>) {
+            <span class="kw">throw</span> <span class="kw">new</span> <span class="fn">InvalidArgumentException</span>(<span class="st">"Valor deve ser positivo"</span>);
+        }
+        <span class="kw">if</span> (<span class="vr">$valor</span> &gt; <span class="vr">$this</span>-&gt;saldo) {
+            <span class="kw">throw</span> <span class="kw">new</span> <span class="fn">SaldoInsuficienteException</span>(<span class="st">"Saldo insuficiente: R$ {$this-&gt;saldo}"</span>);
+        }
+        <span class="vr">$this</span>-&gt;saldo -= <span class="vr">$valor</span>;
+    }
+}
+
+<span class="vr">$conta</span> = <span class="kw">new</span> <span class="fn">Conta</span>(<span class="nm">100</span>);
+<span class="kw">try</span> {
+    <span class="vr">$conta</span>-&gt;<span class="fn">sacar</span>(<span class="nm">30</span>);
+    <span class="vr">$conta</span>-&gt;<span class="fn">sacar</span>(<span class="nm">500</span>);
+} <span class="kw">catch</span> (<span class="tp">SaldoInsuficienteException</span> <span class="vr">$e</span>) {
+    <span class="kw">echo</span> <span class="st">"Erro de negócio: "</span>, <span class="vr">$e</span>-&gt;<span class="fn">getMessage</span>(), <span class="st">"\n"</span>;
+} <span class="kw">catch</span> (<span class="tp">InvalidArgumentException</span> | <span class="tp">TypeError</span> <span class="vr">$e</span>) {
+    <span class="kw">echo</span> <span class="st">"Erro de entrada: "</span>, <span class="vr">$e</span>-&gt;<span class="fn">getMessage</span>(), <span class="st">"\n"</span>;
+} <span class="kw">finally</span> {
+    <span class="kw">echo</span> <span class="st">"Operação finalizada\n"</span>;
+}
+
+<span class="cm">// Divisão por zero lança DivisionByZeroError (PHP 8)</span>
+<span class="kw">try</span> {
+    <span class="kw">echo</span> <span class="fn">intdiv</span>(<span class="nm">1</span>, <span class="nm">0</span>);
+} <span class="kw">catch</span> (<span class="tp">DivisionByZeroError</span> <span class="vr">$e</span>) {
+    <span class="kw">echo</span> <span class="st">"Capturado: "</span>, <span class="vr">$e</span>-&gt;<span class="fn">getMessage</span>(), <span class="st">"\n"</span>;
+}</pre>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCell('cell-26')">▶ Rodar</button>
+        <button class="reset-btn" onclick="clearCell('cell-26')">↺ Limpar</button>
+      </div>
+      <div class="output" id="out-cell-26"></div>
+    </div>
+  </section>
+  <div class="module-divider"><span class="tag">Módulo 3 · PHP na prática</span></div>
+  <section class="lesson" id="l7">
+    <div class="lesson-num">07</div>
+    <h2>Arquivos e JSON</h2>
+<p><code class="inline">file_put_contents</code> / <code class="inline">file_get_contents</code> resolvem a maioria dos casos. Para arquivos grandes use <code class="inline">fopen</code> + <code class="inline">fgets</code>.
+JSON: <code class="inline">json_encode</code> e <code class="inline">json_decode</code> (com <code class="inline">JSON_THROW_ON_ERROR</code> para lançar exceção em vez de falhar em silêncio).</p>
+<div class="playground" id="cell-28">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">arquivos-e-json.php</span>
+      </div>
+      <pre class="code-view"><span class="vr">$arquivo</span> = <span class="fn">sys_get_temp_dir</span>() . <span class="st">'/tarefas.json'</span>;
+
+<span class="vr">$tarefas</span> = [
+    [<span class="st">'id'</span> =&gt; <span class="nm">1</span>, <span class="st">'titulo'</span> =&gt; <span class="st">'Estudar PHP'</span>, <span class="st">'feito'</span> =&gt; <span class="kw">false</span>],
+    [<span class="st">'id'</span> =&gt; <span class="nm">2</span>, <span class="st">'titulo'</span> =&gt; <span class="st">'Praticar PDO'</span>, <span class="st">'feito'</span> =&gt; <span class="kw">true</span>],
+];
+
+<span class="fn">file_put_contents</span>(<span class="vr">$arquivo</span>, <span class="fn">json_encode</span>(<span class="vr">$tarefas</span>, <span class="tp">JSON_PRETTY_PRINT</span> | <span class="tp">JSON_UNESCAPED_UNICODE</span>));
+
+<span class="kw">if</span> (<span class="fn">file_exists</span>(<span class="vr">$arquivo</span>)) {
+    <span class="vr">$lidas</span> = <span class="fn">json_decode</span>(<span class="fn">file_get_contents</span>(<span class="vr">$arquivo</span>), <span class="kw">true</span>, flags: <span class="tp">JSON_THROW_ON_ERROR</span>);
+    <span class="kw">foreach</span> (<span class="vr">$lidas</span> <span class="kw">as</span> <span class="vr">$t</span>) {
+        <span class="kw">echo</span> (<span class="vr">$t</span>[<span class="st">'feito'</span>] ? <span class="st">'[x] '</span> : <span class="st">'[ ] '</span>) . <span class="vr">$t</span>[<span class="st">'titulo'</span>] . <span class="st">"\n"</span>;
+    }
+}
+
+<span class="cm">// CSV linha a linha</span>
+<span class="vr">$csv</span> = <span class="fn">sys_get_temp_dir</span>() . <span class="st">'/dados.csv'</span>;
+<span class="vr">$h</span> = <span class="fn">fopen</span>(<span class="vr">$csv</span>, <span class="st">'w'</span>);
+<span class="fn">fputcsv</span>(<span class="vr">$h</span>, [<span class="st">'nome'</span>, <span class="st">'nota'</span>]);
+<span class="fn">fputcsv</span>(<span class="vr">$h</span>, [<span class="st">'Ana'</span>, <span class="nm">9.5</span>]);
+<span class="fn">fclose</span>(<span class="vr">$h</span>);
+
+<span class="vr">$h</span> = <span class="fn">fopen</span>(<span class="vr">$csv</span>, <span class="st">'r'</span>);
+<span class="kw">while</span> ((<span class="vr">$linha</span> = <span class="fn">fgetcsv</span>(<span class="vr">$h</span>)) !== <span class="kw">false</span>) {
+    <span class="kw">echo</span> <span class="fn">implode</span>(<span class="st">" | "</span>, <span class="vr">$linha</span>), <span class="st">"\n"</span>;
+}
+<span class="fn">fclose</span>(<span class="vr">$h</span>);</pre>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCell('cell-28')">▶ Rodar</button>
+        <button class="reset-btn" onclick="clearCell('cell-28')">↺ Limpar</button>
+      </div>
+      <div class="output" id="out-cell-28"></div>
+    </div>
+  </section>
+  <hr class="divider">
+  <section class="lesson" id="l8">
+    <div class="lesson-num">08</div>
+    <h2>PHP na Web</h2>
+<p>PHP nasceu para a web. Os dados da requisição ficam nas <strong>superglobais</strong>:</p>
+<table class="compare">
+<thead>
+<tr>
+<th>Superglobal</th>
+<th>Conteúdo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code class="inline">$_GET</code></td>
+<td>parâmetros da URL (<code class="inline">?id=5</code>)</td>
+</tr>
+<tr>
+<td><code class="inline">$_POST</code></td>
+<td>dados de formulário (método POST)</td>
+</tr>
+<tr>
+<td><code class="inline">$_SERVER</code></td>
+<td>informações do servidor/requisição</td>
+</tr>
+<tr>
+<td><code class="inline">$_SESSION</code></td>
+<td>dados persistentes entre requisições</td>
+</tr>
+<tr>
+<td><code class="inline">$_COOKIE</code></td>
+<td>cookies do navegador</td>
+</tr>
+<tr>
+<td><code class="inline">$_FILES</code></td>
+<td>uploads</td>
+</tr>
+</tbody>
+</table>
+<p>Para testar localmente: crie um arquivo e rode <code class="inline">php -S localhost:8000</code> na pasta.
+O código abaixo <strong>simula</strong> um formulário para você ver a lógica de validação funcionando aqui.</p>
+<div class="playground" id="cell-30">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">php-na-web.php</span>
+      </div>
+      <pre class="code-view"><span class="cm">// Simulando dados que viriam de $_POST</span>
+<span class="vr">$_POST</span> = [<span class="st">'email'</span> =&gt; <span class="st">'ana@exemplo.com'</span>, <span class="st">'idade'</span> =&gt; <span class="st">'20'</span>, <span class="st">'nome'</span> =&gt; <span class="st">'&lt;b&gt;Ana&lt;/b&gt;'</span>];
+
+<span class="vr">$email</span> = <span class="fn">filter_var</span>(<span class="vr">$_POST</span>[<span class="st">'email'</span>] ?? <span class="st">''</span>, <span class="tp">FILTER_VALIDATE_EMAIL</span>);
+<span class="vr">$idade</span> = <span class="fn">filter_var</span>(<span class="vr">$_POST</span>[<span class="st">'idade'</span>] ?? <span class="st">''</span>, <span class="tp">FILTER_VALIDATE_INT</span>, [<span class="st">'options'</span> =&gt; [<span class="st">'min_range'</span> =&gt; <span class="nm">0</span>, <span class="st">'max_range'</span> =&gt; <span class="nm">120</span>]]);
+
+<span class="vr">$erros</span> = [];
+<span class="kw">if</span> (<span class="vr">$email</span> === <span class="kw">false</span>) <span class="vr">$erros</span>[] = <span class="st">"E-mail inválido"</span>;
+<span class="kw">if</span> (<span class="vr">$idade</span> === <span class="kw">false</span>) <span class="vr">$erros</span>[] = <span class="st">"Idade inválida"</span>;
+
+<span class="kw">if</span> (<span class="vr">$erros</span>) {
+    <span class="kw">echo</span> <span class="fn">implode</span>(<span class="st">"\n"</span>, <span class="vr">$erros</span>), <span class="st">"\n"</span>;
+} <span class="kw">else</span> {
+    <span class="cm">// Sempre escape a saída em HTML para evitar XSS</span>
+    <span class="vr">$nomeSeguro</span> = <span class="fn">htmlspecialchars</span>(<span class="vr">$_POST</span>[<span class="st">'nome'</span>], <span class="tp">ENT_QUOTES</span>, <span class="st">'UTF-8'</span>);
+    <span class="kw">echo</span> <span class="st">"Cadastro ok: $nomeSeguro ($email, $idade anos)\n"</span>;
+}</pre>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCell('cell-30')">▶ Rodar</button>
+        <button class="reset-btn" onclick="clearCell('cell-30')">↺ Limpar</button>
+      </div>
+      <div class="output" id="out-cell-30"></div>
+    </div>
+<h3>Exemplo de arquivo web completo (formulário + processamento)</h3>
+<p>Salve como <code class="inline">form.php</code>, rode <code class="inline">php -S localhost:8000</code> e abra no navegador. (Esta célula só <strong>mostra</strong> o código.)</p>
+<div class="playground" id="cell-32">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">form.php</span>
+      </div>
+      <pre class="code-view"><span class="vr">$exemplo</span> = <span class="st">&lt;&lt;&lt;'PHPCODE'
+&lt;?php
+session_start();
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $nome = trim($_POST['nome'] ?? '');
+    if ($nome !== '') {
+        $_SESSION['nome'] = $nome;       // guarda na sessão
+    }
+}
+?&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html lang="pt-BR"&gt;
+&lt;body&gt;
+  &lt;?php if (isset($_SESSION['nome'])): ?&gt;
+    &lt;h1&gt;Olá, &lt;?= htmlspecialchars($_SESSION['nome']) ?&gt;!&lt;/h1&gt;
+  &lt;?php endif; ?&gt;
+
+  &lt;form method="post"&gt;
+    &lt;input name="nome" placeholder="Seu nome"&gt;
+    &lt;button&gt;Enviar&lt;/button&gt;
+  &lt;/form&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+PHPCODE</span>;
+
+<span class="kw">echo</span> <span class="vr">$exemplo</span>;</pre>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCell('cell-32')">▶ Rodar</button>
+        <button class="reset-btn" onclick="clearCell('cell-32')">↺ Limpar</button>
+      </div>
+      <div class="output" id="out-cell-32"></div>
+    </div>
+  </section>
+  <div class="module-divider"><span class="tag">Módulo 4 · Banco de dados</span></div>
+  <section class="lesson" id="l9">
+    <div class="lesson-num">09</div>
+    <h2>Banco de dados com PDO</h2>
+<p><strong>PDO</strong> (PHP Data Objects) é a interface padrão e única para vários bancos (MySQL, PostgreSQL, SQLite...). Trocar de banco muda basicamente a <strong>DSN</strong> (string de conexão).</p>
+<h3>Regras de ouro</h3>
+<ol>
+<li><strong>Sempre</strong> use <em>prepared statements</em> (consultas preparadas) → impedem <strong>SQL Injection</strong>.</li>
+<li>Ative o modo de erro por exceções: <code class="inline">PDO::ERRMODE_EXCEPTION</code>.</li>
+<li>Use <strong>transações</strong> quando várias operações precisam funcionar juntas.</li>
+<li>Nunca coloque senha do banco no código-fonte versionado (use variáveis de ambiente / <code class="inline">.env</code>).</li>
+</ol>
+<h3>9.1 Conectando</h3>
+<ul>
+<li><strong>SQLite</strong> (arquivo ou memória) — não exige servidor, ideal para estudar.</li>
+<li><strong>MySQL/MariaDB</strong> — o mais comum em hospedagens PHP.</li>
+</ul>
+<div class="playground" id="cell-34">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">conectando.php</span>
+      </div>
+      <pre class="code-view"><span class="cm">// ---- SQLite em memória (roda em qualquer lugar com pdo_sqlite) ----</span>
+<span class="vr">$pdo</span> = <span class="kw">new</span> <span class="fn">PDO</span>(<span class="st">'sqlite::memory:'</span>, options: [
+    <span class="tp">PDO</span>::<span class="tp">ATTR_ERRMODE</span>            =&gt; <span class="tp">PDO</span>::<span class="tp">ERRMODE_EXCEPTION</span>,
+    <span class="tp">PDO</span>::<span class="tp">ATTR_DEFAULT_FETCH_MODE</span> =&gt; <span class="tp">PDO</span>::<span class="tp">FETCH_ASSOC</span>,
+]);
+<span class="kw">echo</span> <span class="st">"Conectado ao SQLite! Driver: "</span>, <span class="vr">$pdo</span>-&gt;<span class="fn">getAttribute</span>(<span class="tp">PDO</span>::<span class="tp">ATTR_DRIVER_NAME</span>), <span class="st">"\n"</span>;
+
+<span class="cm">/* ---- Como seria no MySQL (exemplo, não executa aqui) ----
+$dsn = 'mysql:host=localhost;dbname=meu_banco;charset=utf8mb4';
+$pdo = new PDO($dsn, 'usuario', 'senha', [
+    PDO::ATTR_ERRMODE            =&gt; PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE =&gt; PDO::FETCH_ASSOC,
+    PDO::ATTR_EMULATE_PREPARES   =&gt; false,
+]);
+*/</span></pre>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCell('cell-34')">▶ Rodar</button>
+        <button class="reset-btn" onclick="clearCell('cell-34')">↺ Limpar</button>
+      </div>
+      <div class="output" id="out-cell-34"></div>
+    </div>
+<h3>9.2 Criando tabela e inserindo dados (CREATE + INSERT)</h3>
+<p><code class="inline">prepare()</code> monta a consulta com <em>placeholders</em> (<code class="inline">?</code> ou <code class="inline">:nome</code>) e <code class="inline">execute()</code> envia os valores separadamente — o banco nunca os interpreta como SQL.</p>
+<div class="playground" id="cell-36">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">create-insert.php</span>
+      </div>
+      <pre class="code-view"><span class="vr">$pdo</span> = <span class="kw">new</span> <span class="fn">PDO</span>(<span class="st">'sqlite::memory:'</span>, options: [
+    <span class="tp">PDO</span>::<span class="tp">ATTR_ERRMODE</span> =&gt; <span class="tp">PDO</span>::<span class="tp">ERRMODE_EXCEPTION</span>,
+    <span class="tp">PDO</span>::<span class="tp">ATTR_DEFAULT_FETCH_MODE</span> =&gt; <span class="tp">PDO</span>::<span class="tp">FETCH_ASSOC</span>,
+]);
+
+<span class="vr">$pdo</span>-&gt;<span class="fn">exec</span>(<span class="st">"
+    CREATE TABLE usuarios (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,   -- no MySQL: INT AUTO_INCREMENT PRIMARY KEY
+        nome TEXT NOT NULL,
+        email TEXT NOT NULL UNIQUE,
+        criado_em TEXT DEFAULT CURRENT_TIMESTAMP
+    )
+"</span>);
+
+<span class="vr">$stmt</span> = <span class="vr">$pdo</span>-&gt;<span class="fn">prepare</span>(<span class="st">"INSERT INTO usuarios (nome, email) VALUES (:nome, :email)"</span>);
+<span class="vr">$stmt</span>-&gt;<span class="fn">execute</span>([<span class="st">':nome'</span> =&gt; <span class="st">'Ana'</span>,  <span class="st">':email'</span> =&gt; <span class="st">'ana@exemplo.com'</span>]);
+<span class="vr">$stmt</span>-&gt;<span class="fn">execute</span>([<span class="st">':nome'</span> =&gt; <span class="st">'Bruno'</span>, <span class="st">':email'</span> =&gt; <span class="st">'bruno@exemplo.com'</span>]);
+
+<span class="kw">echo</span> <span class="st">"Último ID inserido: "</span>, <span class="vr">$pdo</span>-&gt;<span class="fn">lastInsertId</span>(), <span class="st">"\n"</span>;
+<span class="kw">echo</span> <span class="st">"Linhas afetadas no último insert: "</span>, <span class="vr">$stmt</span>-&gt;<span class="fn">rowCount</span>(), <span class="st">"\n"</span>;</pre>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCell('cell-36')">▶ Rodar</button>
+        <button class="reset-btn" onclick="clearCell('cell-36')">↺ Limpar</button>
+      </div>
+      <div class="output" id="out-cell-36"></div>
+    </div>
+<h3>9.3 Consultando (SELECT)</h3>
+<ul>
+<li><code class="inline">fetch()</code> → uma linha; <code class="inline">fetchAll()</code> → todas; <code class="inline">fetchColumn()</code> → um valor.</li>
+<li>Pode iterar com <code class="inline">foreach</code> direto no <em>statement</em> para economizar memória.</li>
+</ul>
+<div class="playground" id="cell-38">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">select.php</span>
+      </div>
+      <pre class="code-view"><span class="vr">$pdo</span> = <span class="kw">new</span> <span class="fn">PDO</span>(<span class="st">'sqlite::memory:'</span>, options: [<span class="tp">PDO</span>::<span class="tp">ATTR_ERRMODE</span> =&gt; <span class="tp">PDO</span>::<span class="tp">ERRMODE_EXCEPTION</span>, <span class="tp">PDO</span>::<span class="tp">ATTR_DEFAULT_FETCH_MODE</span> =&gt; <span class="tp">PDO</span>::<span class="tp">FETCH_ASSOC</span>]);
+<span class="vr">$pdo</span>-&gt;<span class="fn">exec</span>(<span class="st">"CREATE TABLE usuarios (id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT, email TEXT UNIQUE)"</span>);
+<span class="vr">$ins</span> = <span class="vr">$pdo</span>-&gt;<span class="fn">prepare</span>(<span class="st">"INSERT INTO usuarios (nome, email) VALUES (?, ?)"</span>);
+<span class="kw">foreach</span> ([[<span class="st">'Ana'</span>,<span class="st">'ana@x.com'</span>], [<span class="st">'Bruno'</span>,<span class="st">'bruno@x.com'</span>], [<span class="st">'Carla'</span>,<span class="st">'carla@x.com'</span>]] <span class="kw">as</span> <span class="vr">$u</span>) <span class="vr">$ins</span>-&gt;<span class="fn">execute</span>(<span class="vr">$u</span>);
+
+<span class="cm">// Todos</span>
+<span class="kw">foreach</span> (<span class="vr">$pdo</span>-&gt;<span class="fn">query</span>(<span class="st">"SELECT * FROM usuarios ORDER BY nome"</span>) <span class="kw">as</span> <span class="vr">$linha</span>) {
+    <span class="kw">echo</span> <span class="st">"{$linha['id']} - {$linha['nome']} &lt;{$linha['email']}&gt;\n"</span>;
+}
+
+<span class="cm">// Um registro com parâmetro</span>
+<span class="vr">$busca</span> = <span class="vr">$pdo</span>-&gt;<span class="fn">prepare</span>(<span class="st">"SELECT * FROM usuarios WHERE email = :email"</span>);
+<span class="vr">$busca</span>-&gt;<span class="fn">execute</span>([<span class="st">':email'</span> =&gt; <span class="st">'bruno@x.com'</span>]);
+<span class="vr">$usuario</span> = <span class="vr">$busca</span>-&gt;<span class="fn">fetch</span>();
+<span class="fn">print_r</span>(<span class="vr">$usuario</span>);
+
+<span class="cm">// Um único valor</span>
+<span class="kw">echo</span> <span class="st">"Total: "</span>, <span class="vr">$pdo</span>-&gt;<span class="fn">query</span>(<span class="st">"SELECT COUNT(*) FROM usuarios"</span>)-&gt;<span class="fn">fetchColumn</span>(), <span class="st">"\n"</span>;
+
+<span class="cm">// Mapear direto para objetos</span>
+<span class="kw">class</span> <span class="tp">Usuario</span> { <span class="kw">public</span> <span class="kw">int</span> <span class="vr">$id</span>; <span class="kw">public</span> <span class="kw">string</span> <span class="vr">$nome</span>; <span class="kw">public</span> <span class="kw">string</span> <span class="vr">$email</span>; }
+<span class="vr">$objs</span> = <span class="vr">$pdo</span>-&gt;<span class="fn">query</span>(<span class="st">"SELECT * FROM usuarios"</span>)-&gt;<span class="fn">fetchAll</span>(<span class="tp">PDO</span>::<span class="tp">FETCH_CLASS</span>, <span class="tp">Usuario</span>::<span class="kw">class</span>);
+<span class="kw">echo</span> <span class="vr">$objs</span>[<span class="nm">0</span>]-&gt;nome, <span class="st">"\n"</span>;</pre>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCell('cell-38')">▶ Rodar</button>
+        <button class="reset-btn" onclick="clearCell('cell-38')">↺ Limpar</button>
+      </div>
+      <div class="output" id="out-cell-38"></div>
+    </div>
+<h3>9.4 Atualizar e excluir (UPDATE / DELETE)</h3>
+<p>Sempre use <code class="inline">WHERE</code> (e confira <code class="inline">rowCount()</code> para saber se algo mudou).</p>
+<div class="playground" id="cell-40">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">update-delete.php</span>
+      </div>
+      <pre class="code-view"><span class="vr">$pdo</span> = <span class="kw">new</span> <span class="fn">PDO</span>(<span class="st">'sqlite::memory:'</span>, options: [<span class="tp">PDO</span>::<span class="tp">ATTR_ERRMODE</span> =&gt; <span class="tp">PDO</span>::<span class="tp">ERRMODE_EXCEPTION</span>, <span class="tp">PDO</span>::<span class="tp">ATTR_DEFAULT_FETCH_MODE</span> =&gt; <span class="tp">PDO</span>::<span class="tp">FETCH_ASSOC</span>]);
+<span class="vr">$pdo</span>-&gt;<span class="fn">exec</span>(<span class="st">"CREATE TABLE usuarios (id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT, email TEXT)"</span>);
+<span class="vr">$pdo</span>-&gt;<span class="fn">exec</span>(<span class="st">"INSERT INTO usuarios (nome, email) VALUES ('Ana','ana@x.com'), ('Bruno','bruno@x.com')"</span>);
+
+<span class="vr">$up</span> = <span class="vr">$pdo</span>-&gt;<span class="fn">prepare</span>(<span class="st">"UPDATE usuarios SET nome = :nome WHERE id = :id"</span>);
+<span class="vr">$up</span>-&gt;<span class="fn">execute</span>([<span class="st">':nome'</span> =&gt; <span class="st">'Ana Souza'</span>, <span class="st">':id'</span> =&gt; <span class="nm">1</span>]);
+<span class="kw">echo</span> <span class="st">"Atualizados: "</span>, <span class="vr">$up</span>-&gt;<span class="fn">rowCount</span>(), <span class="st">"\n"</span>;
+
+<span class="vr">$del</span> = <span class="vr">$pdo</span>-&gt;<span class="fn">prepare</span>(<span class="st">"DELETE FROM usuarios WHERE id = ?"</span>);
+<span class="vr">$del</span>-&gt;<span class="fn">execute</span>([<span class="nm">2</span>]);
+<span class="kw">echo</span> <span class="st">"Removidos: "</span>, <span class="vr">$del</span>-&gt;<span class="fn">rowCount</span>(), <span class="st">"\n"</span>;
+
+<span class="fn">print_r</span>(<span class="vr">$pdo</span>-&gt;<span class="fn">query</span>(<span class="st">"SELECT * FROM usuarios"</span>)-&gt;<span class="fn">fetchAll</span>());</pre>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCell('cell-40')">▶ Rodar</button>
+        <button class="reset-btn" onclick="clearCell('cell-40')">↺ Limpar</button>
+      </div>
+      <div class="output" id="out-cell-40"></div>
+    </div>
+<h3>9.5 ⚠️ SQL Injection: o que NÃO fazer</h3>
+<p>Concatenar entrada do usuário na SQL permite que um atacante altere a consulta.</p>
+<div class="playground" id="cell-42">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">sql-injection.php</span>
+      </div>
+      <pre class="code-view"><span class="vr">$pdo</span> = <span class="kw">new</span> <span class="fn">PDO</span>(<span class="st">'sqlite::memory:'</span>, options: [<span class="tp">PDO</span>::<span class="tp">ATTR_ERRMODE</span> =&gt; <span class="tp">PDO</span>::<span class="tp">ERRMODE_EXCEPTION</span>, <span class="tp">PDO</span>::<span class="tp">ATTR_DEFAULT_FETCH_MODE</span> =&gt; <span class="tp">PDO</span>::<span class="tp">FETCH_ASSOC</span>]);
+<span class="vr">$pdo</span>-&gt;<span class="fn">exec</span>(<span class="st">"CREATE TABLE usuarios (id INTEGER PRIMARY KEY, nome TEXT, senha TEXT)"</span>);
+<span class="vr">$pdo</span>-&gt;<span class="fn">exec</span>(<span class="st">"INSERT INTO usuarios (nome, senha) VALUES ('admin', 'segredo'), ('ana', '123')"</span>);
+
+<span class="vr">$entrada</span> = <span class="st">"' OR '1'='1"</span>;    <span class="cm">// entrada maliciosa</span>
+
+<span class="cm">// ❌ VULNERÁVEL</span>
+<span class="vr">$sql</span> = <span class="st">"SELECT * FROM usuarios WHERE nome = '$entrada'"</span>;
+<span class="kw">echo</span> <span class="st">"Consulta montada: $sql\n"</span>;
+<span class="kw">echo</span> <span class="st">"Linhas retornadas (vulnerável): "</span>, <span class="fn">count</span>(<span class="vr">$pdo</span>-&gt;<span class="fn">query</span>(<span class="vr">$sql</span>)-&gt;<span class="fn">fetchAll</span>()), <span class="st">"\n"</span>;   <span class="cm">// vaza tudo!</span>
+
+<span class="cm">// ✅ SEGURO</span>
+<span class="vr">$stmt</span> = <span class="vr">$pdo</span>-&gt;<span class="fn">prepare</span>(<span class="st">"SELECT * FROM usuarios WHERE nome = ?"</span>);
+<span class="vr">$stmt</span>-&gt;<span class="fn">execute</span>([<span class="vr">$entrada</span>]);
+<span class="kw">echo</span> <span class="st">"Linhas retornadas (seguro): "</span>, <span class="fn">count</span>(<span class="vr">$stmt</span>-&gt;<span class="fn">fetchAll</span>()), <span class="st">"\n"</span>;                    <span class="cm">// 0</span></pre>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCell('cell-42')">▶ Rodar</button>
+        <button class="reset-btn" onclick="clearCell('cell-42')">↺ Limpar</button>
+      </div>
+      <div class="output" id="out-cell-42"></div>
+    </div>
+<h3>9.6 Transações</h3>
+<p>Agrupam operações: ou <strong>todas</strong> são confirmadas (<code class="inline">commit</code>) ou <strong>nenhuma</strong> (<code class="inline">rollBack</code>). Exemplo clássico: transferência bancária.</p>
+<div class="playground" id="cell-44">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">transacoes.php</span>
+      </div>
+      <pre class="code-view"><span class="vr">$pdo</span> = <span class="kw">new</span> <span class="fn">PDO</span>(<span class="st">'sqlite::memory:'</span>, options: [<span class="tp">PDO</span>::<span class="tp">ATTR_ERRMODE</span> =&gt; <span class="tp">PDO</span>::<span class="tp">ERRMODE_EXCEPTION</span>, <span class="tp">PDO</span>::<span class="tp">ATTR_DEFAULT_FETCH_MODE</span> =&gt; <span class="tp">PDO</span>::<span class="tp">FETCH_ASSOC</span>]);
+<span class="vr">$pdo</span>-&gt;<span class="fn">exec</span>(<span class="st">"CREATE TABLE contas (id INTEGER PRIMARY KEY, titular TEXT, saldo REAL)"</span>);
+<span class="vr">$pdo</span>-&gt;<span class="fn">exec</span>(<span class="st">"INSERT INTO contas VALUES (1,'Ana',100), (2,'Bruno',50)"</span>);
+
+<span class="kw">function</span> <span class="fn">transferir</span>(<span class="tp">PDO</span> <span class="vr">$pdo</span>, <span class="kw">int</span> <span class="vr">$de</span>, <span class="kw">int</span> <span class="vr">$para</span>, <span class="kw">float</span> <span class="vr">$valor</span>): <span class="kw">void</span> {
+    <span class="kw">try</span> {
+        <span class="vr">$pdo</span>-&gt;<span class="fn">beginTransaction</span>();
+
+        <span class="vr">$saldo</span> = <span class="vr">$pdo</span>-&gt;<span class="fn">prepare</span>(<span class="st">"SELECT saldo FROM contas WHERE id = ?"</span>);
+        <span class="vr">$saldo</span>-&gt;<span class="fn">execute</span>([<span class="vr">$de</span>]);
+        <span class="kw">if</span> (<span class="vr">$saldo</span>-&gt;<span class="fn">fetchColumn</span>() &lt; <span class="vr">$valor</span>) {
+            <span class="kw">throw</span> <span class="kw">new</span> <span class="fn">RuntimeException</span>(<span class="st">"Saldo insuficiente"</span>);
+        }
+
+        <span class="vr">$pdo</span>-&gt;<span class="fn">prepare</span>(<span class="st">"UPDATE contas SET saldo = saldo - ? WHERE id = ?"</span>)-&gt;<span class="fn">execute</span>([<span class="vr">$valor</span>, <span class="vr">$de</span>]);
+        <span class="vr">$pdo</span>-&gt;<span class="fn">prepare</span>(<span class="st">"UPDATE contas SET saldo = saldo + ? WHERE id = ?"</span>)-&gt;<span class="fn">execute</span>([<span class="vr">$valor</span>, <span class="vr">$para</span>]);
+
+        <span class="vr">$pdo</span>-&gt;<span class="fn">commit</span>();
+        <span class="kw">echo</span> <span class="st">"Transferência de R$ $valor concluída\n"</span>;
+    } <span class="kw">catch</span> (<span class="tp">Throwable</span> <span class="vr">$e</span>) {
+        <span class="vr">$pdo</span>-&gt;<span class="fn">rollBack</span>();
+        <span class="kw">echo</span> <span class="st">"Falhou e foi revertida: "</span>, <span class="vr">$e</span>-&gt;<span class="fn">getMessage</span>(), <span class="st">"\n"</span>;
+    }
+}
+
+<span class="fn">transferir</span>(<span class="vr">$pdo</span>, <span class="nm">1</span>, <span class="nm">2</span>, <span class="nm">70</span>);    <span class="cm">// ok</span>
+<span class="fn">transferir</span>(<span class="vr">$pdo</span>, <span class="nm">1</span>, <span class="nm">2</span>, <span class="nm">70</span>);    <span class="cm">// falha: saldo insuficiente</span>
+<span class="fn">print_r</span>(<span class="vr">$pdo</span>-&gt;<span class="fn">query</span>(<span class="st">"SELECT * FROM contas"</span>)-&gt;<span class="fn">fetchAll</span>());</pre>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCell('cell-44')">▶ Rodar</button>
+        <button class="reset-btn" onclick="clearCell('cell-44')">↺ Limpar</button>
+      </div>
+      <div class="output" id="out-cell-44"></div>
+    </div>
+<h3>9.7 Relacionamentos e JOIN</h3>
+<p>Tabelas ligadas por chave estrangeira. Aqui: um usuário tem vários posts.</p>
+<div class="playground" id="cell-46">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">relacionamentos-e-join.php</span>
+      </div>
+      <pre class="code-view"><span class="vr">$pdo</span> = <span class="kw">new</span> <span class="fn">PDO</span>(<span class="st">'sqlite::memory:'</span>, options: [<span class="tp">PDO</span>::<span class="tp">ATTR_ERRMODE</span> =&gt; <span class="tp">PDO</span>::<span class="tp">ERRMODE_EXCEPTION</span>, <span class="tp">PDO</span>::<span class="tp">ATTR_DEFAULT_FETCH_MODE</span> =&gt; <span class="tp">PDO</span>::<span class="tp">FETCH_ASSOC</span>]);
+<span class="vr">$pdo</span>-&gt;<span class="fn">exec</span>(<span class="st">"PRAGMA foreign_keys = ON"</span>);
+<span class="vr">$pdo</span>-&gt;<span class="fn">exec</span>(<span class="st">"
+    CREATE TABLE autores (id INTEGER PRIMARY KEY, nome TEXT NOT NULL);
+    CREATE TABLE posts (
+        id INTEGER PRIMARY KEY,
+        autor_id INTEGER NOT NULL REFERENCES autores(id) ON DELETE CASCADE,
+        titulo TEXT NOT NULL
+    );
+    INSERT INTO autores VALUES (1,'Ana'), (2,'Bruno');
+    INSERT INTO posts VALUES (1,1,'Intro ao PHP'), (2,1,'PDO na prática'), (3,2,'Composer');
+"</span>);
+
+<span class="vr">$sql</span> = <span class="st">"
+    SELECT a.nome AS autor, COUNT(p.id) AS total, GROUP_CONCAT(p.titulo, ' | ') AS titulos
+    FROM autores a
+    LEFT JOIN posts p ON p.autor_id = a.id
+    GROUP BY a.id
+"</span>;
+<span class="kw">foreach</span> (<span class="vr">$pdo</span>-&gt;<span class="fn">query</span>(<span class="vr">$sql</span>) <span class="kw">as</span> <span class="vr">$r</span>) {
+    <span class="kw">echo</span> <span class="st">"{$r['autor']}: {$r['total']} post(s) → {$r['titulos']}\n"</span>;
+}</pre>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCell('cell-46')">▶ Rodar</button>
+        <button class="reset-btn" onclick="clearCell('cell-46')">↺ Limpar</button>
+      </div>
+      <div class="output" id="out-cell-46"></div>
+    </div>
+<h3>9.8 Mini-projeto: camada de acesso a dados (Repository)</h3>
+<p>Organizar o SQL numa classe deixa o restante da aplicação limpo e fácil de testar. Este é o padrão usado em projetos reais (e a base para entender frameworks como Laravel).</p>
+<div class="playground" id="cell-48">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">repository.php</span>
+      </div>
+      <pre class="code-view"><span class="kw">final</span> <span class="kw">class</span> <span class="tp">Tarefa</span> {
+    <span class="kw">public</span> <span class="kw">function</span> <span class="fn">__construct</span>(
+        <span class="kw">public</span> <span class="kw">readonly</span> ?<span class="kw">int</span> <span class="vr">$id</span>,
+        <span class="kw">public</span> <span class="kw">readonly</span> <span class="kw">string</span> <span class="vr">$titulo</span>,
+        <span class="kw">public</span> <span class="kw">readonly</span> <span class="kw">bool</span> <span class="vr">$concluida</span> = <span class="kw">false</span>,
+    ) {}
+}
+
+<span class="kw">final</span> <span class="kw">class</span> <span class="tp">TarefaRepository</span> {
+    <span class="kw">public</span> <span class="kw">function</span> <span class="fn">__construct</span>(<span class="kw">private</span> <span class="tp">PDO</span> <span class="vr">$pdo</span>) {}
+
+    <span class="kw">public</span> <span class="kw">function</span> <span class="fn">criarTabela</span>(): <span class="kw">void</span> {
+        <span class="vr">$this</span>-&gt;pdo-&gt;<span class="fn">exec</span>(<span class="st">"CREATE TABLE IF NOT EXISTS tarefas (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            titulo TEXT NOT NULL,
+            concluida INTEGER NOT NULL DEFAULT 0
+        )"</span>);
+    }
+
+    <span class="kw">public</span> <span class="kw">function</span> <span class="fn">salvar</span>(<span class="tp">Tarefa</span> <span class="vr">$t</span>): <span class="tp">Tarefa</span> {
+        <span class="vr">$stmt</span> = <span class="vr">$this</span>-&gt;pdo-&gt;<span class="fn">prepare</span>(<span class="st">"INSERT INTO tarefas (titulo, concluida) VALUES (?, ?)"</span>);
+        <span class="vr">$stmt</span>-&gt;<span class="fn">execute</span>([<span class="vr">$t</span>-&gt;titulo, (<span class="kw">int</span>)<span class="vr">$t</span>-&gt;concluida]);
+        <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Tarefa</span>((<span class="kw">int</span>)<span class="vr">$this</span>-&gt;pdo-&gt;<span class="fn">lastInsertId</span>(), <span class="vr">$t</span>-&gt;titulo, <span class="vr">$t</span>-&gt;concluida);
+    }
+
+    <span class="kw">public</span> <span class="kw">function</span> <span class="fn">concluir</span>(<span class="kw">int</span> <span class="vr">$id</span>): <span class="kw">bool</span> {
+        <span class="vr">$stmt</span> = <span class="vr">$this</span>-&gt;pdo-&gt;<span class="fn">prepare</span>(<span class="st">"UPDATE tarefas SET concluida = 1 WHERE id = ?"</span>);
+        <span class="vr">$stmt</span>-&gt;<span class="fn">execute</span>([<span class="vr">$id</span>]);
+        <span class="kw">return</span> <span class="vr">$stmt</span>-&gt;<span class="fn">rowCount</span>() &gt; <span class="nm">0</span>;
+    }
+
+    <span class="cm">/** @return Tarefa[] */</span>
+    <span class="kw">public</span> <span class="kw">function</span> <span class="fn">listar</span>(?<span class="kw">bool</span> <span class="vr">$concluida</span> = <span class="kw">null</span>): <span class="kw">array</span> {
+        <span class="vr">$sql</span> = <span class="st">"SELECT * FROM tarefas"</span>;
+        <span class="vr">$params</span> = [];
+        <span class="kw">if</span> (<span class="vr">$concluida</span> !== <span class="kw">null</span>) {
+            <span class="vr">$sql</span> .= <span class="st">" WHERE concluida = ?"</span>;
+            <span class="vr">$params</span>[] = (<span class="kw">int</span>)<span class="vr">$concluida</span>;
+        }
+        <span class="vr">$stmt</span> = <span class="vr">$this</span>-&gt;pdo-&gt;<span class="fn">prepare</span>(<span class="vr">$sql</span> . <span class="st">" ORDER BY id"</span>);
+        <span class="vr">$stmt</span>-&gt;<span class="fn">execute</span>(<span class="vr">$params</span>);
+        <span class="kw">return</span> <span class="fn">array_map</span>(
+            <span class="kw">fn</span>(<span class="vr">$r</span>) =&gt; <span class="kw">new</span> <span class="fn">Tarefa</span>((<span class="kw">int</span>)<span class="vr">$r</span>[<span class="st">'id'</span>], <span class="vr">$r</span>[<span class="st">'titulo'</span>], (<span class="kw">bool</span>)<span class="vr">$r</span>[<span class="st">'concluida'</span>]),
+            <span class="vr">$stmt</span>-&gt;<span class="fn">fetchAll</span>(<span class="tp">PDO</span>::<span class="tp">FETCH_ASSOC</span>)
+        );
+    }
+
+    <span class="kw">public</span> <span class="kw">function</span> <span class="fn">remover</span>(<span class="kw">int</span> <span class="vr">$id</span>): <span class="kw">void</span> {
+        <span class="vr">$this</span>-&gt;pdo-&gt;<span class="fn">prepare</span>(<span class="st">"DELETE FROM tarefas WHERE id = ?"</span>)-&gt;<span class="fn">execute</span>([<span class="vr">$id</span>]);
+    }
+}
+
+<span class="vr">$pdo</span> = <span class="kw">new</span> <span class="fn">PDO</span>(<span class="st">'sqlite::memory:'</span>, options: [<span class="tp">PDO</span>::<span class="tp">ATTR_ERRMODE</span> =&gt; <span class="tp">PDO</span>::<span class="tp">ERRMODE_EXCEPTION</span>]);
+<span class="vr">$repo</span> = <span class="kw">new</span> <span class="fn">TarefaRepository</span>(<span class="vr">$pdo</span>);
+<span class="vr">$repo</span>-&gt;<span class="fn">criarTabela</span>();
+
+<span class="vr">$a</span> = <span class="vr">$repo</span>-&gt;<span class="fn">salvar</span>(<span class="kw">new</span> <span class="fn">Tarefa</span>(<span class="kw">null</span>, <span class="st">'Estudar PDO'</span>));
+<span class="vr">$b</span> = <span class="vr">$repo</span>-&gt;<span class="fn">salvar</span>(<span class="kw">new</span> <span class="fn">Tarefa</span>(<span class="kw">null</span>, <span class="st">'Fazer o projeto final'</span>));
+<span class="vr">$repo</span>-&gt;<span class="fn">concluir</span>(<span class="vr">$a</span>-&gt;id);
+
+<span class="kw">echo</span> <span class="st">"Pendentes:\n"</span>;
+<span class="kw">foreach</span> (<span class="vr">$repo</span>-&gt;<span class="fn">listar</span>(<span class="kw">false</span>) <span class="kw">as</span> <span class="vr">$t</span>) <span class="kw">echo</span> <span class="st">" - #{$t-&gt;id} {$t-&gt;titulo}\n"</span>;
+<span class="kw">echo</span> <span class="st">"Concluídas:\n"</span>;
+<span class="kw">foreach</span> (<span class="vr">$repo</span>-&gt;<span class="fn">listar</span>(<span class="kw">true</span>) <span class="kw">as</span> <span class="vr">$t</span>) <span class="kw">echo</span> <span class="st">" - #{$t-&gt;id} {$t-&gt;titulo}\n"</span>;</pre>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCell('cell-48')">▶ Rodar</button>
+        <button class="reset-btn" onclick="clearCell('cell-48')">↺ Limpar</button>
+      </div>
+      <div class="output" id="out-cell-48"></div>
+    </div>
+<div class="quiz">
+      <div class="quiz-q">
+        <span class="qtag">TESTE RÁPIDO</span>
+        Qual a forma correta de evitar SQL Injection com PDO?
+      </div>
+      <div class="quiz-options" data-answer="1">
+        <button class="quiz-opt">Colocar a variável entre aspas simples na SQL</button>
+        <button class="quiz-opt">Usar <code class="inline">prepare()</code> com placeholders e passar os valores no <code class="inline">execute()</code></button>
+        <button class="quiz-opt">Usar <code class="inline">htmlspecialchars()</code> na entrada</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+  </section>
+  <div class="module-divider"><span class="tag">Módulo 5 · Projetos profissionais</span></div>
+  <section class="lesson" id="l10">
+    <div class="lesson-num">10</div>
+    <h2>Segurança essencial</h2>
+<table class="compare">
+<thead>
+<tr>
+<th>Risco</th>
+<th>Defesa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>SQL Injection</strong></td>
+<td>Prepared statements (PDO)</td>
+</tr>
+<tr>
+<td><strong>XSS</strong></td>
+<td><code class="inline">htmlspecialchars()</code> ao imprimir dados em HTML</td>
+</tr>
+<tr>
+<td><strong>Senhas expostas</strong></td>
+<td><code class="inline">password_hash()</code> / <code class="inline">password_verify()</code> (nunca MD5/SHA1 puros)</td>
+</tr>
+<tr>
+<td><strong>CSRF</strong></td>
+<td>Token em formulários + cookies <code class="inline">SameSite</code></td>
+</tr>
+<tr>
+<td><strong>Sessão sequestrada</strong></td>
+<td><code class="inline">session_regenerate_id(true)</code> após login, HTTPS</td>
+</tr>
+<tr>
+<td><strong>Upload malicioso</strong></td>
+<td>Validar tipo/tamanho, renomear, salvar fora da pasta pública</td>
+</tr>
+</tbody>
+</table>
+<div class="playground" id="cell-50">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">senhas-e-tokens.php</span>
+      </div>
+      <pre class="code-view"><span class="cm">// Hash seguro de senha</span>
+<span class="vr">$hash</span> = <span class="fn">password_hash</span>(<span class="st">"minhaSenha123"</span>, <span class="tp">PASSWORD_DEFAULT</span>);
+<span class="kw">echo</span> <span class="st">"Hash: "</span>, <span class="fn">substr</span>(<span class="vr">$hash</span>, <span class="nm">0</span>, <span class="nm">20</span>), <span class="st">"...\n"</span>;
+
+<span class="fn">var_dump</span>(<span class="fn">password_verify</span>(<span class="st">"minhaSenha123"</span>, <span class="vr">$hash</span>));   <span class="cm">// true</span>
+<span class="fn">var_dump</span>(<span class="fn">password_verify</span>(<span class="st">"errada"</span>, <span class="vr">$hash</span>));          <span class="cm">// false</span>
+
+<span class="cm">// Token aleatório (CSRF, reset de senha etc.)</span>
+<span class="vr">$token</span> = <span class="fn">bin2hex</span>(<span class="fn">random_bytes</span>(<span class="nm">16</span>));
+<span class="kw">echo</span> <span class="st">"Token: $token\n"</span>;
+
+<span class="cm">// Comparação segura contra timing attacks</span>
+<span class="fn">var_dump</span>(<span class="fn">hash_equals</span>(<span class="vr">$token</span>, <span class="vr">$token</span>));</pre>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCell('cell-50')">▶ Rodar</button>
+        <button class="reset-btn" onclick="clearCell('cell-50')">↺ Limpar</button>
+      </div>
+      <div class="output" id="out-cell-50"></div>
+    </div>
+<div class="callout"><strong>Repare:</strong> o hash e o token mudam a cada execução — é isso que os torna seguros. A saída acima é de uma execução real.</div>
+<h3>Mini-sistema de login com banco (juntando tudo)</h3>
+<div class="playground" id="cell-52">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">login.php</span>
+      </div>
+      <pre class="code-view"><span class="vr">$pdo</span> = <span class="kw">new</span> <span class="fn">PDO</span>(<span class="st">'sqlite::memory:'</span>, options: [<span class="tp">PDO</span>::<span class="tp">ATTR_ERRMODE</span> =&gt; <span class="tp">PDO</span>::<span class="tp">ERRMODE_EXCEPTION</span>, <span class="tp">PDO</span>::<span class="tp">ATTR_DEFAULT_FETCH_MODE</span> =&gt; <span class="tp">PDO</span>::<span class="tp">FETCH_ASSOC</span>]);
+<span class="vr">$pdo</span>-&gt;<span class="fn">exec</span>(<span class="st">"CREATE TABLE usuarios (id INTEGER PRIMARY KEY, email TEXT UNIQUE NOT NULL, senha_hash TEXT NOT NULL)"</span>);
+
+<span class="kw">function</span> <span class="fn">registrar</span>(<span class="tp">PDO</span> <span class="vr">$pdo</span>, <span class="kw">string</span> <span class="vr">$email</span>, <span class="kw">string</span> <span class="vr">$senha</span>): <span class="kw">bool</span> {
+    <span class="kw">if</span> (!<span class="fn">filter_var</span>(<span class="vr">$email</span>, <span class="tp">FILTER_VALIDATE_EMAIL</span>) || <span class="fn">strlen</span>(<span class="vr">$senha</span>) &lt; <span class="nm">8</span>) <span class="kw">return</span> <span class="kw">false</span>;
+    <span class="kw">try</span> {
+        <span class="vr">$pdo</span>-&gt;<span class="fn">prepare</span>(<span class="st">"INSERT INTO usuarios (email, senha_hash) VALUES (?, ?)"</span>)
+            -&gt;<span class="fn">execute</span>([<span class="vr">$email</span>, <span class="fn">password_hash</span>(<span class="vr">$senha</span>, <span class="tp">PASSWORD_DEFAULT</span>)]);
+        <span class="kw">return</span> <span class="kw">true</span>;
+    } <span class="kw">catch</span> (<span class="tp">PDOException</span> <span class="vr">$e</span>) {
+        <span class="kw">return</span> <span class="kw">false</span>;   <span class="cm">// e-mail duplicado, por exemplo</span>
+    }
+}
+
+<span class="kw">function</span> <span class="fn">autenticar</span>(<span class="tp">PDO</span> <span class="vr">$pdo</span>, <span class="kw">string</span> <span class="vr">$email</span>, <span class="kw">string</span> <span class="vr">$senha</span>): <span class="kw">bool</span> {
+    <span class="vr">$stmt</span> = <span class="vr">$pdo</span>-&gt;<span class="fn">prepare</span>(<span class="st">"SELECT senha_hash FROM usuarios WHERE email = ?"</span>);
+    <span class="vr">$stmt</span>-&gt;<span class="fn">execute</span>([<span class="vr">$email</span>]);
+    <span class="vr">$hash</span> = <span class="vr">$stmt</span>-&gt;<span class="fn">fetchColumn</span>();
+    <span class="kw">return</span> <span class="vr">$hash</span> !== <span class="kw">false</span> &amp;&amp; <span class="fn">password_verify</span>(<span class="vr">$senha</span>, <span class="vr">$hash</span>);
+}
+
+<span class="fn">var_dump</span>(<span class="fn">registrar</span>(<span class="vr">$pdo</span>, <span class="st">"ana@exemplo.com"</span>, <span class="st">"senhaForte123"</span>));   <span class="cm">// true</span>
+<span class="fn">var_dump</span>(<span class="fn">registrar</span>(<span class="vr">$pdo</span>, <span class="st">"ana@exemplo.com"</span>, <span class="st">"outraSenha123"</span>));   <span class="cm">// false (duplicado)</span>
+<span class="fn">var_dump</span>(<span class="fn">autenticar</span>(<span class="vr">$pdo</span>, <span class="st">"ana@exemplo.com"</span>, <span class="st">"senhaForte123"</span>));  <span class="cm">// true</span>
+<span class="fn">var_dump</span>(<span class="fn">autenticar</span>(<span class="vr">$pdo</span>, <span class="st">"ana@exemplo.com"</span>, <span class="st">"errada"</span>));         <span class="cm">// false</span></pre>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCell('cell-52')">▶ Rodar</button>
+        <button class="reset-btn" onclick="clearCell('cell-52')">↺ Limpar</button>
+      </div>
+      <div class="output" id="out-cell-52"></div>
+    </div>
+<div class="quiz">
+      <div class="quiz-q">
+        <span class="qtag">TESTE RÁPIDO</span>
+        Como guardar a senha de um usuário no banco?
+      </div>
+      <div class="quiz-options" data-answer="1">
+        <button class="quiz-opt">Com <code class="inline">md5($senha)</code></button>
+        <button class="quiz-opt">Com <code class="inline">password_hash($senha, PASSWORD_DEFAULT)</code></button>
+        <button class="quiz-opt">Em texto puro, numa coluna protegida</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+  </section>
+  <hr class="divider">
+  <section class="lesson" id="l11">
+    <div class="lesson-num">11</div>
+    <h2>Namespaces, autoload e Composer</h2>
+<p>Em projetos reais o código é dividido em arquivos/classes. <strong>Namespaces</strong> evitam conflito de nomes e o <strong>Composer</strong> (gerenciador de dependências) faz o <em>autoload</em> seguindo o padrão <strong>PSR-4</strong>.</p>
+<div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">Estrutura típica</span>
+      </div>
+      <pre class="code-view">meu-projeto/
+├── composer.json
+├── public/index.php        ← ponto de entrada
+├── src/
+│   ├── Model/Usuario.php   ← namespace App\Model;
+│   └── Repository/UsuarioRepository.php
+└── vendor/                 ← gerado pelo Composer</pre>
+      <div class="readonly-note">// somente leitura</div>
+    </div>
+
+<div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">composer.json</span>
+      </div>
+      <pre class="code-view">{
+  "autoload": { "psr-4": { "App\\": "src/" } },
+  "require": { "vlucas/phpdotenv": "^5.6" }
+}</pre>
+      <div class="readonly-note">// somente leitura</div>
+    </div>
+
+<div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">Comandos</span>
+      </div>
+      <pre class="code-view">composer init
+composer require vlucas/phpdotenv   # instala pacote
+composer dump-autoload              # regenera o autoload</pre>
+      <div class="readonly-note">// somente leitura</div>
+    </div>
+
+<div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">src/Model/Usuario.php</span>
+      </div>
+      <pre class="code-view"><span class="kw">&lt;?php</span>
+<span class="kw">declare</span>(strict_types=<span class="nm">1</span>);
+<span class="kw">namespace</span> <span class="tp">App</span>\<span class="tp">Model</span>;
+
+<span class="kw">final</span> <span class="kw">class</span> <span class="tp">Usuario</span> {
+    <span class="kw">public</span> <span class="kw">function</span> <span class="fn">__construct</span>(<span class="kw">public</span> <span class="kw">string</span> <span class="vr">$nome</span>) {}
+}</pre>
+      <div class="readonly-note">// somente leitura</div>
+    </div>
+
+<div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">public/index.php</span>
+      </div>
+      <pre class="code-view"><span class="kw">&lt;?php</span>
+<span class="kw">require</span> __DIR__ . <span class="st">'/../vendor/autoload.php'</span>;
+
+<span class="kw">use</span> <span class="tp">App</span>\<span class="tp">Model</span>\<span class="tp">Usuario</span>;
+
+<span class="vr">$u</span> = <span class="kw">new</span> <span class="fn">Usuario</span>(<span class="st">"Ana"</span>);
+<span class="kw">echo</span> <span class="vr">$u</span>-&gt;nome;</pre>
+      <div class="readonly-note">// somente leitura</div>
+    </div>
+<h3>Variáveis de ambiente (credenciais do banco)</h3>
+<p>Crie um <code class="inline">.env</code> (e coloque no <code class="inline">.gitignore</code>):</p>
+<div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">.env</span>
+      </div>
+      <pre class="code-view">DB_HOST=localhost
+DB_NAME=meu_banco
+DB_USER=usuario
+DB_PASS=senha</pre>
+      <div class="readonly-note">// somente leitura</div>
+    </div>
+<p>E leia com <code class="inline">phpdotenv</code>:</p>
+<div class="playground">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">conexao.php</span>
+      </div>
+      <pre class="code-view"><span class="vr">$dotenv</span> = <span class="tp">Dotenv</span>\<span class="tp">Dotenv</span>::<span class="fn">createImmutable</span>(__DIR__ . <span class="st">'/..'</span>);
+<span class="vr">$dotenv</span>-&gt;<span class="fn">load</span>();
+<span class="vr">$pdo</span> = <span class="kw">new</span> <span class="fn">PDO</span>(
+    <span class="st">"mysql:host={$_ENV['DB_HOST']};dbname={$_ENV['DB_NAME']};charset=utf8mb4"</span>,
+    <span class="vr">$_ENV</span>[<span class="st">'DB_USER'</span>], <span class="vr">$_ENV</span>[<span class="st">'DB_PASS'</span>]
+);</pre>
+      <div class="readonly-note">// somente leitura</div>
+    </div>
+
+  </section>
+  <hr class="divider">
+  <section class="lesson" id="l12">
+    <div class="lesson-num">12</div>
+    <h2>Recursos modernos que vale conhecer</h2>
+<p>Pequena vitrine de recursos do PHP 8.x.</p>
+<div class="playground" id="cell-55">
+      <div class="playground-header">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <span class="playground-label">recursos-modernos.php</span>
+      </div>
+      <pre class="code-view"><span class="cm">// Nullsafe operator</span>
+<span class="kw">class</span> <span class="tp">Endereco</span> { <span class="kw">public</span> ?<span class="kw">string</span> <span class="vr">$cidade</span> = <span class="st">"Florianópolis"</span>; }
+<span class="kw">class</span> <span class="tp">Pessoa</span> { <span class="kw">public</span> ?<span class="tp">Endereco</span> <span class="vr">$endereco</span> = <span class="kw">null</span>; }
+<span class="vr">$p</span> = <span class="kw">new</span> <span class="fn">Pessoa</span>();
+<span class="kw">echo</span> <span class="vr">$p</span>-&gt;endereco?-&gt;cidade ?? <span class="st">"sem endereço"</span>, <span class="st">"\n"</span>;
+
+<span class="cm">// Generators: processam grandes volumes sem estourar memória</span>
+<span class="kw">function</span> <span class="fn">numerosGrandes</span>(<span class="kw">int</span> <span class="vr">$max</span>) {
+    <span class="kw">for</span> (<span class="vr">$i</span> = <span class="nm">1</span>; <span class="vr">$i</span> &lt;= <span class="vr">$max</span>; <span class="vr">$i</span>++) <span class="kw">yield</span> <span class="vr">$i</span>;
+}
+<span class="vr">$soma</span> = <span class="nm">0</span>;
+<span class="kw">foreach</span> (<span class="fn">numerosGrandes</span>(<span class="nm">1_000_000</span>) <span class="kw">as</span> <span class="vr">$n</span>) <span class="vr">$soma</span> += <span class="vr">$n</span>;
+<span class="kw">echo</span> <span class="st">"Soma até 1 milhão: $soma\n"</span>;
+
+<span class="cm">// Funções de array úteis</span>
+<span class="vr">$dados</span> = [[<span class="st">'n'</span>=&gt;<span class="st">'Ana'</span>,<span class="st">'c'</span>=&gt;<span class="st">'ES'</span>], [<span class="st">'n'</span>=&gt;<span class="st">'Bia'</span>,<span class="st">'c'</span>=&gt;<span class="st">'SI'</span>], [<span class="st">'n'</span>=&gt;<span class="st">'Caio'</span>,<span class="st">'c'</span>=&gt;<span class="st">'ES'</span>]];
+<span class="fn">print_r</span>(<span class="fn">array_column</span>(<span class="vr">$dados</span>, <span class="st">'n'</span>, <span class="st">'n'</span>));
+<span class="vr">$porCurso</span> = [];
+<span class="kw">foreach</span> (<span class="vr">$dados</span> <span class="kw">as</span> <span class="vr">$d</span>) <span class="vr">$porCurso</span>[<span class="vr">$d</span>[<span class="st">'c'</span>]][] = <span class="vr">$d</span>[<span class="st">'n'</span>];
+<span class="fn">print_r</span>(<span class="vr">$porCurso</span>);
+
+<span class="cm">// Datas</span>
+<span class="vr">$hoje</span> = <span class="kw">new</span> <span class="fn">DateTimeImmutable</span>(<span class="st">'2026-11-04'</span>, <span class="kw">new</span> <span class="fn">DateTimeZone</span>(<span class="st">'America/Sao_Paulo'</span>));
+<span class="kw">echo</span> <span class="vr">$hoje</span>-&gt;<span class="fn">modify</span>(<span class="st">'+30 days'</span>)-&gt;<span class="fn">format</span>(<span class="st">'d/m/Y'</span>), <span class="st">"\n"</span>;</pre>
+      <div class="playground-actions">
+        <button class="run-btn" onclick="runCell('cell-55')">▶ Rodar</button>
+        <button class="reset-btn" onclick="clearCell('cell-55')">↺ Limpar</button>
+      </div>
+      <div class="output" id="out-cell-55"></div>
+    </div>
+  </section>
+  <div class="module-divider"><span class="tag">Próximos passos</span></div>
+  <section class="lesson" id="l13">
+    <div class="lesson-num">13</div>
+    <h2>Checklist e próximos passos</h2>
+<ol>
+<li>Repita os exemplos alterando valores e quebrando o código de propósito (aprende-se muito com os erros).</li>
+<li>Construa um <strong>CRUD completo</strong> (lista de tarefas ou cadastro de alunos) com PDO + formulário HTML.</li>
+<li>Aprenda <strong>Composer</strong> e <strong>PSR-12</strong> (padrão de código).</li>
+<li>Estude <strong>Laravel</strong> ou <strong>Symfony</strong> — agora que você entende POO e PDO, o ORM (Eloquent/Doctrine) fará sentido.</li>
+<li>Pratique <strong>testes</strong> com PHPUnit e análise estática com PHPStan.</li>
+</ol>
+<p><strong>Referências oficiais:</strong> <a href="https://www.php.net/manual/pt_BR/" target="_blank" rel="noopener">php.net/manual/pt_BR</a> · <a href="https://phptherightway.com/" target="_blank" rel="noopener">PHP The Right Way</a> · <a href="https://phpdelusions.net/pdo" target="_blank" rel="noopener">phpdelusions.net/pdo</a></p>
+  </section>
+
+  <hr class="divider">
+
+  <footer>
+    Você passou por todo o essencial de PHP, da sintaxe ao PDO.
+    <span class="accent">Próximo passo:</span> construir um CRUD completo com PDO e um formulário HTML.
+  </footer>
+
+</div>
+
+<script>
+  // Saídas reais de cada exemplo (geradas rodando o código com PHP 8.3)
+  const OUTPUTS = {
+  "cell-2": "Olá, mundo!\nOlá, Ana! Bem-vinda ao PHP.\nAspas simples não interpolam: $nome",
+  "cell-4": "int(20)\nfloat(1.68)\nstring(13) \"Eng. Software\"\nbool(true)\nNULL\n3.14 2026\nint(50)\nstring(3) \"3.5\"\nbool(false)",
+  "cell-6": "10 1 1024 3\nbool(false)\nbool(true)\nbool(false)\nint(-1)\nOlá, visitante\n16",
+  "cell-8": "Aprovada\nOK\nTerça",
+  "cell-10": "1 2 3 4 5 \nContagem: 3\nContagem: 2\nContagem: 1\n0: Mercúrio\n2: Terra\n3: Marte",
+  "cell-12": "34 bytes | 33 caracteres\nProgramar em PHP é divertido!\nPROGRAMAR EM PHP É DIVERTIDO!\n  Programar em PHP 8 é divertido!  \ncontém PHP\nProgramar-em-PHP-é-divertido!\nPi com 2 casas: 3.14 | Inteiro com zeros: 00042\nNome: Ana, idade: 20",
+  "cell-14": "4 frutas: pera, maçã, banana, uva\nAna tem média 8.1666666666667\nArray\n(\n    [0] => 1\n    [1] => 4\n    [2] => 9\n    [3] => 16\n    [4] => 25\n    [5] => 36\n)\nArray\n(\n    [1] => 2\n    [3] => 4\n    [5] => 6\n)\nSoma: 21\nCaio\n10 30 8\nAna - ES",
+  "cell-16": "5 5\nLéo (18) inativo\n8.1666666666667\n0 5\n110\n123",
+  "cell-18": "não vê\n11",
+  "cell-20": "Teclado - R$ 180.00",
+  "cell-22": "[LOG] Dev: total = 6000\n[LOG] Gerente: total = 11200\nbool(true)",
+  "cell-24": "2\n✅ Pago | valor: pago\nstatus inválido",
+  "cell-26": "Erro de negócio: Saldo insuficiente: R$ 70\nOperação finalizada\nCapturado: Division by zero",
+  "cell-28": "[ ] Estudar PHP\n[x] Praticar PDO\nnome | nota\nAna | 9.5",
+  "cell-30": "Cadastro ok: &lt;b&gt;Ana&lt;/b&gt; (ana@exemplo.com, 20 anos)",
+  "cell-32": "<?php\nsession_start();\n\nif ($_SERVER['REQUEST_METHOD'] === 'POST') {\n    $nome = trim($_POST['nome'] ?? '');\n    if ($nome !== '') {\n        $_SESSION['nome'] = $nome;       // guarda na sessão\n    }\n}\n?>\n<!DOCTYPE html>\n<html lang=\"pt-BR\">\n<body>\n  <?php if (isset($_SESSION['nome'])): ?>\n    <h1>Olá, <?= htmlspecialchars($_SESSION['nome']) ?>!<\/h1>\n  <?php endif; ?>\n\n  <form method=\"post\">\n    <input name=\"nome\" placeholder=\"Seu nome\">\n    <button>Enviar<\/button>\n  <\/form>\n<\/body>\n<\/html>",
+  "cell-34": "Conectado ao SQLite! Driver: sqlite",
+  "cell-36": "Último ID inserido: 2\nLinhas afetadas no último insert: 1",
+  "cell-38": "1 - Ana <ana@x.com>\n2 - Bruno <bruno@x.com>\n3 - Carla <carla@x.com>\nArray\n(\n    [id] => 2\n    [nome] => Bruno\n    [email] => bruno@x.com\n)\nTotal: 3\nAna",
+  "cell-40": "Atualizados: 1\nRemovidos: 1\nArray\n(\n    [0] => Array\n        (\n            [id] => 1\n            [nome] => Ana Souza\n            [email] => ana@x.com\n        )\n\n)",
+  "cell-42": "Consulta montada: SELECT * FROM usuarios WHERE nome = '' OR '1'='1'\nLinhas retornadas (vulnerável): 2\nLinhas retornadas (seguro): 0",
+  "cell-44": "Transferência de R$ 70 concluída\nFalhou e foi revertida: Saldo insuficiente\nArray\n(\n    [0] => Array\n        (\n            [id] => 1\n            [titular] => Ana\n            [saldo] => 30\n        )\n\n    [1] => Array\n        (\n            [id] => 2\n            [titular] => Bruno\n            [saldo] => 120\n        )\n\n)",
+  "cell-46": "Ana: 2 post(s) → Intro ao PHP | PDO na prática\nBruno: 1 post(s) → Composer",
+  "cell-48": "Pendentes:\n - #2 Fazer o projeto final\nConcluídas:\n - #1 Estudar PDO",
+  "cell-50": "Hash: $2y$10$M1GF692XZ1rV/...\nbool(true)\nbool(false)\nToken: 8552fc7153695f960680338cb793cd15\nbool(true)",
+  "cell-52": "bool(true)\nbool(false)\nbool(true)\nbool(false)",
+  "cell-55": "sem endereço\nSoma até 1 milhão: 500000500000\nArray\n(\n    [Ana] => Ana\n    [Bia] => Bia\n    [Caio] => Caio\n)\nArray\n(\n    [ES] => Array\n        (\n            [0] => Ana\n            [1] => Caio\n        )\n\n    [SI] => Array\n        (\n            [0] => Bia\n        )\n\n)\n04/12/2026"
+};
+
+  function escapeHtml(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  async function runCell(id) {
+    const outEl = document.getElementById('out-' + id);
+    const btn = document.querySelector(`#${id} .run-btn`);
+    btn.disabled = true;
+    outEl.classList.add('thinking');
+    outEl.innerHTML = '<span class="log-line">// executando...</span>';
+    await new Promise(r => setTimeout(r, 300 + Math.random() * 300));
+    const output = OUTPUTS[id];
+    outEl.classList.remove('thinking');
+    outEl.innerHTML = output === undefined || output === ''
+      ? '<span class="log-line" style="color:var(--text-dim)">// código rodou, mas nada foi impresso</span>'
+      : output.split('\n').map(l => `<span class="log-line">${escapeHtml(l) || '&nbsp;'}</span>`).join('');
+    btn.disabled = false;
+  }
+
+  function clearCell(id) {
+    document.getElementById('out-' + id).innerHTML = '';
+  }
+
+  document.querySelectorAll('.quiz').forEach(quiz => {
+    const optsWrap = quiz.querySelector('.quiz-options');
+    const answer = parseInt(optsWrap.dataset.answer, 10);
+    const feedback = quiz.querySelector('.quiz-feedback');
+    const buttons = optsWrap.querySelectorAll('.quiz-opt');
+    buttons.forEach((btn, idx) => {
+      btn.addEventListener('click', () => {
+        buttons.forEach(b => { b.disabled = true; });
+        if (idx === answer) {
+          btn.classList.add('correct');
+          feedback.textContent = '✓ Isso mesmo! Mandou bem.';
+        } else {
+          btn.classList.add('wrong');
+          buttons[answer].classList.add('correct');
+          feedback.textContent = '✗ Quase — a resposta certa está marcada em verde.';
+        }
+        feedback.classList.add('show');
+      });
+    });
+  });
+
+  window.addEventListener('scroll', () => {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    document.getElementById('progressFill').style.width = pct + '%';
+  });
+</script>
+
+<script>
+  // ── Menu lateral retrátil ──
+  (function () {
+    const wrap = document.getElementById('sideWrap');
+    const trigger = document.getElementById('sideTrigger');
+    const links = [...wrap.querySelectorAll('.side-nav a')];
+    const sections = links.map(a => document.getElementById(a.dataset.target));
+
+    // clique/toque no ícone abre e fecha (útil no celular, onde não existe "passar o mouse")
+    trigger.addEventListener('click', e => { e.stopPropagation(); wrap.classList.toggle('open'); });
+    links.forEach(a => a.addEventListener('click', () => wrap.classList.remove('open')));
+    document.addEventListener('click', e => { if (!wrap.contains(e.target)) wrap.classList.remove('open'); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') wrap.classList.remove('open'); });
+
+    // destaca no menu a seção que está na tela
+    function markActive() {
+      let current = 0;
+      sections.forEach((s, i) => { if (s && s.getBoundingClientRect().top <= 140) current = i; });
+      links.forEach((a, i) => a.classList.toggle('active', i === current));
+    }
+    window.addEventListener('scroll', markActive, { passive: true });
+    markActive();
+  })();
+</script>
+
+</body>
+</html>
